@@ -10,9 +10,9 @@ Why this is called freevideodithering instead of video dithering? is there a pai
 I call it freevideodithering bc it was free, there is no paid as i want this to be free and everyone can use it\
 Note:\
 This tool does not dither based on the color palletes, instead it get the\
-pixel infomation in the frame of video so you dont have to make you own color palletes\
+pixel infomation in the frame of video so you dont have to make you own color palletes
 
-Features\
+Features
 
 More dithering methods(still making some more)\
 Change canvas size\
