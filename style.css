@@ -1,0 +1,207 @@
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #232323;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ea7010;
+}
+body {
+    font-family: UbuntuR;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    margin: 10px;
+    font-size: 20px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    font-family: UbuntuR;
+    color: #ffffff;
+    box-sizing: border-box;
+    padding: 0px;
+    margin: 0px;
+}
+label {
+    font-family: UbuntuR;
+    color: #ffffff;
+    box-sizing: border-box;
+    font-size: 25px;
+}
+input,
+button,
+select {
+    background-color: #000;
+    color: #e0e0e0;
+    border: 3px solid #ea7010;
+    padding: 4px;
+    border-radius: 10px;
+    font-family: Classwiz-X;
+    font-size: 20px;
+    margin-right: 10px;
+    max-width: 100%;
+    transition: background-color 300ms;
+}
+textarea {
+    background-color: #000;
+    color: #e0e0e0;
+    border: 3px solid #ea7010;
+    padding: 4px;
+    border-radius: 10px;
+    font-family: Classwiz-X;
+    font-size: 15px;
+    margin-right: 10px;
+    max-width: 99%;
+}
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #ea7030;
+    padding: 3px;
+    cursor: pointer;
+    border-radius: 10px;
+    width: 750px;
+}
+input[type="range"]:hover {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ffa020;
+    padding: 3px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+input[type="file"] {
+    padding: 3px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+input:hover,
+button:hover,
+select:hover {
+    background-color: #ea7010;
+    border-color: #ea7010;
+}
+button[disabled] {
+    background-color: #333333;
+    color: #e0e0e0;
+    border: 3px solid #555555;
+    padding: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: Classwiz-X;
+    font-size: 20px;
+    margin-right: 10px;
+    transition: background-color 250ms border 250ms;
+}
+button[disabled]:hover {
+    background-color: #555555;
+    border-color: #555555;
+}
+video {
+    border: 10px solid #ea7010;
+    border-radius: 10px;
+    max-width: 100%;
+}
+canvas {
+    border: 10px solid #ea7010;
+    border-radius: 10px;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    image-rendering: pixelated;
+    text-align: left;
+    transform-origin: top left;
+    position: relative;
+    display: inline-block;
+}
+#console {
+    background: #000000;
+    color: #00ff00;
+    font-family: Unifont, monospace;
+    font-size: 20px;
+    height: 1000px;
+    border: 5px solid #1070ea;
+    border-radius: 10px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+hr {
+    text-align: left;
+}
+.glowfire {
+    background: linear-gradient(to right, #ff0000, #ff7000, #ffff00);
+    background-size: cover;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+}
+select {
+    background-color: #000;
+    color: #fff;
+}
+#docs {
+    text-align: left;
+}
+#uploadFiles {
+    text-align: left;
+}
+.controls {
+    background-color: #090909;
+    border: 8px solid #1b1b1b;
+    border-radius: 10px;
+    max-width: max-content;
+    padding: 30px;
+    margin: 0;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    position: relative;
+    align-items: center;
+}
+
+.previewContainer {
+    background-color: #090909;
+    border: 8px solid #1b1b1b;
+    border-radius: 10px;
+    max-width: max-content;
+    padding: 15px;
+    margin: 0;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    position: relative;
+    align-items: center;
+}
+.videoControls {
+    background-color: #ba4000;
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    max-width: max-content;
+}
+.canvasControls {
+    background-color: #ba4000;
+    padding: 30px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    max-width: max-content;
+    margin-left: 20px;
+}
+.mainCanvas {
+    margin-left: 20px;
+}
+
+
+
+
