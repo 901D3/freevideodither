@@ -18,4 +18,30 @@ More dithering methods(still making some more)\
 Change canvas size\
 Customizable js codes\
 and lastly\
-Record it into a video(for rendering)\
+Record it into a video(for rendering)
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Credits:\
+[cs559-5.ppt by University Of Wisconsin](http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt)\
+[dithermark.com](https://www.dithermark.com) for Cluster, Hatch Left, Right, Horizontal and Vertical matrices
+
+Links:\
+http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt\
+https://www.dithermark.com
+
+
+
+
+
+
+
+# UPDATE SOURCE CODE
+## 02/11/24
+
+***
+Fixed hatch horizontal vertical wrong matrix\
+SHIFT + F1 now will record from start of video till end\
+Matrices are formatted\
+New paste video media link\
+***
