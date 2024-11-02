@@ -3,18 +3,21 @@ document
 .addEventListener("change", function () {
   let method = this.value;
   if (
-    method === "bayer2x2"                       ||
-    method === "bayer4x4"                       ||
-    method === "bayer8x8"                       ||
-    method === "bayer16x16"                     ||
-    method === "bayer32x32"                     ||
-    method === "bayer64x64"                     ||
-    method === "bayer128x128"
+    method === "bayer2x2"               ||
+    method === "bayer4x4"               ||
+    method === "bayer8x8"               ||
+    method === "bayer16x16"             ||
+    method === "bayer32x32"             ||
+    method === "bayer64x64"             ||
+    method === "bayer128x128"           ||
 
-    /*
-    method === "floydsteinberg"                 ||
-    method === "sierra"                         ||
-    method === "sierralite"*/
+    method === "cluster4x4"             ||
+    method === "cluster8x8"             ||
+
+    method === "hatchright4x4"          ||
+    method === "hatchleft4x4"           ||
+    method === "hatchhorizontal4x4"     ||
+    method === "hatchvertical4x4"       
   ) {
     document.getElementById("lvls").style.display = "block";
   } else {
@@ -22,26 +25,43 @@ document
   }
 
   if (
-    method === "bayer2x2rgb"                    ||
-    method === "bayer4x4rgb"                    ||
-    method === "bayer8x8rgb"                    ||
-    method === "bayer16x16rgb"                  ||
-    method === "bayer32x32rgb"                  ||
-    method === "bayer64x64rgb"                  ||
-    method === "bayer128x128rgb"                ||
+    method === "bayer2x2rgb"            ||
+    method === "bayer4x4rgb"            ||
+    method === "bayer8x8rgb"            ||
+    method === "bayer16x16rgb"          ||
+    method === "bayer32x32rgb"          ||
+    method === "bayer64x64rgb"          ||
+    method === "bayer128x128rgb"        ||
 
-    method === "arithmeticaddrgb"               ||
-    method === "arithmeticaddconvrgb"           ||
-    method === "arithmeticxorrgb"               ||
-    method === "arithmeticxorconvrgb"           ||
+    method === "cluster4x4rgb"          ||
+    method === "cluster8x8rgb"          ||
 
-    method === "floydsteinbergrgb"              ||
-    method === "atkinsonrgb"                    ||
-    method === "stuckirgb"                      ||
+    method === "hatchright4x4rgb"       ||
+    method === "hatchleft4x4rgb"        ||
+    method === "hatchhorizontal4x4rgb"  ||
+    method === "hatchvertical4x4rgb"    ||       
 
-    method === "sierrargb"                      ||
-    method === "sierralitergb"                  ||
-    method === "tworowsierrargb"
+    method === "arithmeticaddrgb"       ||
+    method === "arithmeticaddconvrgb"   ||
+    method === "arithmeticxorrgb"       ||
+    method === "arithmeticxorconvrgb"   ||
+
+    method === "floydsteinbergrgb"      ||
+    method === "fanrgb"                 ||
+    method === "shiaufanrgb"            ||
+    method === "shiaufan2rgb"           ||
+    
+    method === "atkinsonrgb"            ||
+    method === "burkesrgb"              ||
+    method === "javisjudiceninkergb"    ||
+    method === "stuckirgb"              ||
+
+    method === "sierrargb"              ||
+    method === "sierralitergb"          ||
+    method === "sierra2rgb"             ||
+    method === "sierra3rgb"             ||
+
+    method === "twodrgb"
 
   ) {
     document.getElementById("rgbLvls").style.display = "block";
