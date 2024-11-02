@@ -8,6 +8,15 @@ const dthrMth = {
   "bayer64x64": bayer,
   "bayer128x128": bayer,
 
+  "cluster4x4": bayer,
+  "cluster8x8": bayer,
+  
+  "hatchleft4x4": bayer,
+  "hatchright4x4": bayer,
+  "hatchhorizontal4x4": bayer,
+  "hatchvertical4x4": bayer,
+
+
   //Colored
   "bayer2x2rgb": bayerRgb,
   "bayer4x4rgb": bayerRgb,
@@ -16,23 +25,43 @@ const dthrMth = {
   "bayer32x32rgb": bayerRgb,
   "bayer64x64rgb": bayerRgb,
   "bayer128x128rgb": bayerRgb,
-  "floydsteinbergrgb": floydSteinbergRgb,
-  "atkinsonrgb": atkinsonRgb,
-  "stuckirgb": stuckiRgb,
-  "sierrargb": sierraRgb,
-  "sierralitergb": sierraLiteRgb,
-  "tworowsierrargb": twoRowSierraRgb,
+
+  "cluster4x4rgb": bayerRgb,
+  "cluster8x8rgb": bayerRgb,
+
+  "hatchleft4x4rgb": bayerRgb,
+  "hatchright4x4rgb": bayerRgb,
+  "hatchhorizontal4x4rgb": bayerRgb,
+  "hatchvertical4x4rgb": bayerRgb,
+
   "arithmeticaddrgb": arithmeticAddRgb,
   "arithmeticaddconvrgb": arithmeticAddConvRgb,
   "arithmeticxorrgb": arithmeticXorRgb,
   "arithmeticxorconvrgb": arithmeticXorConvRgb,
+
+  "floydsteinbergrgb": floydSteinbergRgb,
+  "fanrgb": fanRgb,
+  "shiaufanrgb": shiauFanRgb,
+  "shiaufan2rgb": shiauFan2Rgb,
+
+  "atkinsonrgb": atkinsonRgb,
+  "burkesrgb": burkesRgb,
+  "javisjudiceninkergb": jJNRgb,
+  "stuckirgb": stuckiRgb,
+
+  "sierrargb": sierraRgb,
+  "sierralitergb": sierraLiteRgb,
+  "sierra2rgb": sierra2Rgb,
+  "sierra3rgb": sierra3Rgb,
+  
+  "twodrgb": twoDRgb,
 };
 
 // Initialize global variables
-let frm = 0;
-let stT = 0;
-let lsUpdT = 0;
-let lLT = 0;
+var frm = 0;
+var stT = 0;
+var lsUpdT = 0;
+var lLT = 0;
 
 function processVideo() {
   frm = 0;
