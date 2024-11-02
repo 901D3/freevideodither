@@ -1,11 +1,421 @@
 <!--
-This file is for some script and does not contain the real code from website,
-for the real one, type "view-source:" at the very start of the domain
-or right click and click view source or sth like that
-You will also see some script links
+For now it will show the html code but still truncate some of it
 -->
-
-<h6>901D3's sites has no limit LOL</h6>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Free Video Dithering</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://901d3.glitch.me/styles/style.css">
+    <link rel="stylesheet" href="style.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/unifont@5.1.0/index.min.css"
+      >
+  </head>
+  <body>
+    <h1 class="glowfire" style="font-size: 175px">Free Video Dithering</h1>
+    <br>
+    <br>
+    <h2>A tool for dither video instead of image</h2>
+    <br>
+    <br>
+    <br>
+    <hr>
+    <br>
+    <div id="uploadFiles">
+      <h2>Upload video files</h2>
+      <br>
+      <input
+        type="file"
+        id="videoInput"
+        accept=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv"
+        >
+      <br>
+      <br>
+      <h3>I recommend main or high h264 or h265 video for smoother playback, other codec may lags</h3>
+    </div>
+    <br>
+    <div>
+      <h2>Or paste video link</h2>
+      <br>
+      <input type="text" id="linkUrl">
+      <button id="updateVideoSrc" onclick="updateVideoSrc()">Update</button>
+    </div>
+    <br>
+    <br>
+    <div class="controls">
+      <div class="videoControls">
+        <h2>Video size</h2>
+        <br>
+        <label for="videoWidth">Width:</label>
+        <input type="number" id="videoWidth" placeholder="1280" value="1280">
+        <br><br>
+        <label for="videoHeight">Height:</label>
+        <input type="number" id="videoHeight" placeholder="720" value="720">
+        <br><br>
+        <button onclick="changeVideoSize()">Change video size</button>
+        <br>
+        <br>
+        <br>
+        <button onclick="togglePlayPause()">Play/Pause</button>
+        <br>
+        <br>
+        <br>
+        <div>
+          <label for="speedInput">Playback Speed:</label>
+          <input
+            type="number"
+            id="speedInput"
+            value="1"
+            oninput="setPlaybackSpeed()"
+            >
+        </div>
+        <br>
+        <br>
+        <br>
+        <div>
+          <label for="volumeSlider">Volume:</label>
+          <input
+            type="range"
+            id="volumeSlider"
+            value="100"
+            step="0.001"
+            min="0"
+            oninput="updateVolumeFromSlider()"
+            style="width: 200px;"
+            >
+          <input
+            type="number"
+            id="volumeInput"
+            value="100"
+            step="0.001"
+            min="0"
+            oninput="updateVolumeFromInput()"
+            style="width: 200px"
+            >
+          <span style="font-family: UbuntuBold; font-size: 30px; font-weight: 700">%</span>
+        </div>
+      </div>
+      <div class="canvasControls">
+        <h2>Dithering method</h2>
+        <br>
+        <select id="ditherMethod" onchange="updateDitheringMethod(); onDitherChange()">
+          <option value="none" selected="selected">None</option>
+          <optgroup label="Grayscale">
+          <optgroup label="Ordered">
+            <option value="bayer2x2">Bayer 2x2</option>
+            <option value="bayer4x4">Bayer 4x4</option>
+            <option value="bayer8x8">Bayer 8x8</option>
+            <option value="bayer16x16">Bayer 16x16</option>
+            <option value="bayer32x32">Bayer 32x32</option>
+            <option value="bayer64x64">Bayer 64x64</option>
+            <option value="bayer128x128">Bayer 128x128</option>
+            <option value="cluster4x4">Cluster2x2(4x4)</option>
+            <option value="cluster8x8">Cluster4x4(8x8)</option>
+            <option value="hatchright4x4">Hatch Right</option>
+            <option value="hatchleft4x4">Hatch Left</option>
+            <option value="hatchhorizontal4x4">Hatch Horizontal</option>
+            <option value="hatchvertical4x4">Hatch Vertical</option>
+          </optgroup>
+          <optgroup label="Arithmetic">
+            <option value="arithmeticadd" disabled>Arithmetic Add</option>
+            <option value="arithmeticaddconv" disabled>Arithmetic Add Convariant</option>
+            <option value="arithmeticxor" disabled>Arithmetic Xor</option>
+            <option value="arithmeticaddconv" disabled>Arithmetic Xor Convariant</option>
+          </optgroup>
+          <optgroup label="Error Diffusion">
+            <option value="floydsteinberg" disabled>Floyd-Steinberg</option>
+            <option value="fan" disabled>Fan</option>
+            <option value="shiaufan" disabled>Shiau-Fan</option>
+            <option value="shiaufan2" disabled>Shiau-Fan 2</option>
+            <option value="atkinson" disabled>Atkinson</option>
+            <option value="burkes" disabled>Burkes</option>
+            <option value="javisjudiceninke" disabled>Jarvis-Judice-Ninke</option>
+            <option value="stucki" disabled>Stucki</option>
+            <option value="sierra" disabled>Sierra</option>
+            <option value="sierralite" disabled>Sierra Lite</option>
+            <option value="sierra2" disabled>Sierra 2</option>
+            <option value="sierra3" disabled>Sierra 3</option>
+          </optgroup>
+          </optgroup>
+          <optgroup label="Colored">
+          <optgroup label="Ordered">
+            <option value="bayer2x2rgb">Bayer 2x2</option>
+            <option value="bayer4x4rgb">Bayer 4x4</option>
+            <option value="bayer8x8rgb">Bayer 8x8</option>
+            <option value="bayer16x16rgb">Bayer 16x16</option>
+            <option value="bayer32x32rgb">Bayer 32x32</option>
+            <option value="bayer64x64rgb">Bayer 64x64</option>
+            <option value="bayer128x128rgb">Bayer 128x128</option>
+            <option value="cluster4x4rgb">Cluster2x2(4x4)</option>
+            <option value="cluster8x8rgb">Cluster4x4(8x8)</option>
+            <option value="hatchright4x4rgb">Hatch Right</option>
+            <option value="hatchleft4x4rgb">Hatch Left</option>
+            <option value="hatchhorizontal4x4rgb">Hatch Horizontal</option>
+            <option value="hatchvertical4x4rgb">Hatch Vertical</option>
+          </optgroup>
+          <optgroup label="Arithmetic">
+            <option value="arithmeticaddrgb">Arithmetic Add</option>
+            <option value="arithmeticaddconvrgb">Arithmetic Add Convariant</option>
+            <option value="arithmeticxorrgb">Arithmetic Xor</option>
+            <option value="arithmeticxorconvrgb">Arithmetic Xor Convariant</option>
+          </optgroup>
+          <optgroup label="Error Diffusion">
+            <option value="floydsteinbergrgb">Floyd-Steinberg</option>
+            <option value="fanrgb">Fan</option>
+            <option value="shiaufanrgb">Shiau-Fan</option>
+            <option value="shiaufan2rgb">Shiau-Fan 2</option>
+            <option value="atkinsonrgb">Atkinson</option>
+            <option value="burkesrgb">Burkes</option>
+            <option value="javisjudiceninkergb">Jarvis-Judice-Ninke</option>
+            <option value="stuckirgb">Stucki</option>
+            <option value="sierrargb">Sierra</option>
+            <option value="sierralitergb">Sierra Lite</option>
+            <option value="sierra2rgb">Sierra 2</option>
+            <option value="sierra3rgb">Sierra 3</option>
+            <option value="twodrgb">2d error diff lol</option>
+          </optgroup>
+          </optgroup>
+        </select>
+        <br>
+        <br>
+        <span>You may need a beefy device if you want to apply larger dither</span>
+        <br>
+        <div id="lvls" style="display: none">
+          <br>
+          <label for="grLvlsInput">Blend/Levels: </label>
+          <br>
+          <input
+            type="range"
+            id="grLvlsRange"
+            oninput="updateGrLvlsRange()"
+            min="0"
+            value="5"
+            max="255"
+            step="0.00000000001"
+            >
+          <input
+            type="number"
+            id="grLvlsInput"
+            oninput="updateGrLvlsInput()"
+            value="5"
+            >
+          <br>
+          <p>To change slider max value, type sth &lt;= 1 or &gt;1
+            <br>
+            And to snap slider value, hold shift or double click drag
+          </p>
+        </div>
+        <div id="rgbLvls" style="display: none">
+          <br>
+          <div id="rLvls">
+            <label for="rLvlsInput">Red Blend/Levels: </label>
+            <br>
+            <input
+              type="range"
+              id="rLvlsRange"
+              oninput="updateRedLvlsRange()"
+              min="0"
+              value="6"
+              max="255"
+              step="0.00000000001"
+              >
+            <input
+              type="number"
+              id="rLvlsInput"
+              oninput="updateRedLvlsInput()"
+              value="6"
+              >
+          </div>
+          <div id="gLvls">
+            <label for="gLvlsInput">Green Blend/Levels: </label>
+            <br>
+            <input
+              type="range"
+              id="gLvlsRange"
+              oninput="updateGreenLvlsRange()"
+              min="0"
+              value="7"
+              max="255"
+              step="0.00000000001"
+              >
+            <input
+              type="number"
+              id="gLvlsInput"
+              oninput="updateGreenLvlsInput()"
+              value="7"
+              >
+          </div>
+          <div id="bLvls">
+            <label for="bLvlsInput">Blue Blend/Levels: </label>
+            <br>
+            <input
+              type="range"
+              id="bLvlsRange"
+              oninput="updateBlueLvlsRange()"
+              min="0"
+              value="6"
+              max="255"
+              step="0.00000000001"
+              >
+            <input
+              type="number"
+              id="bLvlsInput"
+              oninput="updateBlueLvlsInput()"
+              value="6"
+              >
+          </div>
+          <br>
+          <p>To change slider max value, type sth &lt;= 1 or &gt;1
+            <br>
+            And to snap slider value, hold shift or double click drag
+          </p>
+        </div>
+        <br>
+        <div id="noiseSettings" style="display: none">
+          <label for="noiseAmountInput">Noise amount:</label>
+          <input
+            type="number"
+            id="noiseAmountInput"
+            value="64"
+            oninput="setNoiseAmount()"
+            >
+        </div>
+        <div name="change canvas size">
+          <h2>Canvas size</h2>
+          <br>
+          <label for="canvasWidth">Width:</label>
+          <input
+            type="number"
+            id="canvasWidth"
+            placeholder="1280"
+            value="1280"
+            >
+          <br><br>
+          <label for="canvasHeight">Height:</label>
+          <input
+            type="number"
+            id="canvasHeight"
+            placeholder="720"
+            value="720"
+            >
+          <br>
+          <br>
+          <button onclick="changecanvasSize()">Change canvas size</button>
+          <br>
+          <br>
+          <span>This can change the recorder resolution</span>
+          <br>
+          <span>but also dither <b>MORE</b></span>
+          <br>
+          <br>
+          <button id="refreshButton" style="font-size: 20px">Refresh canvas</button
+            ><span>[R]</span>
+        </div>
+      </div>
+    </div>
+    <br><br>
+    <div class="previewContainer">
+      <div class="mainVideo">
+        <h2>Video</h2>
+        <video id="video" width="720" height="405" controls loop crossorigin="anonymous" onplay="processVideo()" onseeked="processVideo()">
+          Your browser does not support this tag
+        </video>
+      </div>
+      <div class="mainCanvas">
+        <h2>Preview canvas</h2>
+        <canvas
+          id="canvas"
+          width="720"
+          height="405"
+          >Your browser does not support this tag</canvas>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div>
+      <h2>Recorder</h2>
+      <br>
+      <button id="startRecording" type="button" onclick="startRecording()">
+      Start recording
+      </button>
+      <button id="stopRecording" type="button" onclick="stopRecording()" disabled>
+      Stop recording
+      </button><span>[F1] [SHIFT + F1]</span>
+      <br>
+      <br>
+      <span>Note: file size could be large because its harder to compress if there are complex pixel info</span>
+    </div>
+    <br>
+    <!--<div>
+      <h3>
+        If you dont like these dithering method you can still make your own here
+      </h3>
+      <br>
+      <label style="font-size: 25px">
+        <input
+          style="width: 25px; height: 25px"
+          type="checkbox"
+          id="creativeModeCheckbox"
+       >
+        Custom mode
+      </label>
+      <br>
+      <br>
+      <textarea
+        id="scriptEditor"
+        style="display: none"
+        rows="50"
+        cols="165"
+        oninput="applyJsCode()"
+      ></textarea>
+      </div>
+      -->
+    <br>
+    <div>
+    <br>
+    <label style="font-size: 25px">
+    <input
+      style="width: 25px; height: 25px"
+      type="checkbox"
+      id="mediaRecorderCkbx"
+      >
+    Custom MediaRecorder(edit before start record)
+    </label>
+    <br>
+    <br>
+    <textarea
+      id="mediaRecorderScriptEditor"
+      style="display: none"
+      rows="50"
+      cols="165"
+      oninput="applyMRCode()"
+      ></textarea>
+    <br>
+    </div>
+    <br>
+    <p>These are still very buggy</p>
+    <br>
+    <div id="console">
+      <p style="font-family: Unifont;text-align: center; transform-origin:center; color: #00ff00;">
+0------------------------------------------------------0
+/                                                      /
+\                                                      \
+/          ██╗      ██████╗  ██████╗ ███████╗          /
+\          ██║     ██╔═══██╗██╔════╝ ██╔════╝          \
+/          ██║     ██║   ██║██║  ███╗███████╗          /
+\          ██║     ██║   ██║██║   ██║╚════██║          \
+/          ███████╗╚██████╔╝╚██████╔╝███████║          /
+\          ╚══════╝ ╚═════╝  ╚═════╝ ╚══════╝          \
+/                                                      /
+\                                                      \
+0------------------------------------------------------0
+____________________________________________________________________________________________________________________________________________________________________________
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+</p>
+</div>
+    <h6>901D3's sites has no limit LOL</h6>
     <div>
       <script src="init.js"></script>
       <script>
@@ -79,29 +489,33 @@ You will also see some script links
         let recording = false;
             
         document.addEventListener("keydown", function(event) {
-          if (event.key === "F1" && !event.shiftKey) {
-            event.preventDefault();
-            if (recording) {
-              stopRecording();
-            } else {
-              startRecording();
-            }
-            recording = !recording;
-          }
-          else if (event.key === "F1" && event.shiftKey) {
-            event.preventDefault();
-            video.currentTime = 0;
-            video.play();
-            if (!recording) {
-              startRecording();
-            }
-            video.addEventListener("ended", function() {
-              video.pause();
-              stopRecording();
-              recording = !recording;
-            }, { once: true });
-          }
-        });
+  if (event.key === "F1" && !event.shiftKey) {
+    event.preventDefault();
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+    recording = !recording;
+  } 
+  else if (event.key === "F1" && event.shiftKey) {
+    video.removeAttribute("loop");
+    event.preventDefault();
+    video.currentTime = 0;
+    video.play();
+    if (!recording) {
+      startRecording();
+      recording = true;
+    }
+    
+    video.addEventListener("ended", function() {
+      video.pause();
+      stopRecording();
+      video.setAttribute("loop", "");
+      recording = false;
+    }, { once: true });
+  }
+});
         
       </script>
       <div>
@@ -118,7 +532,44 @@ You will also see some script links
           ></script>
       </div>
       <script id="editableScript" type="application/json"></script>
-      <script name="recorder functions">    
+      <script
+        id="editableMediaRecorderScript"
+        type="application/json"
+        >
+        //MediaRecorder init
+        
+        let canvasStream = canvas.captureStream(); //canvas capture speed in fps
+        let chunks = [];
+        
+        const option = {
+          mimeType: "video/mp4; codec=avc1.64001F",
+          videoBitsPerSecond: 100000000, //media recorder bitrate
+        };
+        
+        const mediaRecorder = new MediaRecorder(
+          canvasStream,
+          option
+        );
+        
+        //Main
+        
+        mediaRecorder.ondataavailable = (e) => {
+          chunks.push(e.data);
+          printLog("chunks pushed");
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks);
+          const recordedVideoUrl = URL.createObjectURL(blob);
+          const downloadLink = document.createElement("a");
+          downloadLink.download = "video.mp4";
+          downloadLink.href = recordedVideoUrl;
+          printLog(`Download link: ${downloadLink}`);
+          downloadLink.click();
+          printLog("Saved as webm");
+        };
+      </script>
+      <script>    
         function startRecording() {
           mediaRecorder.start();
           startRec.setAttribute("disabled", "");
@@ -135,3 +586,33 @@ You will also see some script links
         }
             
       </script>
+      <script>
+        function onDitherChange() {
+          const ditherDropdown = document.getElementById("ditherMethod");
+          ditherMethod = ditherDropdown.value;
+          refreshCanvas();
+        }
+      </script>
+      <script>
+        if (video.HAVE_ENOUGH_DATA) {
+          refreshCanvas();
+        }
+      </script>
+      <script name="custom script" src="custom.js"></script>
+      <script>
+        function updateVideoSrc() {
+          let linkUrl = document.getElementById("linkUrl").value;
+          const vidExt = /\.(mp4|mov|mkv|mpeg|webm|avi|ogm|ogv)$/i;
+
+          if (vidExt.test(linkUrl)) {
+            video.src = linkUrl;
+            printLog(`Link loaded to video: ${linkUrl}`);
+          } else {
+            printLog("Please enter a valid link");
+          }
+        }
+      </script>
+    </div>
+    <hr>
+  </body>
+</html>
