@@ -1,11 +1,24 @@
-<!--
-For now it will show the html code but still truncate some of it
--->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <title>Free Video Dithering</title>
     <meta charset="UTF-8">
+    <!-- HTML Meta Tags -->
+    <title>Free Video Dithering</title>
+    <meta name="description" content="A tool for dither video instead of image">
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="https://freevideodither.glitch.me">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Free Video Dithering">
+    <meta property="og:description" content="A tool for dither video instead of image">
+    <meta property="og:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374">
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="freevideodither.glitch.me">
+    <meta property="twitter:url" content="https://freevideodither.glitch.me">
+    <meta name="twitter:title" content="Free Video Dithering">
+    <meta name="twitter:description" content="A tool for dither video instead of image">
+    <meta name="twitter:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374">
     <link rel="stylesheet" href="https://901d3.glitch.me/styles/style.css">
     <link rel="stylesheet" href="style.css">
     <link
@@ -18,8 +31,6 @@ For now it will show the html code but still truncate some of it
     <br>
     <br>
     <h2>A tool for dither video instead of image</h2>
-    <br>
-    <br>
     <br>
     <hr>
     <br>
@@ -100,7 +111,7 @@ For now it will show the html code but still truncate some of it
       <div class="canvasControls">
         <h2>Dithering method</h2>
         <br>
-        <select id="ditherMethod" onchange="updateDitheringMethod(); onDitherChange()">
+        <select id="ditherMethod" onchange="updateDitheringMethod()">
           <option value="none" selected="selected">None</option>
           <optgroup label="Grayscale">
           <optgroup label="Ordered">
@@ -140,6 +151,7 @@ For now it will show the html code but still truncate some of it
           </optgroup>
           </optgroup>
           <optgroup label="Colored">
+            <option value="thresholdrgb">Threshold</option>
           <optgroup label="Ordered">
             <option value="bayer2x2rgb">Bayer 2x2</option>
             <option value="bayer4x4rgb">Bayer 4x4</option>
@@ -148,16 +160,27 @@ For now it will show the html code but still truncate some of it
             <option value="bayer32x32rgb">Bayer 32x32</option>
             <option value="bayer64x64rgb">Bayer 64x64</option>
             <option value="bayer128x128rgb">Bayer 128x128</option>
-            <option value="cluster4x4rgb">Cluster2x2(4x4)</option>
-            <option value="cluster8x8rgb">Cluster4x4(8x8)</option>
-            <option value="hatchright4x4rgb">Hatch Right</option>
-            <option value="hatchleft4x4rgb">Hatch Left</option>
-            <option value="hatchhorizontal4x4rgb">Hatch Horizontal</option>
-            <option value="hatchvertical4x4rgb">Hatch Vertical</option>
+            <optgroup label="Custom Ordered Matrix">
+              <optgroup label="Checkerboard">
+                <option value="checkerboardrgb">Checkerboard</option>
+              </optgroup>
+              <optgroup label="Cluster">
+                <option value="cluster4x4rgb">Cluster2x2(4x4)</option>
+                <option value="cluster8x8rgb">Cluster4x4(8x8)</option>
+              </optgroup>
+              <optgroup label="Hatch">
+                <option value="hatchright4x4rgb">Hatch Right</option>
+                <option value="hatchleft4x4rgb">Hatch Left</option>
+                <option value="hatchhorizontal4x4rgb">Hatch Horizontal</option>
+                <option value="hatchvertical4x4rgb">Hatch Vertical</option>
+              </optgroup>
+            </optgroup>
           </optgroup>
           <optgroup label="Arithmetic">
             <option value="arithmeticaddrgb">Arithmetic Add</option>
             <option value="arithmeticaddconvrgb">Arithmetic Add Convariant</option>
+            <option value="arithmeticsubrgb">Arithmetic Sub</option>
+            <option value="arithmeticsubconvrgb">Arithmetic Sub Convariant</option>
             <option value="arithmeticxorrgb">Arithmetic Xor</option>
             <option value="arithmeticxorconvrgb">Arithmetic Xor Convariant</option>
           </optgroup>
@@ -179,9 +202,6 @@ For now it will show the html code but still truncate some of it
           </optgroup>
         </select>
         <br>
-        <br>
-        <span>You may need a beefy device if you want to apply larger dither</span>
-        <br>
         <div id="lvls" style="display: none">
           <br>
           <label for="grLvlsInput">Blend/Levels: </label>
@@ -189,7 +209,7 @@ For now it will show the html code but still truncate some of it
           <input
             type="range"
             id="grLvlsRange"
-            oninput="updateGrLvlsRange()"
+            oninput="grLvlsRange()"
             min="0"
             value="5"
             max="255"
@@ -198,13 +218,13 @@ For now it will show the html code but still truncate some of it
           <input
             type="number"
             id="grLvlsInput"
-            oninput="updateGrLvlsInput()"
+            oninput="grLvlsInput()"
             value="5"
             >
           <br>
           <p>To change slider max value, type sth &lt;= 1 or &gt;1
             <br>
-            And to snap slider value, hold shift or double click drag
+            And to snap slider value, hold shift
           </p>
         </div>
         <div id="rgbLvls" style="display: none">
@@ -215,7 +235,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="range"
               id="rLvlsRange"
-              oninput="updateRedLvlsRange()"
               min="0"
               value="6"
               max="255"
@@ -224,7 +243,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="number"
               id="rLvlsInput"
-              oninput="updateRedLvlsInput()"
               value="6"
               >
           </div>
@@ -234,7 +252,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="range"
               id="gLvlsRange"
-              oninput="updateGreenLvlsRange()"
               min="0"
               value="7"
               max="255"
@@ -243,7 +260,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="number"
               id="gLvlsInput"
-              oninput="updateGreenLvlsInput()"
               value="7"
               >
           </div>
@@ -253,7 +269,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="range"
               id="bLvlsRange"
-              oninput="updateBlueLvlsRange()"
               min="0"
               value="6"
               max="255"
@@ -262,7 +277,6 @@ For now it will show the html code but still truncate some of it
             <input
               type="number"
               id="bLvlsInput"
-              oninput="updateBlueLvlsInput()"
               value="6"
               >
           </div>
@@ -272,16 +286,67 @@ For now it will show the html code but still truncate some of it
             And to snap slider value, hold shift or double click drag
           </p>
         </div>
-        <br>
-        <div id="noiseSettings" style="display: none">
-          <label for="noiseAmountInput">Noise amount:</label>
-          <input
-            type="number"
-            id="noiseAmountInput"
-            value="64"
-            oninput="setNoiseAmount()"
-            >
+        <div id="rgbErrLvls" style="display: none">
+          <br>
+          <div id="rErrLvls">
+            <label for="rErrLvlsInput">Red Diffuse: </label>
+            <br>
+            <input
+              type="range"
+              id="rErrLvlsRange"
+              min="0"
+              value="1"
+              max="1"
+              step="0.00000000001"
+              oninput="rErrorLvlsRange()"
+              >
+            <input
+              type="number"
+              id="rErrLvlsInput"
+              value="1"
+              oninput="rErrorLvlsInput()"
+              >
+          </div>
+          <div id="gErrLvls">
+            <label for="gErrLvlsInput">Green Diffuse: </label>
+            <br>
+            <input
+              type="range"
+              id="gErrLvlsRange"
+              min="0"
+              value="1"
+              max="1"
+              step="0.00000000001"
+              oninput="gErrorLvlsRange()"
+              >
+            <input
+              type="number"
+              id="gErrLvlsInput"
+              value="1"
+              oninput="gErrorLvlsInput()"
+              >
+          </div>
+          <div id="bErrLvls">
+            <label for="bErrLvlsInput">Blue Diffuse: </label>
+            <br>
+            <input
+              type="range"
+              id="bErrLvlsRange"
+              min="0"
+              value="1"
+              max="1"
+              step="0.00000000001"
+              oninput="bErrorLvlsRange()"
+              >
+            <input
+              type="number"
+              id="bErrLvlsInput"
+              value="1"
+              oninput="bErrorLvlsInput()"
+              >
+          </div>
         </div>
+        <br>
         <div name="change canvas size">
           <h2>Canvas size</h2>
           <br>
@@ -307,11 +372,22 @@ For now it will show the html code but still truncate some of it
           <br>
           <span>This can change the recorder resolution</span>
           <br>
-          <span>but also dither <b>MORE</b></span>
+          <span>but also dither more</span>
           <br>
           <br>
-          <button id="refreshButton" style="font-size: 20px">Refresh canvas</button
-            ><span>[R]</span>
+          <div>
+            <input type="checkbox" id="canvasRendering" onclick="tglCvsRendering()" checked>
+            <label for="canvasRendering">Pixelated rendering</label>
+            <br>
+            <br>
+            <button style="font-size: 20px" onclick="processVideo()">Refresh canvas</button>
+            <span>[R]</span>
+            <br>
+            <br>
+            <button style="font-size: 20px" onclick="canvasFullscreen()">Fullscreen canvas</button>
+            <span>[F]</span>
+          </div>
+          <br>
         </div>
       </div>
     </div>
@@ -319,17 +395,22 @@ For now it will show the html code but still truncate some of it
     <div class="previewContainer">
       <div class="mainVideo">
         <h2>Video</h2>
+        <div style="border: 10px solid #ea7010;border-radius: 10px;">
         <video id="video" width="720" height="405" controls loop crossorigin="anonymous" onplay="processVideo()" onseeked="processVideo()">
           Your browser does not support this tag
         </video>
+        </div>
       </div>
       <div class="mainCanvas">
         <h2>Preview canvas</h2>
+        <div style="border: 10px solid #ea7010;border-radius: 10px;">
         <canvas
           id="canvas"
           width="720"
           height="405"
+          style="image-rendering: pixelated;"
           >Your browser does not support this tag</canvas>
+          </div>
       </div>
     </div>
     <br>
@@ -413,6 +494,9 @@ For now it will show the html code but still truncate some of it
 0------------------------------------------------------0
 ____________________________________________________________________________________________________________________________________________________________________________
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+Check out the source code!
+<a href="https://github.com/901D3/freevideodither" style="color:#ea7010;" target="_blank">github.com/901D3/freevideodither</a>
 </p>
 </div>
     <h6>901D3's sites has no limit LOL</h6>
@@ -461,29 +545,43 @@ ________________________________________________________________________________
             }
           });
       </script>
-      <script>
-        document
-          .getElementById("refreshButton")
-          .addEventListener("click", function () {
-            refreshCanvas();
-          });
-        
+      <script>        
         document.addEventListener("keydown", function (event) {
           var activeElement = document.activeElement.tagName.toLowerCase();
-        
           if (
             event.code === "KeyR" &&
             activeElement !== "input" &&
             activeElement !== "textarea"
           ) {
-            refreshCanvas();
+            processVideo();
+          } else if (
+            event.code === "KeyF" &&
+            activeElement !== "input" &&
+            activeElement !== "textarea"
+          ) {
+            canvasFullscreen();
           }
         });
-        
-        
-        function refreshCanvas() {
-          processVideo();
-        }
+          if (
+            event.code === "KeyF" &&
+            activeElement !== "input" &&
+            activeElement !== "textarea"
+          ) {
+            canvasFullscreen();
+          }
+
+          function canvasFullscreen() {
+
+          if (canvas.requestFullscreen) {
+              canvas.requestFullscreen();
+          } else if (canvas.mozRequestFullScreen) {
+              canvas.mozRequestFullScreen();
+          } else if (canvas.webkitRequestFullscreen) {
+              canvas.webkitRequestFullscreen();
+          } else if (canvas.msRequestFullscreen) {
+              canvas.msRequestFullscreen();
+          }
+          }
       </script>
       <script>
         let recording = false;
@@ -587,15 +685,8 @@ ________________________________________________________________________________
             
       </script>
       <script>
-        function onDitherChange() {
-          const ditherDropdown = document.getElementById("ditherMethod");
-          ditherMethod = ditherDropdown.value;
-          refreshCanvas();
-        }
-      </script>
-      <script>
         if (video.HAVE_ENOUGH_DATA) {
-          refreshCanvas();
+          processVideo();
         }
       </script>
       <script name="custom script" src="custom.js"></script>
@@ -609,6 +700,15 @@ ________________________________________________________________________________
             printLog(`Link loaded to video: ${linkUrl}`);
           } else {
             printLog("Please enter a valid link");
+          }
+        }
+      </script>
+      <script>
+        function tglCvsRendering() {
+          if (document.getElementById("canvasRendering").checked) {
+          canvas.setAttribute("style", "image-rendering:pixelated");
+          } else {
+            canvas.removeAttribute("style", "image-rendering:pixelated");
           }
         }
       </script>
