@@ -1,11 +1,11 @@
 //MediaRecorder init
 
-let canvasStream = canvas.captureStream(); //canvas capture speed in fps
+let canvasStream = canvas.captureStream();
 let chunks = [];
 
 const option = {
   mimeType: "video/mp4; codec=vp9",
-  videoBitsPerSecond: 100000000, //media recorder bitrate
+  videoBitsPerSecond: 1000000000, //media recorder bitrate
 };
 
 const mediaRecorder = new MediaRecorder(
