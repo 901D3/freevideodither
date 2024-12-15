@@ -1,245 +1,111 @@
-document
-.getElementById("ditherMethod")
-.addEventListener("change", function () {
-  let method = this.value;
-  if (
-    method === "bayer2x2"               ||
-    method === "bayer4x4"               ||
-    method === "bayer8x8"               ||
-    method === "bayer16x16"             ||
-    method === "bayer32x32"             ||
-    method === "bayer64x64"             ||
-    method === "bayer128x128"           ||
+const dthrMth = {
+  //Grayscale
+  "bayer2x2": bayer,
+  "bayer4x4": bayer,
+  "bayer8x8": bayer,
+  "bayer16x16": bayer,
+  "bayer32x32": bayer,
+  "bayer64x64": bayer,
+  "bayer128x128": bayer,
 
-    method === "cluster4x4"             ||
-    method === "cluster8x8"             ||
-
-    method === "hatchright4x4"          ||
-    method === "hatchleft4x4"           ||
-    method === "hatchhorizontal4x4"     ||
-    method === "hatchvertical4x4"       
-  ) {
-    document.getElementById("lvls").style.display = "block";
-  } else {
-    document.getElementById("lvls").style.display = "none";
-  }
-
-  if (
-    method === "bayer2x2rgb"            ||
-    method === "bayer4x4rgb"            ||
-    method === "bayer8x8rgb"            ||
-    method === "bayer16x16rgb"          ||
-    method === "bayer32x32rgb"          ||
-    method === "bayer64x64rgb"          ||
-    method === "bayer128x128rgb"        ||
-
-    method === "cluster4x4rgb"          ||
-    method === "cluster8x8rgb"          ||
-
-    method === "hatchright4x4rgb"       ||
-    method === "hatchleft4x4rgb"        ||
-    method === "hatchhorizontal4x4rgb"  ||
-    method === "hatchvertical4x4rgb"    ||       
-
-    method === "arithmeticaddrgb"       ||
-    method === "arithmeticaddconvrgb"   ||
-    method === "arithmeticxorrgb"       ||
-    method === "arithmeticxorconvrgb"   ||
-
-    method === "floydsteinbergrgb"      ||
-    method === "fanrgb"                 ||
-    method === "shiaufanrgb"            ||
-    method === "shiaufan2rgb"           ||
-    
-    method === "atkinsonrgb"            ||
-    method === "burkesrgb"              ||
-    method === "javisjudiceninkergb"    ||
-    method === "stuckirgb"              ||
-
-    method === "sierrargb"              ||
-    method === "sierralitergb"          ||
-    method === "sierra2rgb"             ||
-    method === "sierra3rgb"             ||
-
-    method === "twodrgb"
-
-  ) {
-    document.getElementById("rgbLvls").style.display = "block";
-  } else {
-    document.getElementById("rgbLvls").style.display = "none";
-  }
-});
-
-var grlvls, rLvls, gLvls, bLvls;
-var lvlsRange, lvlsInput;
-
-//Grayscale
-
-function updateGrLvlsRange() {
-  lvlsRange = document.getElementById("grLvlsRange");
-  var lvlsInput = document.getElementById("grLvlsInput");
-  lvlsInput.value = lvlsRange.value;
-}
-
-function updateGrLvlsInput() {
-  lvlsInput = document.getElementById("grLvlsInput");
-  var lvlsRange = document.getElementById("grLvlsRange");
-  lvls = parseFloat(lvlsInput.value);
-  lvlsRange.value = lvls;
-
-  if (lvls > 1) {
-      lvlsRange.max = 255;
-      lvlsRange.value = Math.min(lvlsRange.value, 255);
-  } else {
-      lvlsRange.max = 1;
-      lvlsRange.value = Math.min(lvlsRange.value, 1);
-  }
+  "cluster4x4": bayer,
+  "cluster8x8": bayer,
   
+  "hatchleft4x4": bayer,
+  "hatchright4x4": bayer,
+  "hatchhorizontal4x4": bayer,
+  "hatchvertical4x4": bayer,
+
+
+  //Colored
+  "thresholdrgb": thresholdRgb,
+
+  "bayer2x2rgb": bayerRgb,
+  "bayer4x4rgb": bayerRgb,
+  "bayer8x8rgb": bayerRgb,
+  "bayer16x16rgb": bayerRgb,
+  "bayer32x32rgb": bayerRgb,
+  "bayer64x64rgb": bayerRgb,
+  "bayer128x128rgb": bayerRgb,
+
+  "checkerboardrgb": bayerRgb,
+
+  "cluster4x4rgb": bayerRgb,
+  "cluster8x8rgb": bayerRgb,
+
+  "hatchleft4x4rgb": bayerRgb,
+  "hatchright4x4rgb": bayerRgb,
+  "hatchhorizontal4x4rgb": bayerRgb,
+  "hatchvertical4x4rgb": bayerRgb,
+
+  "arithmeticaddrgb": arithmeticAddRgb,
+  "arithmeticaddconvrgb": arithmeticAddConvRgb,
+  "arithmeticsubrgb": arithmeticSubRgb,
+  "arithmeticsubconvrgb": arithmeticSubConvRgb,
+  "arithmeticxorrgb": arithmeticXorRgb,
+  "arithmeticxorconvrgb": arithmeticXorConvRgb,
+
+  "floydsteinbergrgb": floydSteinbergRgb,
+  "fanrgb": fanRgb,
+  "shiaufanrgb": shiauFanRgb,
+  "shiaufan2rgb": shiauFan2Rgb,
+
+  "atkinsonrgb": atkinsonRgb,
+  "burkesrgb": burkesRgb,
+  "javisjudiceninkergb": jJNRgb,
+  "stuckirgb": stuckiRgb,
+
+  "sierrargb": sierraRgb,
+  "sierralitergb": sierraLiteRgb,
+  "sierra2rgb": sierra2Rgb,
+  "sierra3rgb": sierra3Rgb,
+  
+  "twodrgb": twoDRgb,
+};
+
+// Initialize global variables
+var frm = 0;
+var stT = 0;
+var lsUpdT = 0;
+var lLT = 0;
+
+function processVideo() {
+  frm = 0;
+  stT = performance.now();
+  lsUpdT = stT;
+  lLT = stT;
+  processFrame();
 }
 
-//RGB
+function processFrame() {
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  let f = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-const colors = ['r', 'g', 'b'];
-
-function updateLvlsRange(color) {
-  const slider = document.getElementById(`${color}LvlsRange`);
-  const value = parseFloat(slider.value);
-  slider.value = value;
-  document.getElementById(`${color}LvlsInput`).value = value;
-}
-
-function updateLvlsInput(color) {
-  const range = document.getElementById(`${color}LvlsRange`);
-  const input = document.getElementById(`${color}LvlsInput`);
-  const lvls = parseFloat(input.value);
-
-  if (lvls > 1) {
-    range.max = 255;
-    range.value = Math.min(range.value, 255);
-  } else {
-    range.max = 1;
-    range.value = Math.min(range.value, 1);
+  let mth = document.getElementById("ditherMethod").value;
+  if (dthrMth[mth]) {
+    dthrMth[mth](f);
   }
 
-  range.value = lvls;
-}
+  ctx.imageSmoothingEnabled = false;
+  ctx.putImageData(f, 0, 0);
+  ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
 
-colors.forEach(color => {
-  // Update sliders and inputs
-  document.getElementById(`${color.toLowerCase()}LvlsRange`).addEventListener('input', () => updateLvlsRange(color.toLowerCase()));
-  document.getElementById(`${color.toLowerCase()}LvlsInput`).addEventListener('input', () => updateLvlsInput(color.toLowerCase()));
-});
+  frm++;
+  let crT = performance.now();
+  let esT = (crT - stT) / 1000;
+  let avgFps = frm / esT;
+  let dlT = (crT - lsUpdT) / 1000;
+  let crFps = dlT > 0 ? 1 / dlT : 0;
 
-// Prevent touch events on sliders
-const sliders = ['grLvlsRange', 'rLvlsRange', 'gLvlsRange', 'bLvlsRange'];
+  lsUpdT = crT;
 
-sliders.forEach(sliderId => {
-  const slider = document.getElementById(sliderId);
-  slider.addEventListener('touchstart', event => event.preventDefault());
-  slider.addEventListener('touchmove', event => event.preventDefault());
-});
-
-//Slider snapper
-
-function getDivisionValues(min, max) {
-  const divisions = [];
-  for (let i = min; i <= max; i++) {
-    for (let j = 0; j < 5; j++) {
-      divisions.push(i + j * 0.25);
-    }
-  }
-  return divisions;
-}
-
-function snap(value, min, max) {
-  const divisions = getDivisionValues(min, max);
-  let closestDivision = divisions.reduce((prev, curr) => {
-    return Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev;
-  });
-  return closestDivision;
-}
-
-let shiftPressed = false;
-
-window.addEventListener('keydown', function (event) {
-  if (event.key === "Shift") {
-    shiftPressed = true;
-  }
-});
-
-window.addEventListener('keyup', function (event) {
-  if (event.key === "Shift") {
-    shiftPressed = false;
-  }
-});
-
-function handleSliderInput(sliderId) {
-  const slider = document.getElementById(sliderId);
-  const min = parseFloat(slider.min);
-  const max = parseFloat(slider.max);
-  let value = parseFloat(slider.value);
-
-  if (shiftPressed) {
-    value = snap(value, min, max);
+  if (crT - lLT >= 500) {
+    printLog(`elapsed: ${esT.toString().padEnd(22)} | processed: ${frm.toString().padEnd(22)} | AvgFps: ${avgFps.toString().padEnd(22)} | Fps: ${crFps.toString().padEnd(22)} | `);
+    lLT = crT;
   }
 
-  slider.value = value;
-  document.getElementById(sliderId.replace('Range', 'Input')).value = value;
+  if (video.paused || video.ended) {
+    return;
+  }
+  requestAnimationFrame(processFrame);
 }
-
-document.getElementById('grLvlsRange').addEventListener('input', () => handleSliderInput('grLvlsRange'));
-document.getElementById('rLvlsRange').addEventListener('input', () => handleSliderInput('rLvlsRange'));
-document.getElementById('gLvlsRange').addEventListener('input', () => handleSliderInput('gLvlsRange'));
-document.getElementById('bLvlsRange').addEventListener('input', () => handleSliderInput('bLvlsRange'));
-
-document.getElementById('grLvlsRange').addEventListener('dblclick', () => {
-  const lvlslider = document.getElementById('grLvlsRange');
-  const min = parseFloat(lvlslider.min);
-  const max = parseFloat(lvlslider.max);
-  const value = parseFloat(lvlslider.value);
-  const snapped = snap(value, min, max);
-  lvlslider.value = snapped;
-  document.getElementById('grLvlsInput').value = snapped;
-});
-
-document.getElementById('rLvlsRange').addEventListener('dblclick', () => {
-  const min = parseFloat(redSlider.min);
-  const max = parseFloat(redSlider.max);
-  const value = parseFloat(redSlider.value);
-  const snapped = snap(value, min, max);
-  redSlider.value = snapped;
-  document.getElementById('rLvlsInput').value = snapped;
-});
-
-document.getElementById('gLvlsRange').addEventListener('dblclick', () => {
-  const min = parseFloat(greenSlider.min);
-  const max = parseFloat(greenSlider.max);
-  const value = parseFloat(greenSlider.value);
-  const snapped = snap(value, min, max);
-  greenSlider.value = snapped;
-  document.getElementById('gLvlsInput').value = snapped;
-});
-
-document.getElementById('bLvlsRange').addEventListener('dblclick', () => {
-  const min = parseFloat(blueSlider.min);
-  const max = parseFloat(blueSlider.max);
-  const value = parseFloat(blueSlider.value);
-  const snapped = snap(value, min, max);
-  blueSlider.value = snapped;
-  document.getElementById('bLvlsInput').value = snapped;
-});
-
-document
-  .getElementById("ditherMethod")
-  .addEventListener("change", function () {
-    let method = this.value;
-    if (method === "random" || method === "randomrgb") {
-      document.getElementById("noiseSettings").style.display = "block";
-    } else {
-      document.getElementById("noiseSettings").style.display = "none";
-    }
-  });
-
-
-
-
