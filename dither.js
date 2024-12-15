@@ -7,7 +7,7 @@ function updateDitheringMethod() {
         [0, 2],
         [3, 1],
       ];
-      bayerSize = 2;
+      matSz = 2;
       break;
     case "bayer4x4":
     case "bayer4x4rgb":
@@ -17,7 +17,7 @@ function updateDitheringMethod() {
         [ 3, 11,  1,  9],
         [15,  7, 13,  5],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
     case "bayer8x8":
     case "bayer8x8rgb":
@@ -31,7 +31,7 @@ function updateDitheringMethod() {
         [15, 47,  7, 39, 13, 45,  5, 37],
         [63, 31, 55, 23, 61, 29, 53, 21],
       ];
-      bayerSize = 8;
+      matSz = 8;
       break;
     case "bayer16x16":
     case "bayer16x16rgb":
@@ -53,7 +53,7 @@ function updateDitheringMethod() {
         [ 63, 191,  31, 159,  55, 183,  23, 151,  61, 189,  29, 157,  53, 181,  21, 149],
         [255, 127, 223,  95, 247, 119, 215,  87, 253, 125, 221,  93, 245, 117, 213,  85],
       ];
-      bayerSize = 16;
+      matSz = 16;
       break;
     case "bayer32x32":
     case "bayer32x32rgb":
@@ -91,7 +91,7 @@ function updateDitheringMethod() {
         [ 255, 767, 127, 639,  223, 735,  95, 607,  247, 759, 119, 631,  215, 727,  87, 599,  253, 765, 125, 637,  221, 733,  93, 605,  245, 757, 117, 629,  213, 725,  85, 597],
         [1023, 511, 895, 383,  991, 479, 863, 351, 1015, 503, 887, 375,  983, 471, 855, 343, 1021, 509, 893, 381,  989, 477, 861, 349, 1013, 501, 885, 373,  981, 469, 853, 341],
       ];
-      bayerSize = 32;
+      matSz = 32;
       break;
     case "bayer64x64":
     case "bayer64x64rgb":
@@ -161,7 +161,7 @@ function updateDitheringMethod() {
         [1023, 3071,  511, 2559,  895, 2943,  383, 2431,  991, 3039,  479, 2527,  863, 2911,  351, 2399, 1015, 3063,  503, 2551,  887, 2935,  375, 2423,  983, 3031,  471, 2519,  855, 2903,  343, 2391, 1021, 3069,  509, 2557,  893, 2941,  381, 2429,  989, 3037,  477, 2525,  861, 2909,  349, 2397, 1013, 3061,  501, 2549,  885, 2933,  373, 2421,  981, 3029,  469, 2517,  853, 2901,  341, 2389],
         [4095, 2047, 3583, 1535, 3967, 1919, 3455, 1407, 4063, 2015, 3551, 1503, 3935, 1887, 3423, 1375, 4087, 2039, 3575, 1527, 3959, 1911, 3447, 1399, 4055, 2007, 3543, 1495, 3927, 1879, 3415, 1367, 4093, 2045, 3581, 1533, 3965, 1917, 3453, 1405, 4061, 2013, 3549, 1501, 3933, 1885, 3421, 1373, 4085, 2037, 3573, 1525, 3957, 1909, 3445, 1397, 4053, 2005, 3541, 1493, 3925, 1877, 3413, 1365],
       ];
-      bayerSize = 64;
+      matSz = 64;
       break;
     case "bayer128x128":
     case "bayer128x128rgb":
@@ -295,17 +295,25 @@ function updateDitheringMethod() {
         [ 4095, 12287,  2047, 10239,  3583, 11775,  1535,  9727,  3967, 12159,  1919, 10111,  3455, 11647,  1407,  9599,  4063, 12255,  2015, 10207,  3551, 11743,  1503,  9695,  3935, 12127,  1887, 10079,  3423, 11615,  1375,  9567,  4087, 12279,  2039, 10231,  3575, 11767,  1527,  9719,  3959, 12151,  1911, 10103,  3447, 11639,  1399,  9591,  4055, 12247,  2007, 10199,  3543, 11735,  1495,  9687,  3927, 12119,  1879, 10071,  3415, 11607,  1367,  9559,  4093, 12285,  2045, 10237,  3581, 11773,  1533,  9725,  3965, 12157,  1917, 10109,  3453, 11645,  1405,  9597,  4061, 12253,  2013, 10205,  3549, 11741,  1501,  9693,  3933, 12125,  1885, 10077,  3421, 11613,  1373,  9565,  4085, 12277,  2037, 10229,  3573, 11765,  1525,  9717,  3957, 12149,  1909, 10101,  3445, 11637,  1397,  9589,  4053, 12245,  2005, 10197,  3541, 11733,  1493,  9685,  3925, 12117,  1877, 10069,  3413, 11605,  1365,  9557],
         [16383,  8191, 14335,  6143, 15871,  7679, 13823,  5631, 16255,  8063, 14207,  6015, 15743,  7551, 13695,  5503, 16351,  8159, 14303,  6111, 15839,  7647, 13791,  5599, 16223,  8031, 14175,  5983, 15711,  7519, 13663,  5471, 16375,  8183, 14327,  6135, 15863,  7671, 13815,  5623, 16247,  8055, 14199,  6007, 15735,  7543, 13687,  5495, 16343,  8151, 14295,  6103, 15831,  7639, 13783,  5591, 16215,  8023, 14167,  5975, 15703,  7511, 13655,  5463, 16381,  8189, 14333,  6141, 15869,  7677, 13821,  5629, 16253,  8061, 14205,  6013, 15741,  7549, 13693,  5501, 16349,  8157, 14301,  6109, 15837,  7645, 13789,  5597, 16221,  8029, 14173,  5981, 15709,  7517, 13661,  5469, 16373,  8181, 14325,  6133, 15861,  7669, 13813,  5621, 16245,  8053, 14197,  6005, 15733,  7541, 13685,  5493, 16341,  8149, 14293,  6101, 15829,  7637, 13781,  5589, 16213,  8021, 14165,  5973, 15701,  7509, 13653,  5461],
       ];
-      bayerSize = 128;
+      matSz = 128;
+      break;
+    case "checkerboard":
+    case "checkerboardrgb":
+      bayerMatrix = [
+        [0, 1,],
+        [1, 0,],
+      ];
+      matSz = 2;
       break;
     case "cluster4x4":
     case "cluster4x4rgb":
       bayerMatrix = [
-        [12,  6, 10,  4],
-        [ 1, 16, 14,  7],
-        [ 8, 13, 15,  2],
-        [ 3,  9,  5, 11],
+        [11,  5,  9,  3],
+        [ 0, 15, 13,  6],
+        [ 7, 12, 14,  1],
+        [ 2,  8,  4, 10],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
     case "cluster8x8":
     case "cluster8x8rgb":
@@ -319,7 +327,7 @@ function updateDitheringMethod() {
         [31, 51, 59,  7, 29, 49, 57,  5],
         [11, 35, 19, 43,  9, 33, 17, 41],
       ];
-      bayerSize = 8;
+      matSz = 8;
       break;
     case "hatchleft4x4":
     case "hatchleft4x4rgb":
@@ -329,7 +337,7 @@ function updateDitheringMethod() {
         [ 7, 15,  7,  0],
          [0,  7, 15,  7],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
     case "hatchright4x4":
     case "hatchright4x4rgb":
@@ -339,7 +347,7 @@ function updateDitheringMethod() {
         [ 0,  7, 15,  7],
         [ 7, 15,  7,  0],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
     case "hatchhorizontal4x4":
     case "hatchhorizontal4x4rgb":
@@ -349,7 +357,7 @@ function updateDitheringMethod() {
         [ 0,  0,  0,  0],
         [ 7,  7,  7,  7],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
     case "hatchvertical4x4":
     case "hatchvertical4x4rgb":
@@ -359,14 +367,20 @@ function updateDitheringMethod() {
         [15,  7,  0,  7],
         [15,  7,  0,  7],
       ];
-      bayerSize = 4;
+      matSz = 4;
       break;
-      x;
+  }
+  threshold = 255 / matSz ** 2;
+
+  ditherMethod = dropdown.value;
+  printLog(`selected: ${method}`);
+
+  if (video.paused) {
+    processVideo()
+  } else if (video.playing) {
+    //skip
   }
 
-  threshold = 255 / (bayerSize * bayerSize + 1);
-  printLog(`selected: ${method}`);
-  refreshCanvas();
 }
 
 //---------------------------------------------------------------
@@ -377,17 +391,17 @@ function updateDitheringMethod() {
 
 // Bayer
 
-function bayer(iDat) {
-  let width = iDat.width;
-  let height = iDat.height;
-  let data = iDat.data;
+function bayer(frm) {
+  let width = frm.width;
+  let height = frm.height;
+  let data = frm.data;
 
   let lvls = parseFloat(document.getElementById("grLvlsInput").value);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
-      let bayerValue = (bayerMatrix[y % bayerSize][x % bayerSize] * threshold) / 255.0;
+      let bayerValue = (bayerMatrix[y % matSz][x % matSz] * threshold) / 255.0;
       let ditheredValue = (Math.floor(lvls * (data[i] / 255.0) + bayerValue) / lvls) * 255.0;
       data[i] = ditheredValue;
       data[i + 1] = ditheredValue;
@@ -402,12 +416,39 @@ function bayer(iDat) {
 
 //--------------
 
+//Threshold
+
+function thresholdRgb(frm) {
+  let width = frm.width;
+  let height = frm.height;
+  let data = frm.data;
+
+  let rLvls = parseFloat(rLvlsInput.value),
+      gLvls = parseFloat(gLvlsInput.value),
+      bLvls = parseFloat(bLvlsInput.value);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let i = (y * width + x) * 4;
+
+        let leveledR = Math.floor(rLvls * (data[i] / 255.0)) * (255.0 / rLvls);
+        let leveledG = Math.floor(gLvls * (data[i + 1] / 255.0)) * (255.0 / gLvls);
+        let leveledB = Math.floor(bLvls * (data[i + 2] / 255.0)) * (255.0 / bLvls);
+
+        data[i] = leveledR;
+        data[i + 1] = leveledG;
+        data[i + 2] = leveledB;
+    }
+  }
+}
+
+
 // Bayer
 
-function bayerRgb(iDat) {
-  let width = iDat.width;
-  let height = iDat.height;
-  let data = iDat.data;
+function bayerRgb(frm) {
+  let width = frm.width;
+  let height = frm.height;
+  let data = frm.data;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
@@ -416,23 +457,23 @@ function bayerRgb(iDat) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
-      let bayerValue = (bayerMatrix[y % bayerSize][x % bayerSize] * threshold) / 255.0;
-      let ditheredR = (Math.floor(rLvls * (data[i] / 255.0) + bayerValue) / rLvls) * 255.0;
-      let ditheredG = (Math.floor(gLvls * (data[i + 1] / 255.0) + bayerValue) / gLvls) * 255.0;
-      let ditheredB = (Math.floor(bLvls * (data[i + 2] / 255.0) + bayerValue) / bLvls) * 255.0;
+      let bayerValue = (bayerMatrix[y % matSz][x % matSz] * threshold) / 255.0;
+      let dithR = (Math.floor(rLvls * (data[i] / 255.0) + bayerValue) / rLvls) * 255.0;
+      let dithG = (Math.floor(gLvls * (data[i + 1] / 255.0) + bayerValue) / gLvls) * 255.0;
+      let dithB = (Math.floor(bLvls * (data[i + 2] / 255.0) + bayerValue) / bLvls) * 255.0;
 
-      data[i] = ditheredR;
-      data[i + 1] = ditheredG;
-      data[i + 2] = ditheredB;
+      data[i] = dithR;
+      data[i + 1] = dithG;
+      data[i + 2] = dithB;
     }
   }
 }
 
 //Arithmetic ADD
 
-function arithmeticAddRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
+function arithmeticAddRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
@@ -459,9 +500,9 @@ function arithmeticAddRgb(iDat) {
   }
 }
 
-function arithmeticAddConvRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
+function arithmeticAddConvRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
@@ -484,11 +525,11 @@ function arithmeticAddConvRgb(iDat) {
   }
 }
 
-//Arithmetic XOR
+//Arithmetic SUB
 
-function arithmeticXorRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
+function arithmeticSubRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
@@ -498,13 +539,13 @@ function arithmeticXorRgb(iDat) {
     y = 0;
 
   for (let i = 0; i < data.length; i += 4) {
-    let rMask = ((((x + 0 * 17) ^ (y * 149)) * 1234) & 511) / 511.0;
+    let rMask = (((x - 0 * 67 - y * 236) * 119) & 255) / 255.0;
     data[i] = (Math.floor(rLvls * (data[i] / 255.0) + rMask) / rLvls) * 255.0;
 
-    let gMask = ((((x + 1 * 17) ^ (y * 149)) * 1234) & 511) / 511.0;
+    let gMask = (((x - 1 * 67 - y * 236) * 119) & 255) / 255.0;
     data[i + 1] = (Math.floor(gLvls * (data[i + 1] / 255.0) + gMask) / gLvls) * 255.0;
 
-    let bMask = ((((x + 2 * 17) ^ (y * 149)) * 1234) & 511) / 511.0;
+    let bMask = (((x - 2 * 67 - y * 236) * 119) & 255) / 255.0;
     data[i + 2] = (Math.floor(bLvls * (data[i + 2] / 255.0) + bMask) / bLvls) * 255.0;
 
     x++;
@@ -515,9 +556,9 @@ function arithmeticXorRgb(iDat) {
   }
 }
 
-function arithmeticXorConvRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
+function arithmeticSubConvRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
@@ -527,7 +568,63 @@ function arithmeticXorConvRgb(iDat) {
     y = 0;
 
   for (let i = 0; i < data.length; i += 4) {
-    let mask = (((x ^ (y * 149)) * 1234) & 511) / 511.0;
+    let mask = (((x - y * 237) * 119) & 255) / 255.0;
+    data[i] = (Math.floor(rLvls * (data[i] / 255.0) + mask) / rLvls) * 255.0;
+    data[i + 1] = (Math.floor(gLvls * (data[i + 1] / 255.0) + mask) / gLvls) * 255.0;
+    data[i + 2] = (Math.floor(bLvls * (data[i + 2] / 255.0) + mask) / bLvls) * 255.0;
+
+    x++;
+    if (x >= width) {
+      x = 0;
+      y++;
+    }
+  }
+}
+
+//Arithmetic XOR
+
+function arithmeticXorRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+
+  let rLvls = parseFloat(rLvlsInput.value),
+    gLvls = parseFloat(gLvlsInput.value),
+    bLvls = parseFloat(bLvlsInput.value);
+
+  let x = 0,
+    y = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    let rMask = ((((x + 0 * 17) ^ (y * 149)) * 1234) & 255) / 255.0;
+    data[i] = (Math.floor(rLvls * (data[i] / 255.0) + rMask) / rLvls) * 255.0;
+
+    let gMask = ((((x + 1 * 17) ^ (y * 149)) * 1234) & 255) / 255.0;
+    data[i + 1] = (Math.floor(gLvls * (data[i + 1] / 255.0) + gMask) / gLvls) * 255.0;
+
+    let bMask = ((((x + 2 * 17) ^ (y * 149)) * 1234) & 255) / 255.0;
+    data[i + 2] = (Math.floor(bLvls * (data[i + 2] / 255.0) + bMask) / bLvls) * 255.0;
+
+    x++;
+    if (x >= width) {
+      x = 0;
+      y++;
+    }
+  }
+}
+
+function arithmeticXorConvRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+
+  let rLvls = parseFloat(rLvlsInput.value),
+    gLvls = parseFloat(gLvlsInput.value),
+    bLvls = parseFloat(bLvlsInput.value);
+
+  let x = 0,
+    y = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    let mask = (((x ^ (y * 149)) * 1234) & 255) / 255.0;
     data[i] = (Math.floor(rLvls * (data[i] / 255.0) + mask) / rLvls) * 255.0;
     data[i + 1] = (Math.floor(gLvls * (data[i + 1] / 255.0) + mask) / gLvls) * 255.0;
     data[i + 2] = (Math.floor(bLvls * (data[i + 2] / 255.0) + mask) / bLvls) * 255.0;
@@ -545,34 +642,38 @@ function arithmeticXorConvRgb(iDat) {
 //([-  X  7]
 // [3  5  1]) x (1 / 16)
 
-function floydSteinbergRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function floydSteinbergRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 16;
-      let errG = (oldG - newG) / 16;
-      let errB = (oldB - newB) / 16;
+      let errR = (r - R) * rErrStr / 16;
+      let errG = (g - G) * gErrStr / 16;
+      let errB = (b - B) * bErrStr / 16;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 7;
@@ -603,39 +704,45 @@ function floydSteinbergRgb(iDat) {
   }
 }
 
+
 //Fan
 //
 //([-  -  X  7]
 // [1  3  5   ]) x (1 / 16)
 
-function fanRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function fanRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 16;
-      let errG = (oldG - newG) / 16;
-      let errB = (oldB - newB) / 16;
+      let errR = (r - R) * rErrStr / 16;
+      let errG = (g - G) * gErrStr / 16;
+      let errB = (b - B) * bErrStr / 16;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 7;
@@ -671,34 +778,39 @@ function fanRgb(iDat) {
 //([-  -  X  4]
 // [1  1  2   ]) x (1 / 8)
 
-function shiauFanRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function shiauFanRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 8;
-      let errG = (oldG - newG) / 8;
-      let errB = (oldB - newB) / 8;
+      let errR = (r - R) * rErrStr / 8;
+      let errG = (g - G) * gErrStr / 8;
+      let errB = (b - B) * bErrStr / 8;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 4;
@@ -734,34 +846,39 @@ function shiauFanRgb(iDat) {
 //([-  -  -  X  4]
 // [1  1  2  4   ]) x (1 / 16)
 
-function shiauFan2Rgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function shiauFan2Rgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 16;
-      let errG = (oldG - newG) / 16;
-      let errB = (oldB - newB) / 16;
+      let errR = (r - R) * rErrStr / 16;
+      let errG = (g - G) * gErrStr / 16;
+      let errB = (b - B) * bErrStr / 16;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 8;
@@ -804,34 +921,39 @@ function shiauFan2Rgb(iDat) {
 // [   1  1  1   ]
 // [      1      ]) x (1 / 8)
 
-function atkinsonRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function atkinsonRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 8;
-      let errG = (oldG - newG) / 8;
-      let errB = (oldB - newB) / 8;
+      let errR = (r - R) * rErrStr / 8;
+      let errG = (g - G) * gErrStr / 8;
+      let errB = (b - B) * bErrStr / 8;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         let i = (y * width + (x + 1)) * 4;
@@ -885,34 +1007,39 @@ function atkinsonRgb(iDat) {
 //([-  -  X  8  4]
 // [2  4  8  4  2]) x (1 / 32)
 
-function burkesRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function burkesRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 32,
-        errG = (oldG - newG) / 32,
-        errB = (oldB - newB) / 32;
+      let errR = (r - R) * rErrStr / 32,
+        errG = (g - G) * gErrStr / 32,
+        errB = (b - B) * bErrStr / 32;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 8;
@@ -966,34 +1093,39 @@ function burkesRgb(iDat) {
 // [3   5   7   5   3]
 // [1   3   5   3   1]) x (1 / 48)
 
-function jJNRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function jJNRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls);
-      newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls);
-      newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls);
+      G = Math.round((gLvls * g) / 255) * (255 / gLvls);
+      B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 48,
-        errG = (oldG - newG) / 48,
-        errB = (oldB - newB) / 48;
+      let errR = (r - R) * rErrStr / 48,
+        errG = (g - G) * gErrStr / 48,
+        errB = (b - B) * bErrStr / 48;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 7;
@@ -1078,34 +1210,39 @@ function jJNRgb(iDat) {
 // [2   4   8   4   2]
 // [1   2   4   2   1]) x (1 /42)
 
-function stuckiRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function stuckiRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 42;
-      let errG = (oldG - newG) / 42;
-      let errB = (oldB - newB) / 42;
+      let errR = (r - R) * rErrStr / 42;
+      let errG = (g - G) * gErrStr / 42;
+      let errB = (b - B) * bErrStr / 42;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 8;
@@ -1190,34 +1327,39 @@ function stuckiRgb(iDat) {
 // [2  4  5  4  2]
 // [   2  3  2   ]) x (1 / 32)
 
-function sierraRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function sierraRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 32;
-      let errG = (oldG - newG) / 32;
-      let errB = (oldB - newB) / 32;
+      let errR = (r - R) * rErrStr / 32;
+      let errG = (g - G) * gErrStr / 32;
+      let errB = (b - B) * bErrStr / 32;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 5;
@@ -1295,34 +1437,39 @@ function sierraRgb(iDat) {
 //([-  X  2]
 // [1  1   ]) x (1 / 4)
 
-function sierraLiteRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function sierraLiteRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 4;
-      let errG = (oldG - newG) / 4;
-      let errB = (oldB - newB) / 4;
+      let errR = (r - R) * rErrStr / 4;
+      let errG = (g - G) * gErrStr / 4;
+      let errB = (b - B) * bErrStr / 4;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 2;
@@ -1350,34 +1497,39 @@ function sierraLiteRgb(iDat) {
 //([-  -  X  4  3]
 // [1  2  3  2  1]) x (1 / 16)
 
-function sierra2Rgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function sierra2Rgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 16;
-      let errG = (oldG - newG) / 16;
-      let errB = (oldB - newB) / 16;
+      let errR = (r - R) * rErrStr / 16;
+      let errG = (g - G) * gErrStr / 16;
+      let errB = (b - B) * bErrStr / 16;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 4;
@@ -1435,34 +1587,39 @@ function sierra2Rgb(iDat) {
 // [2  4  5  4  2]
 // [   2  3  2   ]) x (1 / 16)
 
-function sierra3Rgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function sierra3Rgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 16;
-      let errG = (oldG - newG) / 16;
-      let errB = (oldB - newB) / 16;
+      let errR = (r - R) * rErrStr / 16;
+      let errG = (g - G) * gErrStr / 16;
+      let errB = (b - B) * bErrStr / 16;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 5;
@@ -1541,34 +1698,39 @@ function sierra3Rgb(iDat) {
 //([-  X  1]
 // [   1  0]) x (1 / 2)
 
-function twoDRgb(iDat) {
-  let data = iDat.data;
-  let width = iDat.width;
-  let height = iDat.height;
+function twoDRgb(frm) {
+  let data = frm.data;
+  let width = frm.width;
+  let height = frm.height;
 
   let rLvls = parseFloat(rLvlsInput.value),
     gLvls = parseFloat(gLvlsInput.value),
     bLvls = parseFloat(bLvlsInput.value);
 
+  let rErrStr = parseFloat(rErrLvlsInput.value),
+    gErrStr = parseFloat(gErrLvlsInput.value),
+    bErrStr = parseFloat(bErrLvlsInput.value);
+
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let i = (y * width + x) * 4;
 
-      let oldR = data[i],
-        oldG = data[i + 1],
-        oldB = data[i + 2];
+      let r = data[i],
+        g = data[i + 1],
+        b = data[i + 2];
 
-      let newR = Math.round((rLvls * oldR) / 255) * (255 / rLvls),
-        newG = Math.round((gLvls * oldG) / 255) * (255 / gLvls),
-        newB = Math.round((bLvls * oldB) / 255) * (255 / bLvls);
+      let R = Math.round((rLvls * r) / 255) * (255 / rLvls),
+        G = Math.round((gLvls * g) / 255) * (255 / gLvls),
+        B = Math.round((bLvls * b) / 255) * (255 / bLvls);
 
-      let errR = (oldR - newR) / 2;
-      let errG = (oldG - newG) / 2;
-      let errB = (oldB - newB) / 2;
+      let errR = (r - R) * rErrStr / 2;
+      let errG = (g - G) * gErrStr / 2;
+      let errB = (b - B) * bErrStr / 2;
 
-      data[i] = newR;
-      data[i + 1] = newG;
-      data[i + 2] = newB;
+      data[i] = R;
+      data[i + 1] = G;
+      data[i + 2] = B;
 
       if (x + 1 < width) {
         data[i + 4] += errR * 1;
