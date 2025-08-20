@@ -59,14 +59,14 @@ mediaRecorderScriptEditor.value = editableMediaRecorderScript.textContent;
 mediaRecorderCkbx.addEventListener("change", function () {
   if (this.checked) {
     editableMediaRecorderScript.type = "text/javascript";
-    ogMediaRecorderScript.type = "application/json";
+    ogMediaRecorderScript.type = "text/plain";
     mediaRecorderScriptEditor.style.display = "block";
     editableMediaRecorderScript.style.display = "none";
     video.pause();
     printLog("Video paused");
   } else {
     mediaRecorderScriptEditor.style.display = "none";
-    editableMediaRecorderScript.type = "application/json";
+    editableMediaRecorderScript.type = "text/plain";
     ogMediaRecorderScript.type = "text/javascript";
     video.pause();
   }

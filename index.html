@@ -1,718 +1,684 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Free Video Dithering</title>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1" />
     <!-- HTML Meta Tags -->
     <title>Free Video Dithering</title>
-    <meta name="description" content="A tool for dither video instead of image">
+    <meta name="description" content="A tool for dither video instead of image" />
     <!-- Facebook Meta Tags -->
-    <meta property="og:url" content="https://freevideodither.glitch.me">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Free Video Dithering">
-    <meta property="og:description" content="A tool for dither video instead of image">
-    <meta property="og:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374">
+    <meta property="og:url" content="https://freevideodither.glitch.me" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Free Video Dithering" />
+    <meta property="og:description" content="A tool for dither video instead of image" />
+    <meta property="og:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374" />
     <!-- Twitter Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:domain" content="freevideodither.glitch.me">
-    <meta property="twitter:url" content="https://freevideodither.glitch.me">
-    <meta name="twitter:title" content="Free Video Dithering">
-    <meta name="twitter:description" content="A tool for dither video instead of image">
-    <meta name="twitter:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374">
-    <link rel="stylesheet" href="https://901d3.glitch.me/styles/style.css">
-    <link rel="stylesheet" href="style.css">
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/unifont@5.1.0/index.min.css"
-      >
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="twitter:domain" content="freevideodither.glitch.me" />
+    <meta property="twitter:url" content="https://freevideodither.glitch.me" />
+    <meta name="twitter:title" content="Free Video Dithering" />
+    <meta name="twitter:description" content="A tool for dither video instead of image" />
+    <meta name="twitter:image" content="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/banner.png?v=1729867894374" />
+    <link rel="stylesheet" href="https://901d3.glitch.me/styles/style.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unifont@5.1.0/index.min.css" />
+    <link rel="icon" type="image/x-icon" href="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/BAYER2X2SMALL.png?v=1736951293061" />
+    <script type="text/javascript" src="https://unpkg.com/default-passive-events"></script>
   </head>
   <body>
-    <h1 class="glowfire" style="font-size: 175px">Free Video Dithering</h1>
-    <br>
-    <br>
-    <h2>A tool for dither video instead of image</h2>
-    <br>
-    <hr>
-    <br>
+    <h1 class="glowfire" style="font-size: 175px; text-align: center"> Free Video Dithering </h1>
+    <br/><br/>
+    <h1 style="text-align: center">A tool for dither video instead of image</h1>
+    <br/>
+    <hr />
+    <br/>
     <div id="uploadFiles">
       <h2>Upload video files</h2>
-      <br>
-      <input
-        type="file"
-        id="videoInput"
-        accept=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv"
-        >
-      <br>
-      <br>
-      <h3>I recommend main or high h264 or h265 video for smoother playback, other codec may lags</h3>
+      <br/>
+      <input type="file" id="videoInput" title=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv" accept=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv" />
+      <br/>
     </div>
-    <br>
+    <br/>
     <div>
-      <h2>Or paste video link</h2>
-      <br>
-      <input type="text" id="linkUrl">
+      <h2>Paste video link</h2>
+      <br/>
+      <input type="text" id="linkUrl" />
       <button id="updateVideoSrc" onclick="updateVideoSrc()">Update</button>
+      <br/>
+      <br/>
+      <input type="checkbox" id="disableFilter" />
+      <label for="disableFilter">Remove Filter</label>
     </div>
-    <br>
-    <br>
-    <div class="controls">
-      <div class="videoControls">
-        <h2>Video size</h2>
-        <br>
-        <label for="videoWidth">Width:</label>
-        <input type="number" id="videoWidth" placeholder="1280" value="1280">
-        <br><br>
-        <label for="videoHeight">Height:</label>
-        <input type="number" id="videoHeight" placeholder="720" value="720">
-        <br><br>
-        <button onclick="changeVideoSize()">Change video size</button>
-        <br>
-        <br>
-        <br>
-        <button onclick="togglePlayPause()">Play/Pause</button>
-        <br>
-        <br>
-        <br>
-        <div>
-          <label for="speedInput">Playback Speed:</label>
-          <input
-            type="number"
-            id="speedInput"
-            value="1"
-            oninput="setPlaybackSpeed()"
-            >
-        </div>
-        <br>
-        <br>
-        <br>
-        <div>
-          <label for="volumeSlider">Volume:</label>
-          <input
-            type="range"
-            id="volumeSlider"
-            value="100"
-            step="0.001"
-            min="0"
-            oninput="updateVolumeFromSlider()"
-            style="width: 200px;"
-            >
-          <input
-            type="number"
-            id="volumeInput"
-            value="100"
-            step="0.001"
-            min="0"
-            oninput="updateVolumeFromInput()"
-            style="width: 200px"
-            >
-          <span style="font-family: UbuntuBold; font-size: 30px; font-weight: 700">%</span>
-        </div>
-      </div>
-      <div class="canvasControls">
-        <h2>Dithering method</h2>
-        <br>
-        <select id="ditherMethod" onchange="updateDitheringMethod()">
-          <option value="none" selected="selected">None</option>
-          <optgroup label="Grayscale">
-          <optgroup label="Ordered">
-            <option value="bayer2x2">Bayer 2x2</option>
-            <option value="bayer4x4">Bayer 4x4</option>
-            <option value="bayer8x8">Bayer 8x8</option>
-            <option value="bayer16x16">Bayer 16x16</option>
-            <option value="bayer32x32">Bayer 32x32</option>
-            <option value="bayer64x64">Bayer 64x64</option>
-            <option value="bayer128x128">Bayer 128x128</option>
-            <option value="cluster4x4">Cluster2x2(4x4)</option>
-            <option value="cluster8x8">Cluster4x4(8x8)</option>
-            <option value="hatchright4x4">Hatch Right</option>
-            <option value="hatchleft4x4">Hatch Left</option>
-            <option value="hatchhorizontal4x4">Hatch Horizontal</option>
-            <option value="hatchvertical4x4">Hatch Vertical</option>
-          </optgroup>
-          <optgroup label="Arithmetic">
-            <option value="arithmeticadd" disabled>Arithmetic Add</option>
-            <option value="arithmeticaddconv" disabled>Arithmetic Add Convariant</option>
-            <option value="arithmeticxor" disabled>Arithmetic Xor</option>
-            <option value="arithmeticaddconv" disabled>Arithmetic Xor Convariant</option>
-          </optgroup>
-          <optgroup label="Error Diffusion">
-            <option value="floydsteinberg" disabled>Floyd-Steinberg</option>
-            <option value="fan" disabled>Fan</option>
-            <option value="shiaufan" disabled>Shiau-Fan</option>
-            <option value="shiaufan2" disabled>Shiau-Fan 2</option>
-            <option value="atkinson" disabled>Atkinson</option>
-            <option value="burkes" disabled>Burkes</option>
-            <option value="javisjudiceninke" disabled>Jarvis-Judice-Ninke</option>
-            <option value="stucki" disabled>Stucki</option>
-            <option value="sierra" disabled>Sierra</option>
-            <option value="sierralite" disabled>Sierra Lite</option>
-            <option value="sierra2" disabled>Sierra 2</option>
-            <option value="sierra3" disabled>Sierra 3</option>
-          </optgroup>
-          </optgroup>
-          <optgroup label="Colored">
-            <option value="thresholdrgb">Threshold</option>
-          <optgroup label="Ordered">
-            <option value="bayer2x2rgb">Bayer 2x2</option>
-            <option value="bayer4x4rgb">Bayer 4x4</option>
-            <option value="bayer8x8rgb">Bayer 8x8</option>
-            <option value="bayer16x16rgb">Bayer 16x16</option>
-            <option value="bayer32x32rgb">Bayer 32x32</option>
-            <option value="bayer64x64rgb">Bayer 64x64</option>
-            <option value="bayer128x128rgb">Bayer 128x128</option>
-            <optgroup label="Custom Ordered Matrix">
-              <optgroup label="Checkerboard">
-                <option value="checkerboardrgb">Checkerboard</option>
-              </optgroup>
-              <optgroup label="Cluster">
-                <option value="cluster4x4rgb">Cluster2x2(4x4)</option>
-                <option value="cluster8x8rgb">Cluster4x4(8x8)</option>
-              </optgroup>
-              <optgroup label="Hatch">
-                <option value="hatchright4x4rgb">Hatch Right</option>
-                <option value="hatchleft4x4rgb">Hatch Left</option>
-                <option value="hatchhorizontal4x4rgb">Hatch Horizontal</option>
-                <option value="hatchvertical4x4rgb">Hatch Vertical</option>
-              </optgroup>
-            </optgroup>
-          </optgroup>
-          <optgroup label="Arithmetic">
-            <option value="arithmeticaddrgb">Arithmetic Add</option>
-            <option value="arithmeticaddconvrgb">Arithmetic Add Convariant</option>
-            <option value="arithmeticsubrgb">Arithmetic Sub</option>
-            <option value="arithmeticsubconvrgb">Arithmetic Sub Convariant</option>
-            <option value="arithmeticxorrgb">Arithmetic Xor</option>
-            <option value="arithmeticxorconvrgb">Arithmetic Xor Convariant</option>
-          </optgroup>
-          <optgroup label="Error Diffusion">
-            <option value="floydsteinbergrgb">Floyd-Steinberg</option>
-            <option value="fanrgb">Fan</option>
-            <option value="shiaufanrgb">Shiau-Fan</option>
-            <option value="shiaufan2rgb">Shiau-Fan 2</option>
-            <option value="atkinsonrgb">Atkinson</option>
-            <option value="burkesrgb">Burkes</option>
-            <option value="javisjudiceninkergb">Jarvis-Judice-Ninke</option>
-            <option value="stuckirgb">Stucki</option>
-            <option value="sierrargb">Sierra</option>
-            <option value="sierralitergb">Sierra Lite</option>
-            <option value="sierra2rgb">Sierra 2</option>
-            <option value="sierra3rgb">Sierra 3</option>
-            <option value="twodrgb">2d error diff lol</option>
-          </optgroup>
-          </optgroup>
-        </select>
-        <br>
-        <div id="lvls" style="display: none">
-          <br>
-          <label for="grLvlsInput">Blend/Levels: </label>
-          <br>
-          <input
-            type="range"
-            id="grLvlsRange"
-            oninput="grLvlsRange()"
-            min="0"
-            value="5"
-            max="255"
-            step="0.00000000001"
-            >
-          <input
-            type="number"
-            id="grLvlsInput"
-            oninput="grLvlsInput()"
-            value="5"
-            >
-          <br>
-          <p>To change slider max value, type sth &lt;= 1 or &gt;1
-            <br>
-            And to snap slider value, hold shift
-          </p>
-        </div>
-        <div id="rgbLvls" style="display: none">
-          <br>
-          <div id="rLvls">
-            <label for="rLvlsInput">Red Blend/Levels: </label>
-            <br>
-            <input
-              type="range"
-              id="rLvlsRange"
-              min="0"
-              value="6"
-              max="255"
-              step="0.00000000001"
-              >
-            <input
-              type="number"
-              id="rLvlsInput"
-              value="6"
-              >
-          </div>
-          <div id="gLvls">
-            <label for="gLvlsInput">Green Blend/Levels: </label>
-            <br>
-            <input
-              type="range"
-              id="gLvlsRange"
-              min="0"
-              value="7"
-              max="255"
-              step="0.00000000001"
-              >
-            <input
-              type="number"
-              id="gLvlsInput"
-              value="7"
-              >
-          </div>
-          <div id="bLvls">
-            <label for="bLvlsInput">Blue Blend/Levels: </label>
-            <br>
-            <input
-              type="range"
-              id="bLvlsRange"
-              min="0"
-              value="6"
-              max="255"
-              step="0.00000000001"
-              >
-            <input
-              type="number"
-              id="bLvlsInput"
-              value="6"
-              >
-          </div>
-          <br>
-          <p>To change slider max value, type sth &lt;= 1 or &gt;1
-            <br>
-            And to snap slider value, hold shift or double click drag
-          </p>
-        </div>
-        <div id="rgbErrLvls" style="display: none">
-          <br>
-          <div id="rErrLvls">
-            <label for="rErrLvlsInput">Red Diffuse: </label>
-            <br>
-            <input
-              type="range"
-              id="rErrLvlsRange"
-              min="0"
-              value="1"
-              max="1"
-              step="0.00000000001"
-              oninput="rErrorLvlsRange()"
-              >
-            <input
-              type="number"
-              id="rErrLvlsInput"
-              value="1"
-              oninput="rErrorLvlsInput()"
-              >
-          </div>
-          <div id="gErrLvls">
-            <label for="gErrLvlsInput">Green Diffuse: </label>
-            <br>
-            <input
-              type="range"
-              id="gErrLvlsRange"
-              min="0"
-              value="1"
-              max="1"
-              step="0.00000000001"
-              oninput="gErrorLvlsRange()"
-              >
-            <input
-              type="number"
-              id="gErrLvlsInput"
-              value="1"
-              oninput="gErrorLvlsInput()"
-              >
-          </div>
-          <div id="bErrLvls">
-            <label for="bErrLvlsInput">Blue Diffuse: </label>
-            <br>
-            <input
-              type="range"
-              id="bErrLvlsRange"
-              min="0"
-              value="1"
-              max="1"
-              step="0.00000000001"
-              oninput="bErrorLvlsRange()"
-              >
-            <input
-              type="number"
-              id="bErrLvlsInput"
-              value="1"
-              oninput="bErrorLvlsInput()"
-              >
-          </div>
-        </div>
-        <br>
-        <div name="change canvas size">
-          <h2>Canvas size</h2>
-          <br>
-          <label for="canvasWidth">Width:</label>
-          <input
-            type="number"
-            id="canvasWidth"
-            placeholder="1280"
-            value="1280"
-            >
-          <br><br>
-          <label for="canvasHeight">Height:</label>
-          <input
-            type="number"
-            id="canvasHeight"
-            placeholder="720"
-            value="720"
-            >
-          <br>
-          <br>
-          <button onclick="changecanvasSize()">Change canvas size</button>
-          <br>
-          <br>
-          <span>This can change the recorder resolution</span>
-          <br>
-          <span>but also dither more</span>
-          <br>
-          <br>
-          <div>
-            <input type="checkbox" id="canvasRendering" onclick="tglCvsRendering()" checked>
-            <label for="canvasRendering">Pixelated rendering</label>
-            <br>
-            <br>
-            <button style="font-size: 20px" onclick="processVideo()">Refresh canvas</button>
-            <span>[R]</span>
-            <br>
-            <br>
-            <button style="font-size: 20px" onclick="canvasFullscreen()">Fullscreen canvas</button>
-            <span>[F]</span>
-          </div>
-          <br>
-        </div>
-      </div>
-    </div>
-    <br><br>
-    <div class="previewContainer">
-      <div class="mainVideo">
-        <h2>Video</h2>
-        <div style="border: 10px solid #ea7010;border-radius: 10px;">
-        <video id="video" width="720" height="405" controls loop crossorigin="anonymous" onplay="processVideo()" onseeked="processVideo()">
-          Your browser does not support this tag
-        </video>
-        </div>
-      </div>
-      <div class="mainCanvas">
-        <h2>Preview canvas</h2>
-        <div style="border: 10px solid #ea7010;border-radius: 10px;">
-        <canvas
-          id="canvas"
-          width="720"
-          height="405"
-          style="image-rendering: pixelated;"
-          >Your browser does not support this tag</canvas>
-          </div>
-      </div>
-    </div>
-    <br>
-    <br>
-    <div>
+    <br/>
+    <br/>
+    <div class="recorder">
       <h2>Recorder</h2>
-      <br>
-      <button id="startRecording" type="button" onclick="startRecording()">
-      Start recording
-      </button>
-      <button id="stopRecording" type="button" onclick="stopRecording()" disabled>
-      Stop recording
-      </button><span>[F1] [SHIFT + F1]</span>
-      <br>
-      <br>
-      <span>Note: file size could be large because its harder to compress if there are complex pixel info</span>
+      <br/>
+      <button id="startRecording" type="button" onclick="startRecording()"> ⏺ Start </button>
+      <button id="stopRecording" class="brk" type="button" onclick="stopRecording()" disabled> ⏹ Stop </button>
+      <button id="pauseRecording" type="button" onclick="pauseRecording()"> ⏸ Pause </button>
+      <button id="resumeRecording" type="button" onclick="resumeRecording()" disabled> ▶ Resume</button>
+      <span class="span1">[F1] [SHIFT + F1]</span>
+      <span class="span2">[F4]</span>
+      <br/>
     </div>
-    <br>
-    <!--<div>
-      <h3>
+    <br/>
+    <br/>
+    <div class="bigContainer">
+      <div class="controls">
+        <div class="videoControls">
+          <h1>Video</h1>
+          <br/>
+          <label for="videoWidth">Width:</label>
+          <input type="number" id="videoWidth" placeholder="1280" value="1280" />
+          <br/>
+          <br/>
+          <label for="videoHeight">Height:</label>
+          <input type="number" id="videoHeight" placeholder="720" value="720" />
+          <br/>
+          <br/>
+          <button onclick="changeVideoSize()">Change video size</button>
+          <br/>
+          <br/>
+          <button onclick="togglePlayPause()">Play/Pause</button>
+          <br/>
+          <br/>
+          <div>
+            <label for="speedInput">Playback Speed:</label>
+            <input type="number" id="speedInput" value="1" oninput="setPlaybackSpeed()" />
+          </div>
+          <br/>
+          <div>
+            <label for="volumeSlider">Volume:</label>
+            <input type="range" id="volumeSlider" value="100" step="0.001" min="0" style="width: 200px" />
+            <input type="number" id="volumeInput" value="100" step="0.001" min="0" style="width: 200px" />
+            <span style="font-family: UbuntuBold; font-size: 30px; font-weight: 700"> % </span>
+          </div>
+          <hr />
+          <div>
+            <h1>Dither</h1>
+            <br/>
+            <select id="dither">
+              <option value="none" selected="selected">None</option>
+              <optgroup label="-Matrix">
+                <option value="matrixthreshold">Matrix Threshold</option>
+              </optgroup>
+              <optgroup label="-Arithmetic">
+                <option value="arithmeticcustom">Arithmetic</option>
+              </optgroup>
+              <optgroup label="-Error Diffusion">
+                <option value="errdiffscustom">Error Diffusion</option>
+                <option value="varerrdiffscustom"> Variable Error Diffusion </option>
+              </optgroup>
+              <!--
+              <optgroup label="--Dot Diffusion"><option value="dotdiffs">Dot Diffusion</option></optgroup>-->
+            </select>
+            <div id="matrixDisp" style="display: none">
+              <br/>
+              <select id="matrix">
+                <option value="threshold">Threshold</option>
+                <optgroup label="-Bayer">
+                  <option value="bayer2">Bayer 2²</option>
+                  <option value="bayer4">Bayer 4²</option>
+                  <option value="bayer8">Bayer 8²</option>
+                  <option value="bayer16">Bayer 16²</option>
+                  <option value="bayer32">Bayer 32²</option>
+                  <option value="bayer64">Bayer 64²</option>
+                  <option value="bayer128">Bayer 128²</option>
+                  <option value="bayer256">Bayer 256²</option>
+                  <option value="bayer512">Bayer 512²</option>
+                </optgroup>
+                <optgroup label="-Custom Ordered Matrix">
+                  <option value="checkerboard">Checkerboard</option>
+                  <option value="cluster">Cluster</option>
+                </optgroup>
+                <optgroup label="--Dispersed Dots">
+                  <option value="disperseddots1">Dispersed Dots 1</option>
+                  <option value="disperseddots2">Dispersed Dots 2</option>
+                  <option value="voiddispersed">Void Dispersed</option>
+                </optgroup>
+                <optgroup label="Non-Rectangular">
+                  <option value="nonrect1">Non-Rectangular 1</option>
+                  <option value="nonrect2">Non-Rectangular 2</option>
+                  <option value="nonrect3">Non-Rectangular 3</option>
+                  <option value="nonrect4">Non-Rectangular 4</option>
+                </optgroup>
+                <optgroup label="--Hatch">
+                  <option value="hatchright4x4">Hatch Right</option>
+                  <option value="hatchleft4x4">Hatch Left</option>
+                  <option value="hatchhorizontal4x4">Hatch Horizontal</option>
+                  <option value="hatchvertical4x4">Hatch Vertical</option>
+                </optgroup>
+                <optgroup label="--Mutiple Matrices">
+                  <option value="kallebach">Kallebach</option>
+                </optgroup>
+                <optgroup label="--Other">
+                  <option value="bluenoise">Blue Noise</option>
+                </optgroup>
+                <optgroup label="-User Presets"></optgroup>
+              </select>
+            </div>
+            <div id="arithmeticDisp" style="display: none">
+              <br/>
+              <select id="arithmetic">
+                <option value="arithmeticAdd">Arithmetic Add</option>
+                <option value="arithmeticAddConv"> Arithmetic Add Convariant </option>
+                <option value="arithmeticSub">Arithmetic Sub</option>
+                <option value="arithmeticSubConv"> Arithmetic Sub Convariant </option>
+                <option value="arithmeticXor">Arithmetic Xor</option>
+                <option value="arithmeticXorConv"> Arithmetic Xor Convariant </option>
+                <option value="halftone">Halftone</option>
+                <optgroup label="-User Presets"></optgroup>
+              </select>
+            </div>
+            <div id="errorDiffsDisp" style="display: none">
+              <br/>
+              <select id="errorDiffs">
+                <option value="floydsteinberg">Floyd-Steinberg</option>
+                <option value="falsefloydsteinberg"> False Floyd-Steinberg </option>
+                <option value="fan">Fan</option>
+                <option value="shiaufan">Shiau-Fan</option>
+                <option value="shiaufan2">Shiau-Fan 2</option>
+                <option value="atkinson">Atkinson</option>
+                <option value="burkes">Burkes</option>
+                <option value="javisjudiceninke">Jarvis-Judice-Ninke</option>
+                <option value="stucki">Stucki</option>
+                <option value="sierra">Sierra</option>
+                <option value="sierralite">Sierra Lite</option>
+                <option value="sierra2">Sierra 2</option>
+                <option value="box">Box</option>
+                <option value="diagonal">Diagonal</option>
+                <option value="pigeon">Steve Pigeon</option>
+                <option value="kist">Robert Kist</option>
+                <option value="arce">Stevenson Arce</option>
+                <option value="xot">Xot(Perf Warning)</option>
+                <option value="twod">Two-Dim</option>
+                <option value="oned">One-Dim</option>
+                <optgroup label="-User Presets"></optgroup>
+              </select>
+            </div>
+            <div id="varerrdiffsDisp" style="display: none">
+              <br/>
+              <select id="varerrdiffs">
+                <option value="ostromoukhov">Ostromoukhov</option>
+                <option value="zhoufang">Zhou-Fang</option>
+                <optgroup label="-User Presets"></optgroup>
+              </select>
+            </div>
+            <div id="errDiffsDisp" style="display: none">
+              <br/>
+              <textarea id="errDiffsMatInput" style="width: 450px; height: 250px" placeholder='"," for next cell,
+"/" for next row,
+"-" for skipped pixel,
+"x" for currently scanning pixel
+'>
+x
+</textarea>
+              <br/>
+              <br/>
+              <input id="errDiffsDivInput" type="number" placeholder="Matrix Division" />
+              <input type="checkbox" id="autoDiv" checked />
+              <label for="autoDiv">Auto</label>
+              <br/>
+            </div>
+            <div>
+              <div id="arithInput" style="display: none">
+                <br/>
+                <textarea id="arithmeticInput" style="width: 450px; height: 100px" placeholder='use "x", "y" and "c" in the expression, "A" "k" for halftone'></textarea>
+              </div>
+              <div id="coeffsInput" style="display: none">
+                <br/>
+                <textarea id="coefficientsInput" style="width: 450px; height: 300px" placeholder="support only right, down-left and down. More coming soon..."></textarea>
+              </div>
+            </div>
+            <div id="bnDisp" style="display: none">
+              <br/>
+              <canvas id="blueNoiseCanvas" style="border: 5px solid #ffea00; border-radius: 5px">Your browser does not support this tag</canvas>
+              <br/>
+              <br/>
+              <label for="bnSigma">Sigma:</label>
+              <input type="range" id="bnSigmaRange" min="0" max="10" step="0.000000000001" />
+              <input type="number" id="bnSigma" value="1.5" />
+              <br/>
+              <br/>
+              <label for="bnSeed">Seed:</label>
+              <input type="number" id="bnSeed" />
+              <br/>
+              <br/>
+              <label for="bnWidth">Width:</label>
+              <input type="number" id="bnWidth" value="64" />
+              <br/>
+              <br/>
+              <label for="bnHeight">Height:</label>
+              <input type="number" id="bnHeight" value="64" />
+              <br/>
+              <br/>
+              <label for="minDistance">Min Distance:</label>
+              <input type="number" id="minDistance" value="10" />
+              <br/>
+              <br/>
+              <label for="maxPoints">Max Points:</label>
+              <input type="number" id="maxPoints" value="5" />
+              <br/>
+              <br/>
+              <label for="swLoopLimit">Loop Limit:</label>
+              <input type="number" id="swLoopLimit" value="100" />
+              <br/>
+              <br/>
+              <input type="checkbox" id="pds" />
+              <label for="pds">PDS Init</label>
+              <br/>
+              <br/>
+              <input type="checkbox" id="bnInvert" />
+              <label for="bnInvert">Invert</label>
+              <br/>
+              <br/>
+              <button id="bnGen">Generate</button>
+            </div>
+            <div id="halftoneLvls" style="display: none">
+              <div id="aLvls">
+                <br/>
+                <label for="aLvlsInput">A: </label>
+                <input type="number" id="aLvlsInput" value="64" />
+              </div>
+              <br/>
+              <div id="kLvls">
+                <label for="kLvlsInput">k: </label>
+                <input type="number" id="kLvlsInput" value="100" />
+              </div>
+            </div>
+            <div id="lvls" style="display: none">
+              <br/>
+              <div id="rLvls">
+                <label for="rLvlsInput">R: </label>
+                <br/>
+                <input type="range" id="rLvlsRange" min="2" value="2" max="255" step="0.00000000001" />
+                <input type="number" id="rLvlsInput" value="2" />
+              </div>
+              <div id="gLvls">
+                <label for="gLvlsInput">G: </label>
+                <br/>
+                <input type="range" id="gLvlsRange" min="2" value="2" max="255" step="0.00000000001" />
+                <input type="number" id="gLvlsInput" value="2" />
+              </div>
+              <div id="bLvls">
+                <label for="bLvlsInput">B: </label>
+                <br/>
+                <input type="range" id="bLvlsRange" min="2" value="2" max="255" step="0.00000000001" />
+                <input type="number" id="bLvlsInput" value="2" />
+              </div>
+              <br/>
+            </div>
+            <div id="errLvls" style="display: none">
+              <br/>
+              <div id="rErrLvls">
+                <label for="errR">Red Diffuse: </label>
+                <br/>
+                <input type="range" id="rErrLvlsRange" min="0" value="1" max="1" step="0.00000000001" />
+                <input type="number" id="errR" value="1" />
+              </div>
+              <div id="gErrLvls">
+                <label for="errG">Green Diffuse: </label>
+                <br/>
+                <input type="range" id="gErrLvlsRange" min="0" value="1" max="1" step="0.00000000001" />
+                <input type="number" id="errG" value="1" />
+              </div>
+              <div id="bErrLvls">
+                <label for="errB">Blue Diffuse: </label>
+                <br/>
+                <input type="range" id="bErrLvlsRange" min="0" value="1" max="1" step="0.00000000001" />
+                <input type="number" id="errB" value="1" />
+              </div>
+            </div>
+            <div id="linearDisp" style="display: none">
+              <input type="checkbox" id="linear" />
+              <label for="linear">Linear RGB</label>
+            </div>
+            <div id="serpentineDisp" style="display: none">
+              <input type="checkbox" id="serp" />
+              <label for="serp">Serpentine</label>
+            </div>
+            <div id="buffDisp" style="display: none">
+              <input type="checkbox" id="buff" />
+              <label for="buff">Use Buffer</label>
+            </div>
+            <div id="bufferDisp" style="display: none">
+              <br/>
+              <select id="buffers">
+                <option value="Int8Array">8bit Integer</option>
+                <option value="Int16Array">16bit Integer</option>
+                <option value="Int32Array">32bit Integer</option>
+                <option value="Float32Array">Float(32bit)</option>
+                <option value="Float64Array">Double(64bit)</option>
+              </select>
+            </div>
+            <div id="randMatDisp" style="display: none">
+              <input type="checkbox" id="randMat" />
+              <label for="randMat">Random Matrices</label>
+            </div>
+            <div>
+              <hr />
+              <input type="text" id="presetName" placeholder="Enter preset name" />
+              <button id="savePreset">Save as User Preset</button>
+              <br/>
+              <div id="presetCheckboxes"></div>
+              <br/>
+              <button id="delPresets">Delete Selected Presets</button>
+            </div>
+            <br/>
+            <hr />
+            <br/>
+            <div>
+              <h2>Canvas size</h2>
+              <br/>
+              <label for="canvasWidth">Width:</label>
+              <input type="number" id="canvasWidth" placeholder="480" value="480" />
+              <br/>
+              <br/>
+              <label for="canvasHeight">Height:</label>
+              <input type="number" id="canvasHeight" placeholder="480" value="270" />
+              <br/>
+              <br/>
+              <button onclick="changecanvasSize()">Change canvas size</button>
+              <br/>
+              <br/>
+              <div>
+                <input type="checkbox" id="canvasRendering" checked />
+                <label for="canvasRendering">Pixelated Rendering</label>
+                <br/>
+                <br/>
+                <input type="checkbox" id="desyncOpt" />
+                <label for="desyncOpt">Canvas Desynchronize</label>
+                <br/>
+                <br/>
+                <button onclick="process()">Refresh canvas</button>
+                <span>[R]</span>
+                <br/>
+                <br/>
+                <button onclick="fullscreenCvs()">Fullscreen canvas</button>
+                <span>[F]</span>
+              </div>
+              <br/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="previewContainer">
+        <div class="mainVideo">
+          <h2 style="text-align: center">Video</h2>
+          <video id="video" width="480" height="270" src="https://cdn.glitch.global/d8d2c659-a577-47c5-9a67-a6ea18704dba/grad.mp4?v=1742178361834" controls loop crossorigin="anonymous"> Your browser does not support this tag </video>
+          <br/>
+        </div>
+        <hr />
+        <div class="mainCanvas">
+          <h2 style="text-align: center">Canvas</h2>
+          <canvas style="border: 10px solid #ea7010; border-radius: 10px" id="canvas" width="480" height="270">Your browser does not support this tag</canvas>
+        </div>
+      </div>
+    </div>
+    <br/>
+    <!--<div><h3>
         If you dont like these dithering method you can still make your own here
-      </h3>
-      <br>
-      <label style="font-size: 25px">
-        <input
+      </h3><br><label style="font-size: 25px"><input
           style="width: 25px; height: 25px"
           type="checkbox"
           id="creativeModeCheckbox"
        >
         Custom mode
-      </label>
-      <br>
-      <br>
-      <textarea
+      </label><br><br><textarea
         id="scriptEditor"
         style="display: none"
         rows="50"
         cols="165"
         oninput="applyJsCode()"
-      ></textarea>
-      </div>
+      ></textarea></div>
       -->
-    <br>
+    <br/>
     <div>
-    <br>
-    <label style="font-size: 25px">
-    <input
-      style="width: 25px; height: 25px"
-      type="checkbox"
-      id="mediaRecorderCkbx"
-      >
-    Custom MediaRecorder(edit before start record)
-    </label>
-    <br>
-    <br>
-    <textarea
-      id="mediaRecorderScriptEditor"
-      style="display: none"
-      rows="50"
-      cols="165"
-      oninput="applyMRCode()"
-      ></textarea>
-    <br>
+      <br/>
+      <label>
+        <input type="checkbox" id="mediaRecorderCkbx" /> Custom MediaRecorder(edit before start record) </label>
+      <br/>
+      <textarea id="mediaRecorderScriptEditor" style="display: none" rows="50" cols="165" oninput="applyMRCode()"></textarea>
+      <br/>
     </div>
-    <br>
-    <p>These are still very buggy</p>
-    <br>
-    <div id="console">
-      <p style="font-family: Unifont;text-align: center; transform-origin:center; color: #00ff00;">
-0------------------------------------------------------0
-/                                                      /
-\                                                      \
-/          ██╗      ██████╗  ██████╗ ███████╗          /
-\          ██║     ██╔═══██╗██╔════╝ ██╔════╝          \
-/          ██║     ██║   ██║██║  ███╗███████╗          /
-\          ██║     ██║   ██║██║   ██║╚════██║          \
-/          ███████╗╚██████╔╝╚██████╔╝███████║          /
-\          ╚══════╝ ╚═════╝  ╚═════╝ ╚══════╝          \
-/                                                      /
-\                                                      \
-0------------------------------------------------------0
-____________________________________________________________________________________________________________________________________________________________________________
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
-Check out the source code!
-<a href="https://github.com/901D3/freevideodither" style="color:#ea7010;" target="_blank">github.com/901D3/freevideodither</a>
-</p>
-</div>
+    <p>These things are still very buggy</p>
+    <br/>
+    <label>
+      <input type="checkbox" id="showTelemetries" /> Show Telemetries(may cause lag) </label>
+    <br/>
+    <br/>
+    <div id="console"><span style="
+          font-family: Unifont;
+          text-align: center;
+          transform-origin: center;
+          color: #00ff00;
+        ">Check out the source code! <a href="https://github.com/901D3/freevideodither" target="_blank">github.com/901D3/freevideodither</a>
+</span>View avc1 options for custom MediaRecorder settings <a href="https://freevideodither.glitch.me/avc1_options.txt" target="_blank">avc1_options.txt</a>
+    </div>
+    <br/>
     <h6>901D3's sites has no limit LOL</h6>
-    <div>
-      <script src="init.js"></script>
-      <script>
-        function printLog(message) {
-            const consoleElement = document.getElementById("console");
-            const textNode = document.createTextNode(message + "\n");
-            consoleElement.appendChild(textNode);
-            consoleElement.scrollTop = consoleElement.scrollHeight;
-        }
-            
-      </script>
-      <script>
-        window.onload = function () {
-          const screenWidth = window.screen.width;
-          const screenHeight = window.screen.height;
-        
-          const currentWidth = window.innerWidth;
-          const currentHeight = window.innerHeight;
-        
-          printLog("screen resolution: " + screenWidth + "x" + screenHeight);
-          printLog(
-            "current resolution: " + currentWidth + "x" + currentHeight
-          );
-        };
-      </script>
-      <script>
-        function handleVideoUpload(event) {
-          videoFile = event.target.files[0];
-          let url = URL.createObjectURL(videoFile);
-          video.src = url;
-          printLog(`Uploaded video url: ${url}`);
-        }
-        document
-          .getElementById("videoInput")
-          .addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            if (file) {
-              const videoURL = URL.createObjectURL(file);
-              const videoElement = document.getElementById("video");
-              videoElement.src = videoURL;
-              videoElement.load();
-              printLog(`Video src: ${videoURL}`);
-            }
-          });
-      </script>
-      <script>        
-        document.addEventListener("keydown", function (event) {
-          var activeElement = document.activeElement.tagName.toLowerCase();
-          if (
-            event.code === "KeyR" &&
-            activeElement !== "input" &&
-            activeElement !== "textarea"
-          ) {
-            processVideo();
-          } else if (
-            event.code === "KeyF" &&
-            activeElement !== "input" &&
-            activeElement !== "textarea"
-          ) {
-            canvasFullscreen();
-          }
-        });
-          if (
-            event.code === "KeyF" &&
-            activeElement !== "input" &&
-            activeElement !== "textarea"
-          ) {
-            canvasFullscreen();
-          }
-
-          function canvasFullscreen() {
-
-          if (canvas.requestFullscreen) {
-              canvas.requestFullscreen();
-          } else if (canvas.mozRequestFullScreen) {
-              canvas.mozRequestFullScreen();
-          } else if (canvas.webkitRequestFullscreen) {
-              canvas.webkitRequestFullscreen();
-          } else if (canvas.msRequestFullscreen) {
-              canvas.msRequestFullscreen();
-          }
-          }
-      </script>
-      <script>
-        let recording = false;
-            
-        document.addEventListener("keydown", function(event) {
-  if (event.key === "F1" && !event.shiftKey) {
-    event.preventDefault();
-    if (recording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-    recording = !recording;
-  } 
-  else if (event.key === "F1" && event.shiftKey) {
-    video.removeAttribute("loop");
-    event.preventDefault();
-    video.currentTime = 0;
-    video.play();
-    if (!recording) {
-      startRecording();
-      recording = true;
-    }
-    
-    video.addEventListener("ended", function() {
-      video.pause();
-      stopRecording();
-      video.setAttribute("loop", "");
-      recording = false;
-    }, { once: true });
-  }
-});
-        
-      </script>
-      <div>
-        <script src="sizing.js"></script>
-        <script src="videocontrols.js"></script>
-        <script src="levels.js"></script>
-        <script src="dither.js" id="ogScript" type="text/javascript"></script>
-        <script src="init2.js"></script>
-        <script src="process.js"></script>
-        <script
-          src="recorder.js"
-          id="ogMediaRecorderScript"
-          type="text/javascript"
-          ></script>
-      </div>
-      <script id="editableScript" type="application/json"></script>
-      <script
-        id="editableMediaRecorderScript"
-        type="application/json"
-        >
-        //MediaRecorder init
-        
-        let canvasStream = canvas.captureStream(); //canvas capture speed in fps
-        let chunks = [];
-        
-        const option = {
-          mimeType: "video/mp4; codec=avc1.64001F",
-          videoBitsPerSecond: 100000000, //media recorder bitrate
-        };
-        
-        const mediaRecorder = new MediaRecorder(
-          canvasStream,
-          option
-        );
-        
-        //Main
-        
-        mediaRecorder.ondataavailable = (e) => {
-          chunks.push(e.data);
-          printLog("chunks pushed");
-        };
-        
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks);
-          const recordedVideoUrl = URL.createObjectURL(blob);
-          const downloadLink = document.createElement("a");
-          downloadLink.download = "video.mp4";
-          downloadLink.href = recordedVideoUrl;
-          printLog(`Download link: ${downloadLink}`);
-          downloadLink.click();
-          printLog("Saved as webm");
-        };
-      </script>
-      <script>    
-        function startRecording() {
-          mediaRecorder.start();
-          startRec.setAttribute("disabled", "");
-          stopRec.removeAttribute("disabled");
-          printLog("MediaRecorder started");
-        }
-        
-        function stopRecording() {
-          mediaRecorder.stop();
-          startRec.removeAttribute("disabled");
-          stopRec.setAttribute("disabled", "");
-          printLog("MediaRecorder stopped");
-          chunks = [];
-        }
-            
-      </script>
-      <script>
-        if (video.HAVE_ENOUGH_DATA) {
-          processVideo();
-        }
-      </script>
-      <script name="custom script" src="custom.js"></script>
-      <script>
-        function updateVideoSrc() {
-          let linkUrl = document.getElementById("linkUrl").value;
-          const vidExt = /\.(mp4|mov|mkv|mpeg|webm|avi|ogm|ogv)$/i;
-
-          if (vidExt.test(linkUrl)) {
-            video.src = linkUrl;
-            printLog(`Link loaded to video: ${linkUrl}`);
-          } else {
-            printLog("Please enter a valid link");
-          }
-        }
-      </script>
-      <script>
-        function tglCvsRendering() {
-          if (document.getElementById("canvasRendering").checked) {
-          canvas.setAttribute("style", "image-rendering:pixelated");
-          } else {
-            canvas.removeAttribute("style", "image-rendering:pixelated");
-          }
-        }
-      </script>
-    </div>
-    <hr>
+    <br/>
+    <hr />
   </body>
+  <div>
+    <script src="init.js"></script>
+    <script src="generator.js"></script>
+    <script>
+      window.onload = function() {
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const currentWidth = window.innerWidth;
+        const currentHeight = window.innerHeight;
+        printLog("current resolution: " + screenWidth + "x" + screenHeight);
+        printLog("window resolution: " + currentWidth + "x" + currentHeight);
+      };
+      gId("videoInput").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const videoURL = URL.createObjectURL(file);
+          video.src = videoURL;
+          video.load();
+          printLog(`Video src: ${videoURL}`);
+        }
+      });
+      document.addEventListener("keydown", function(event) {
+        var activeElement = document.activeElement.tagName.toLowerCase();
+        if (event.code === "KeyR" && activeElement !== "input" && activeElement !== "textarea") {
+          process();
+        } else if (event.code === "KeyF" && activeElement !== "input" && activeElement !== "textarea") fullscreenCvs();
+      });
+      let originalBorder = cvs.style.border;
+      let originalBorderRadius = cvs.style.borderRadius;
+
+      function fullscreenCvs() {
+        if (!document.fullscreenElement) {
+          if (cvs.requestFullscreen) {
+            cvs.requestFullscreen();
+          } else if (cvs.mozRequestFullScreen) {
+            cvs.mozRequestFullScreen();
+          } else if (cvs.webkitRequestFullscreen) {
+            cvs.webkitRequestFullscreen();
+          } else if (cvs.msRequestFullscreen) {
+            cvs.msRequestFullscreen();
+          }
+          cvs.style.border = "none";
+          cvs.style.borderRadius = "0px";
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      }
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          cvs.style.border = originalBorder;
+          cvs.style.borderRadius = originalBorderRadius;
+        }
+      });
+      let recording = false;
+      document.addEventListener("keydown", function(event) {
+        if (event.key === "F1" && !event.shiftKey) {
+          event.preventDefault();
+          if (recording) {
+            stopRecording();
+          } else {
+            startRecording();
+          }
+          recording = !recording;
+        } else if (event.key === "F1" && event.shiftKey) {
+          event.preventDefault();
+          if (!video.hasAttribute("src")) {
+            printLog("Cannot record | video does not have source");
+            return;
+          }
+          video.removeAttribute("loop");
+          video.currentTime = 0;
+          video.play();
+          if (!recording) {
+            startRecording();
+            recording = true;
+          }
+          video.addEventListener("ended", function() {
+            video.pause();
+            stopRecording();
+            video.setAttribute("loop", "true");
+            recording = false;
+          }, {
+            once: true
+          });
+        }
+      });
+      gId("desyncOpt").addEventListener("change", function() {
+        desyncOpt = this.checked;
+        ctx = cvs.getContext("2d", {
+          desynchronized: desyncOpt
+        });
+      });
+    </script>
+    <div>
+      <script src="sizing.js"></script>
+      <script src="videocontrols.js"></script>
+      <script src="levels.js"></script>
+      <script src="dither.js" id="ogScript" type="text/javascript"></script>
+      <script src="init2.js"></script>
+      <script src="process.js"></script>
+      <script src="recorder.js" id="ogMediaRecorderScript" type="text/javascript"></script>
+    </div>
+    <script id="editableScript" type="application/json"></script>
+    <script id="editableMediaRecorderScript" type="text/plain"> let canvasStream = cvs.captureStream(); //canvas capture speed, type a number inside () for fps
+      let chunks = [];
+
+      const option = {
+      mimeType: "video/mp4; codec=avc1.645200", //see freevideodither.glitch.me/avc1_options.txt for custom avc1 options
+      videoBitsPerSecond: 100000000, //media recorder bitrate
+      };
+
+      const mediaRecorder = new MediaRecorder(
+      canvasStream,
+      option
+      );
+
+      //Main
+
+      mediaRecorder.ondataavailable = (e) => {
+      chunks.push(e.data);
+      printLog("chunks pushed");
+      };
+
+      mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks);
+      const recordedVideoUrl = URL.createObjectURL(blob);
+      const downloadLink = document.createElement("a");
+      downloadLink.download = "video.mp4";
+      downloadLink.href = recordedVideoUrl;
+      printLog(`Download link: ${downloadLink}`);
+      downloadLink.click();
+      printLog("Saved as webm");
+      };
+    </script>
+    <script>
+      function startRecording() {
+        mediaRecorder.start();
+        startRec.setAttribute("disabled", "");
+        stopRec.removeAttribute("disabled");
+        pauseRec.removeAttribute("disabled");
+        resumeRec.setAttribute("disabled", "");
+        printLog("MediaRecorder started");
+      }
+
+      function stopRecording() {
+        mediaRecorder.stop();
+        startRec.removeAttribute("disabled");
+        stopRec.setAttribute("disabled", "");
+        pauseRec.setAttribute("disabled", "");
+        resumeRec.setAttribute("disabled", "");
+        printLog("MediaRecorder stopped");
+        chunks = [];
+      }
+
+      function pauseRecording() {
+        mediaRecorder.pause();
+        startRec.setAttribute("disabled", "");
+        stopRec.removeAttribute("disabled");
+        pauseRec.setAttribute("disabled", "");
+        resumeRec.removeAttribute("disabled");
+        printLog("MediaRecorder paused");
+      }
+
+      function resumeRecording() {
+        mediaRecorder.resume();
+        startRec.setAttribute("disabled", "");
+        stopRec.removeAttribute("disabled");
+        pauseRec.removeAttribute("disabled");
+        resumeRec.setAttribute("disabled", "");
+        printLog("MediaRecorder resumed");
+      }
+    </script>
+    <script src="custom.js"></script>
+    <script>
+      function updateVideoSrc() {
+        let linkUrl = gId("linkUrl").value;
+        const vidExt = /\.(mp4|mov|mkv|mpeg|webm|avi|ogm|ogv)$/i;
+        if (vidExt.test(linkUrl)) {
+          video.src = linkUrl;
+          printLog(`Link loaded to video: ${linkUrl}`);
+        } else {
+          printLog("Please enter a valid link");
+        }
+      }
+
+      function updateVideoSrc() {
+        const linkUrl = gId("linkUrl").value;
+        const disableFilter = gId("disableFilter").checked;
+        const vidExt = /\.(mp4|mov|mkv|mpeg|webm|avi|ogm|ogv)$/i;
+        if (disableFilter || vidExt.test(linkUrl)) {
+          const video = gId("video");
+          video.src = linkUrl;
+          printLog(`Link loaded to video: ${linkUrl}`);
+        } else {
+          printLog("Please enter a valid link with a supported video extension.");
+        }
+      }
+      gId("canvasRendering").addEventListener("change", function() {
+        var currentStyle = cvs.getAttribute("style");
+        if (gId("canvasRendering").checked) {
+          if (currentStyle) {
+            cvs.setAttribute("style", currentStyle + "; image-rendering: pixelated");
+          } else {
+            cvs.setAttribute("style", "image-rendering: pixelated");
+          }
+        } else {
+          if (currentStyle) {
+            cvs.setAttribute("style", currentStyle.replace(/;?\s*image-rendering:\s*pixelated/g, "").trim());
+          }
+        }
+      });
+    </script>
+  </div>
 </html>

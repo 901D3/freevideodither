@@ -1,111 +1,139 @@
-const dthrMth = {
-  //Grayscale
-  "bayer2x2": bayer,
-  "bayer4x4": bayer,
-  "bayer8x8": bayer,
-  "bayer16x16": bayer,
-  "bayer32x32": bayer,
-  "bayer64x64": bayer,
-  "bayer128x128": bayer,
+gId("dither").addEventListener("change", function() {
+  switch (this.value) {
+    case "matrixthreshold":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("randMatDisp", "block");
+      setDisp("matrixDisp", "block");
+      setDisp("bnDisp", "block");
+      setDisp("errDiffsDisp", "block");
+      setDisp("linearDisp", "block");
+      break;
+    case "arithmeticcustom":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("halftoneLvls", "block");
+      setDisp("arithmeticDisp", "block");
+      setDisp("arithInput", "block");
+      setDisp("linearDisp", "block");
+      break;
+    case "varerrdiffscustom":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("errLvls", "block");
+      setDisp("serpentineDisp", "block");
+      setDisp("buffDisp", "block");
+      setDisp("varerrdiffsDisp", "block");
+      setDisp("coeffsInput", "block");
+      setDisp("linearDisp", "block");
+      if (gId("buff").checked) {
+        setDisp("bufferDisp", "block");
+      } else {
+        setDisp("bufferDisp", "none");
+      }
+      break;
+    case "errdiffscustom":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("errLvls", "block");
+      setDisp("errorDiffsDisp", "block");
+      setDisp("errDiffsDisp", "block");
+      setDisp("serpentineDisp", "block");
+      setDisp("linearDisp", "block");
+      setDisp("buffDisp", "block");
+      if (gId("buff").checked) {
+        setDisp("bufferDisp", "block");
+      } else {
+        setDisp("bufferDisp", "none");
+      }
+      break;
+    case "halftone":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("halftoneLvls", "block");
+      setDisp("linearDisp", "block");
+      break;
+    case "dotdiffs":
+      hideElements();
+      setDisp("lvls", "block");
+      setDisp("errLvls", "block");
+      break;
+    default:
+      hideElements();
+  }
+});
 
-  "cluster4x4": bayer,
-  "cluster8x8": bayer,
-  
-  "hatchleft4x4": bayer,
-  "hatchright4x4": bayer,
-  "hatchhorizontal4x4": bayer,
-  "hatchvertical4x4": bayer,
+//RGB
 
+let colors = ['r', 'g', 'b'];
+let cl = ['R', 'G', 'B'];
 
-  //Colored
-  "thresholdrgb": thresholdRgb,
-
-  "bayer2x2rgb": bayerRgb,
-  "bayer4x4rgb": bayerRgb,
-  "bayer8x8rgb": bayerRgb,
-  "bayer16x16rgb": bayerRgb,
-  "bayer32x32rgb": bayerRgb,
-  "bayer64x64rgb": bayerRgb,
-  "bayer128x128rgb": bayerRgb,
-
-  "checkerboardrgb": bayerRgb,
-
-  "cluster4x4rgb": bayerRgb,
-  "cluster8x8rgb": bayerRgb,
-
-  "hatchleft4x4rgb": bayerRgb,
-  "hatchright4x4rgb": bayerRgb,
-  "hatchhorizontal4x4rgb": bayerRgb,
-  "hatchvertical4x4rgb": bayerRgb,
-
-  "arithmeticaddrgb": arithmeticAddRgb,
-  "arithmeticaddconvrgb": arithmeticAddConvRgb,
-  "arithmeticsubrgb": arithmeticSubRgb,
-  "arithmeticsubconvrgb": arithmeticSubConvRgb,
-  "arithmeticxorrgb": arithmeticXorRgb,
-  "arithmeticxorconvrgb": arithmeticXorConvRgb,
-
-  "floydsteinbergrgb": floydSteinbergRgb,
-  "fanrgb": fanRgb,
-  "shiaufanrgb": shiauFanRgb,
-  "shiaufan2rgb": shiauFan2Rgb,
-
-  "atkinsonrgb": atkinsonRgb,
-  "burkesrgb": burkesRgb,
-  "javisjudiceninkergb": jJNRgb,
-  "stuckirgb": stuckiRgb,
-
-  "sierrargb": sierraRgb,
-  "sierralitergb": sierraLiteRgb,
-  "sierra2rgb": sierra2Rgb,
-  "sierra3rgb": sierra3Rgb,
-  
-  "twodrgb": twoDRgb,
-};
-
-// Initialize global variables
-var frm = 0;
-var stT = 0;
-var lsUpdT = 0;
-var lLT = 0;
-
-function processVideo() {
-  frm = 0;
-  stT = performance.now();
-  lsUpdT = stT;
-  lLT = stT;
-  processFrame();
+function sync(i, i2, d) {
+  if (d === '0') gId(i2).value = pFl(gIdV(i))
+  else if (d === '1') gId(i).value = pFl(gIdV(i2))
 }
 
-function processFrame() {
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  let f = ctx.getImageData(0, 0, canvas.width, canvas.height);
+colors.forEach(colors => {
+  gId(`${colors}LvlsRange`).addEventListener('input', () => sync(`${colors}LvlsRange`, `${colors}LvlsInput`, '0'));
+  gId(`${colors}LvlsInput`).addEventListener('input', () => sync(`${colors}LvlsRange`, `${colors}LvlsInput`, '1'));
+});
 
-  let mth = document.getElementById("ditherMethod").value;
-  if (dthrMth[mth]) {
-    dthrMth[mth](f);
+cl.forEach((cl) => {
+  gId(`${lwC(cl)}ErrLvlsRange`).addEventListener('input', () => sync(`${lwC(cl)}ErrLvlsRange`, `err${cl}`, '0'));
+  gId(`err${cl}`).addEventListener('input', () => sync(`${lwC(cl)}ErrLvlsRange`, `err${cl}`, '1'));
+});
+
+gId("volumeSlider").addEventListener("input", () => {sync("volumeSlider", "volumeInput", "0")});
+gId("volumeInput").addEventListener("input", () => {sync("volumeSlider", "volumeInput", "1")});
+
+gId("bnSigmaRange").addEventListener("input", () => {sync("bnSigmaRange", "bnSigma", "0")});
+gId("bnSigma").addEventListener("input", () => {sync("bnSigmaRange", "bnSigma", "1")});
+
+let sliders = ['rLvlsRange', 'gLvlsRange', 'bLvlsRange'];
+
+sliders.forEach(sliderId => {
+  let slider = gId(sliderId);
+  slider.addEventListener('touchstart', event => event.preventDefault());
+  slider.addEventListener('touchmove', event => event.preventDefault());
+});
+
+//Slider snapper
+
+function getDivVal(min, max) {
+  let divisions = [];
+  for (let i = min; i <= max; i++) {
+    for (let j = 0; j < 5; j++) {
+      divisions.push(i + j * 0.25);
+    }
   }
-
-  ctx.imageSmoothingEnabled = false;
-  ctx.putImageData(f, 0, 0);
-  ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
-
-  frm++;
-  let crT = performance.now();
-  let esT = (crT - stT) / 1000;
-  let avgFps = frm / esT;
-  let dlT = (crT - lsUpdT) / 1000;
-  let crFps = dlT > 0 ? 1 / dlT : 0;
-
-  lsUpdT = crT;
-
-  if (crT - lLT >= 500) {
-    printLog(`elapsed: ${esT.toString().padEnd(22)} | processed: ${frm.toString().padEnd(22)} | AvgFps: ${avgFps.toString().padEnd(22)} | Fps: ${crFps.toString().padEnd(22)} | `);
-    lLT = crT;
-  }
-
-  if (video.paused || video.ended) {
-    return;
-  }
-  requestAnimationFrame(processFrame);
+  return divisions;
 }
+
+function snap(value, min, max) {
+  let closestDivision = getDivVal(min, max).reduce((prev, curr) => {
+    return abs(curr - value) < abs(prev - value) ? curr : prev;
+  });
+  return closestDivision;
+}
+
+let shift = false;
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === "Shift") shift = true
+});
+
+window.addEventListener('keyup', (event) => {
+  if (event.key === "Shift") shift = false
+});
+
+function handleSliderInput(sliderId) {
+  let slider = gId(sliderId);
+  let value = pFl(slider.value);
+  if (shift) value = snap(value, pFl(slider.min), pFl(slider.max))
+  slider.value = value;
+  gId(sliderId.replace('Range', 'Input')).value = value;
+}
+
+colors.forEach(colors => {
+  gId(`${colors}LvlsRange`).addEventListener('input', () => handleSliderInput(`${colors}LvlsRange`));
+});

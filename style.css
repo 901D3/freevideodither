@@ -1,25 +1,45 @@
 ::-webkit-scrollbar {
-    width: 12px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
     background: #000000;
+    height: 15px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: #232323;
+    height: 18px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: #ea7010;
+    height: 15px;
 }
+
+::-webkit-resizer {
+    background: #ff9040;
+    border-top-left-radius: 7px;
+    border-bottom-right-radius: 6px;
+}
+
+.resizable {
+    overflow: hidden;
+    resize: both;
+}
+
 body {
+    accent-color: #ff9d00;
     font-family: UbuntuR;
     background-color: #0a0a0a;
     color: #ffffff;
     margin: 10px;
-    font-size: 20px;
+    font-size: 15px;
+    width: auto;
+    overflow-x: auto;
 }
+
 h1,
 h2,
 h3,
@@ -33,26 +53,44 @@ p {
     padding: 0px;
     margin: 0px;
 }
+
 label {
+    margin: 0px;
     font-family: UbuntuR;
     color: #ffffff;
     box-sizing: border-box;
-    font-size: 25px;
+    font-size: 16px;
+    cursor: pointer;
 }
-input,
-button,
+
+input {
+    background-color: #000;
+    color: #e0e0e0;
+    border: 3px solid #ea7010;
+    padding: 2px;
+    border-radius: 10px;
+    font-family: Classwiz-X;
+    font-size: 12px;
+    margin-right: 5px;
+    max-width: 300px;
+    vertical-align: middle;
+    line-height:normal;
+    display: inline-block;
+    transition: background-color 200ms;
+}
+
 select {
     background-color: #000;
     color: #e0e0e0;
     border: 3px solid #ea7010;
-    padding: 4px;
+    padding: 2px;
     border-radius: 10px;
     font-family: Classwiz-X;
-    font-size: 20px;
-    margin-right: 10px;
-    max-width: 100%;
-    transition: background-color 300ms;
+    font-size: 15px;
+    margin-right: 5px;
+    transition: background-color 200ms;
 }
+
 textarea {
     background-color: #000;
     color: #e0e0e0;
@@ -60,37 +98,59 @@ textarea {
     padding: 4px;
     border-radius: 10px;
     font-family: Classwiz-X;
-    font-size: 15px;
+    font-size: 10px;
     margin-right: 10px;
-    max-width: 99%;
 }
+
 input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
-    background-color: #ea7030;
-    padding: 3px;
+    padding: 2px;
     cursor: pointer;
-    border-radius: 10px;
-    width: 750px;
+    display: inline-block;
+    width: 200px;
+    height: 12px;
 }
+
 input[type="range"]:hover {
     -webkit-appearance: none;
     appearance: none;
-    background: #ffa020;
-    padding: 3px;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: auto;
 }
+
+input[type="checkbox"] {
+    display: inline-flex;
+    justify-content: center;
+    position: relative;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
 input[type="file"] {
     padding: 3px;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: auto;
 }
+
 input:hover,
 button:hover,
 select:hover {
-    background-color: #ea7010;
+    background-color: #793400;
     border-color: #ea7010;
+}
+button {
+    background-color: #000;
+    color: #e0e0e0;
+    border: 3px solid #ea7010;
+    padding: 4px;
+    border-radius: 10px;
+    font-family: UbuntuBold;
+    font-size: 12px;
+    margin-right: 10px;
+    max-width: 100%;
+    transition: background-color 200ms;
 }
 button[disabled] {
     background-color: #333333;
@@ -99,42 +159,50 @@ button[disabled] {
     padding: 4px;
     border-radius: 10px;
     cursor: pointer;
-    font-family: Classwiz-X;
-    font-size: 20px;
+    font-size:  15px;
     margin-right: 10px;
-    transition: background-color 250ms border 250ms;
+    transition: background-color 200ms border 200ms;
 }
+
 button[disabled]:hover {
     background-color: #555555;
     border-color: #555555;
 }
+
 video {
-    max-width: 100%;
+    border: 10px solid #ea7010;
+    border-radius: 10px;
+    align-self: center;
     image-rendering: pixelated;
 }
+
 canvas {
-    max-width: 100%;
-    height: auto;
-    max-height: 100%;
+    aspect-ratio: inherit;
     text-align: left;
     transform-origin: top left;
     position: relative;
     display: inline-block;
+    align-self: center;
+    image-rendering: pixelated;
 }
+
 #console {
     background: #000000;
     color: #00ff00;
     font-family: Unifont, monospace;
-    font-size: 20px;
+    font-size: 16px;
     height: 1000px;
     border: 5px solid #1070ea;
     border-radius: 10px;
     overflow-y: auto;
     white-space: pre-wrap;
 }
+
 hr {
     text-align: left;
+    width:100%;
 }
+
 .glowfire {
     background: linear-gradient(to right, #ff0000, #ff7000, #ffff00);
     background-size: cover;
@@ -142,62 +210,144 @@ hr {
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
 }
+
 select {
     background-color: #000;
     color: #fff;
 }
+
 #docs {
     text-align: left;
 }
+
 #uploadFiles {
     text-align: left;
 }
+
 .controls {
     background-color: #090909;
-    border: 8px solid #1b1b1b;
     border-radius: 10px;
-    max-width: max-content;
-    padding: 30px;
-    margin: 0;
-    display: flex;
-    justify-content: left;
-    align-items: center;
+    margin: 0px;
     position: relative;
-    align-items: center;
+    resize: both;
 }
 
 .previewContainer {
-    background-color: #090909;
-    border: 8px solid #1b1b1b;
-    border-radius: 10px;
-    max-width: max-content;
-    padding: 15px;
-    margin: 0;
     display: flex;
-    justify-content: left;
-    align-items: center;
-    position: relative;
-    align-items: center;
+    flex-direction: column;
+    background-color: #090909;
+    border-radius: 10px;
+    max-width: max-content;
+    margin: 0px;
+    justify-content: center;
+    align-self: center;
 }
+
 .videoControls {
-    background-color: #ba4000;
-    padding: 20px;
-    border: 1px solid gray;
+    background-color: #e14f00;
+    border: 8px solid #1b1b1b;
+    padding: 10px;
     border-radius: 10px;
     max-width: max-content;
 }
+
 .canvasControls {
-    background-color: #ba4000;
-    padding: 30px;
-    border: 1px solid gray;
+    background-color: #e14f00;
+    border: 8px solid #1b1b1b;
+    padding: 10px;
     border-radius: 10px;
     max-width: max-content;
-    margin-left: 20px;
 }
+
+a {
+    color: #ea7030;
+}
+
+.recorder {
+    display: grid;
+    grid-template-columns: repeat(2, 7%);
+    grid-template-rows: auto auto;
+    gap: 15px;
+}
+
+.recorder h2 {
+    grid-row: -4;
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.recorder button {
+    padding: 7px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+}
+
+#startRecording {
+    grid-row: 1; 
+    grid-column: 1;
+}
+
+#stopRecording {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+#pauseRecording {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+#resumeRecording {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+.recorder .span1 {
+    text-align: center;
+    grid-row: 3;
+    grid-column: 1;
+}
+.recorder .span2 {
+    text-align: center;
+    grid-row: 3;
+    grid-column: 2;
+}
+
+.bigContainer {
+    display: grid;
+    grid-template-areas:
+      "controls previewContainer"
+      "preview previewContainer";
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    align-items: center;
+    overflow: auto;
+    border-top: 8px solid #1b1b1b;
+    border-bottom: 8px solid #1b1b1b;
+    border-radius: 5px;
+    height: 150%;
+    resize: both;
+}
+
+.preview {
+    grid-area: preview;
+    display: flex;
+    background: #fff;
+    align-content: center;
+    justify-content: center;
+}
+
+.mainVideo {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .mainCanvas {
-    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
-
-
-
-

@@ -1,14 +1,12 @@
-var startRec = document.getElementById("startRecording");
-var stopRec = document.getElementById("stopRecording");
+var startRec = gId("startRecording");
+var stopRec = gId("stopRecording");
+var pauseRec = gId("pauseRecording");
+var resumeRec = gId("resumeRecording");
 var videoFile;
-var ditheredFrames = [];
 var isProcessing = false;
-var lastUpdateTime = startTime;
-var frameCount = 0
-var startTime = performance.now();
-var lastUpdateTime = startTime;
-var lastLogTime = startTime;
+var isRecording = false;
+video.addEventListener("loadedmetadata", adjustCanvasSize);
 
-video.addEventListener("loadedmetadata", () => {
-  adjustCanvasSize();
-});
+function ranInt(a, b) {
+  return floor(a + random() * (b - a));
+}
