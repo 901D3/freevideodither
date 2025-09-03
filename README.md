@@ -32,6 +32,8 @@ http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt
 
 https://www.dithermark.com
 
+https://901d3.github.io/freevideodither/
+
 
 
 
