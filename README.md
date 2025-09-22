@@ -1,7 +1,7 @@
 # ***freevideodither***
 ## **A tool for dither video**
 
-This is a website for dithering videos, you can change dithering methods and some more settings(greyed dithering methods means it isnt avalable)\
+This is a website for dithering videos with customizable matrix threshold(bayer), error diffusion and more
 
 A middle finger to paid video dithering tools
 
