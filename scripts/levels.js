@@ -1,0 +1,187 @@
+gId("rLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", undefined, "slider");
+});
+gId("rLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 1, "input");
+});
+
+gId("gLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", undefined, "slider");
+});
+gId("gLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 1, "input");
+});
+
+gId("bLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", undefined, "slider");
+});
+gId("bLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 1, "input");
+});
+
+gId("rErrLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", undefined, "slider");
+});
+gId("rErrLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
+});
+
+gId("gErrLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", undefined, "slider");
+});
+gId("gErrLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
+});
+
+gId("bErrLvlsRange").addEventListener("input", function () {
+  sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", undefined, "slider");
+});
+gId("bErrLvlsInput").addEventListener("input", function () {
+  sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", 1, "input");
+});
+
+gId("useLinear").addEventListener("input", function () {
+  useLinear = gId("useLinear").checked ? true : false;
+});
+
+gId("useSerpentine").addEventListener("input", function () {
+  useSerpentine = gId("useSerpentine").checked ? true : false;
+});
+
+gId("useBuffer").addEventListener("input", function () {
+  useBuffer = gId("useBuffer").checked ? true : false;
+  if (useBuffer) {
+    gId("bufferSelectDisp").classList.remove("disabled");
+  } else {
+    gId("bufferSelectDisp").classList.add("disabled");
+  }
+  errDiffsBuffer = bufferChange(canvasWidth, canvasHeight);
+  processFrame();
+});
+
+gId("buffer").addEventListener("change", function () {
+  buffer = gId("buffer").value;
+  errDiffsBuffer = bufferChange(canvasWidth, canvasHeight);
+});
+
+function autoDivWrapper() {
+  if (autoDiv) {
+    divisionInput = findHighest(matrixInput) + 1;
+    gId("divisionInput").value = findHighest(matrixInput) + 1;
+  } else if (!autoDiv) {
+    divisionInput = Number(gId("divisionInput").value);
+  }
+}
+
+function errDiffsAutoDivWrapper() {
+  if (errDiffsAutoDiv) {
+    errDiffsDivisionInput = matrixSum(errDiffsMatrixInput) + 1;
+    gId("errDiffsDivisionInput").value = matrixSum(errDiffsMatrixInput) + 1;
+  } else if (!errDiffsAutoDiv) {
+    errDiffsDivisionInput = Number(gId("errDiffsDivisionInput").value);
+  }
+}
+
+function matrixInputLUTCreate() {
+  const mY = matrixInput.length;
+  const mX = matrixInput[0].length;
+  const div = 255 / divisionInput;
+
+  matrixInputLUT = new Float32Array(mY * mX);
+
+  for (let y = 0; y < mY; y++) {
+    for (let x = 0; x < mX; x++) {
+      matrixInputLUT[y * mX + x] = (matrixInput[y][x] * div) / 255;
+    }
+  }
+
+  matrixInputLUT.mY = mY;
+  matrixInputLUT.mX = mX;
+}
+
+gId("matrixInput").addEventListener("input", function () {
+  try {
+    matrixInput = JSON.parse(gId("matrixInput").value);
+  } catch (e) {
+    printLog(e, 1, "red", "red");
+  }
+  autoDiv = gId("autoDiv").checked;
+  autoDivWrapper();
+  matrixInputLUTCreate();
+});
+
+gId("divisionInput").addEventListener("input", function () {
+  autoDivWrapper();
+  matrixInputLUTCreate();
+});
+
+gId("autoDiv").addEventListener("input", function () {
+  autoDiv = gId("autoDiv").checked;
+  autoDivWrapper();
+  matrixInputLUTCreate();
+});
+
+gId("arithmeticInput").addEventListener("input", function () {
+  arithmeticInput = gId("arithmeticInput").value;
+});
+
+gId("errDiffsMatrixInput").addEventListener("input", function () {
+  try {
+    errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+  } catch (e) {
+    printLog(e, 1, "red", "red");
+  }
+
+  errDiffsAutoDivWrapper();
+  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
+});
+
+gId("errDiffsDivisionInput").addEventListener("input", function () {
+  errDiffsAutoDivWrapper();
+  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
+});
+
+gId("errDiffsAutoDiv").addEventListener("input", function () {
+  errDiffsAutoDiv = gId("errDiffsAutoDiv").checked;
+  errDiffsAutoDivWrapper();
+});
+
+gId("frameRateRange").addEventListener("input", function () {
+  sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", undefined, "slider");
+});
+
+gId("frameRateInput").addEventListener("input", function () {
+  sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", 30, "input");
+  if (frameRateInput == 0) {
+    frameRate = 9999999999;
+  }
+});
+
+(function () {
+  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 1, "input");
+  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 1, "input");
+  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 1, "input");
+
+  sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
+  sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
+  sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", 1, "input");
+
+  sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", 30, "input");
+
+  useLinear = gId("useLinear").checked ? true : false;
+  useSerpentine = gId("useSerpentine").checked ? true : false;
+  useBuffer = gId("useBuffer").checked ? true : false;
+  buffer = gId("buffer").value;
+  autoDiv = gId("autoDiv").checked;
+  errDiffsAutoDiv = gId("errDiffsAutoDiv").checked;
+  autoDivWrapper();
+  errDiffsAutoDivWrapper();
+  matrixInputLUTCreate();
+
+  matrixInput = JSON.parse(gId("matrixInput").value);
+  divisionInput = Number(gId("divisionInput").value);
+  errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
+  //arithmeticInput = new Function("x", "y", "c", "return " + gId("arithmeticInput").value + ";");
+  //errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+})();
