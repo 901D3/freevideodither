@@ -327,6 +327,10 @@ span {
   padding: 0px;
 }
 
+#console span {
+  font-size: 16px;
+}
+
 .recorder button {
   padding: 7px;
   font-size: 15px;
@@ -418,6 +422,11 @@ span {
   pointer-events: none;
   opacity: 0.2;
   cursor: not-allowed;
+}
+
+.offscreen_hide {
+  width: 0px;
+  height: 0px;
 }
 
 .settings_label-input {
