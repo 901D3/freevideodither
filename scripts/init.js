@@ -35,6 +35,7 @@ var blueNoiseCanvas = gId("blueNoiseCanvas");
 var blueNoiseCtx = blueNoiseCanvas.getContext("2d");
 var video = gId("video");
 var ditherDropdown = gId("dither");
+var ditherDropdownValue = "none";
 var canvasStream = canvas.captureStream();
 var frm = 0;
 var stT = 0;
@@ -119,6 +120,15 @@ var errDiffsMatrixInputYStart;
 var errDiffsDivisionInput;
 var errDiffsAutoDiv;
 var errDiffsBuffer;
+var errDiffsBufferTarget;
+var setErrDiffsTarget = () => {};
+var getBufferValue = () => {};
+
+var getLinear = useLinear ? (val) => linearLUT[val] : (val) => val;
+var getBuffer = useBuffer ? (i, c) => errDiffsBuffer[i + c] : () => 0;
+var getIndex = useSerpentine
+  ? (x, yOffs, y) => ((y & 1 ? canvasWidth - 1 - x : x) + yOffs) << 2
+  : (x, yOffs) => (x + yOffs) << 2;
 
 var frameRate;
 
