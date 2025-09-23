@@ -1,4 +1,5 @@
 const d = {
+  none: () => {},
   matrixThreshold: bayer,
   arithmetic: arithmetic,
   errDiffs: errDiffs,
@@ -116,10 +117,17 @@ async function render() {
 }
 
 function processFrame() {
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const m = gIdV("dither");
-  const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  if (d[m]) d[m](frame);
+  ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+  const frame = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+  const imageData = frame.data;
+  const imageDataLength = imageData.length;
+  if (useLinear) {
+    for (let i = 0; i < imageDataLength; i++) {
+      imageData[i] = floor(linearLUT[imageData[i]]);
+    }
+  }
+  d[ditherDropdownValue](imageData);
+
   ctx.putImageData(frame, 0, 0);
 }
 
