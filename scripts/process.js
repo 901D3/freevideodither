@@ -45,6 +45,8 @@ async function render() {
   video.pause();
   video.muted = true;
   video.loop = false;
+  video.controls = false;
+  video.classList.add("offscreen_hide");
 
   function seek(time) {
     return new Promise((resolve) => {
@@ -65,22 +67,50 @@ async function render() {
   const t0 = performance.now();
   while (frameIndex < totalFrames && !video.ended) {
     const frameTime = frameIndex / recorderFrameRate;
+    let t1 = performance.now();
     await seek(frameTime);
+    t1 = performance.now() - t1;
 
     processFrame();
-    let t1 = performance.now();
+
+    let t2 = performance.now();
     const bitmap = await createImageBitmap(canvas);
+    t2 = performance.now() - t2;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, 0, 0);
+
+    let t3 = performance.now();
     blob = await canvasToWebPBlob(canvas, recorderWebmWriterQuality);
-    console.log("Canvas to webp: " + (performance.now() - t1) + "ms");
+    t3 = performance.now() - t3;
+
+    let t4 = performance.now();
     recorderWebmWriterSettings.addFrame(new Uint8Array(await blob.arrayBuffer()), canvasWidth, canvasHeight);
+    t4 = performance.now() - t4;
+
+    printLog(
+      "Dither: " +
+        t1 +
+        "ms\n" +
+        "createImageBitmap: " +
+        t2 +
+        "ms\n" +
+        "Canvas to WebP: " +
+        t3 +
+        "ms\n" +
+        "WebM Writer addFrame: " +
+        t4 +
+        "ms\n" +
+        "Total: " +
+        (t1 + t2 + t3 + t4) +
+        "ms\n" +
+        "Rendered: " +
+        (frameIndex / totalFrames) * 100 +
+        "%",
+      1
+    );
 
     if (isRendering == false) {
       printLog("Rendering stopped manually");
-      isRendering = false;
-      video.muted = false;
-      video.loop = true;
 
       onComplete();
       return true;
@@ -89,11 +119,17 @@ async function render() {
   }
   const totalTime = performance.now() - t0;
   printLog(
-    "Elapsed: " + totalTime + "\n" + "Rendering takes " + (totalTime / (video.duration * 1000)) * 100 + "% of video duration"
+    "Elapsed: " + totalTime + "ms\n" + "Rendering takes " + (totalTime / (video.duration * 1000)) * 100 + "% of video duration"
   );
   onComplete();
 
   async function onComplete() {
+    isRendering = false;
+    video.muted = false;
+    video.loop = true;
+    video.controls = true;
+    video.classList.remove("offscreen_hide");
+
     await recorderWebmWriterSettings.complete().then((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
