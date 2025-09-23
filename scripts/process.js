@@ -71,14 +71,6 @@ async function render() {
     await seek(frameTime);
     t1 = performance.now() - t1;
 
-    processFrame();
-
-    let t2 = performance.now();
-    const bitmap = await createImageBitmap(canvas);
-    t2 = performance.now() - t2;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(bitmap, 0, 0);
-
     let t3 = performance.now();
     blob = await canvasToWebPBlob(canvas, recorderWebmWriterQuality);
     t3 = performance.now() - t3;
@@ -91,9 +83,6 @@ async function render() {
       "Dither: " +
         t1 +
         "ms\n" +
-        "createImageBitmap: " +
-        t2 +
-        "ms\n" +
         "Canvas to WebP: " +
         t3 +
         "ms\n" +
@@ -101,7 +90,7 @@ async function render() {
         t4 +
         "ms\n" +
         "Total: " +
-        (t1 + t2 + t3 + t4) +
+        (t1 + t3 + t4) +
         "ms\n" +
         "Rendered: " +
         (frameIndex / totalFrames) * 100 +
