@@ -1,22 +1,28 @@
 gId("rLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", undefined, "slider");
+  rLvls--;
 });
 gId("rLvlsInput").addEventListener("input", function () {
-  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 1, "input");
+  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 2, "input");
+  rLvls--;
 });
 
 gId("gLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", undefined, "slider");
+  gLvls--;
 });
 gId("gLvlsInput").addEventListener("input", function () {
-  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 1, "input");
+  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 2, "input");
+  gLvls--;
 });
 
 gId("bLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", undefined, "slider");
+  bLvls--;
 });
 gId("bLvlsInput").addEventListener("input", function () {
-  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 1, "input");
+  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 2, "input");
+  bLvls--;
 });
 
 gId("rErrLvlsRange").addEventListener("input", function () {
@@ -52,10 +58,19 @@ gId("useBuffer").addEventListener("input", function () {
   useBuffer = gId("useBuffer").checked ? true : false;
   if (useBuffer) {
     gId("bufferSelectDisp").classList.remove("disabled");
+    errDiffsBuffer = bufferChange(canvasWidth, canvasHeight);
+    setErrDiffsTarget = () => {
+      errDiffsBufferTarget = errDiffsBuffer;
+    };
+    getBufferValue = (i, c) => errDiffsBuffer[i + c];
   } else {
     gId("bufferSelectDisp").classList.add("disabled");
+    errDiffsBuffer = [];
+    setErrDiffsTarget = (d) => {
+      errDiffsBufferTarget = d;
+    };
+    getBufferValue = () => 0;
   }
-  errDiffsBuffer = bufferChange(canvasWidth, canvasHeight);
   processFrame();
 });
 
@@ -158,9 +173,12 @@ gId("frameRateInput").addEventListener("input", function () {
 });
 
 (function () {
-  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 1, "input");
-  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 1, "input");
-  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 1, "input");
+  sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 2, "input");
+  sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 2, "input");
+  sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 2, "input");
+  rLvls--;
+  gLvls--;
+  bLvls--;
 
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
@@ -177,6 +195,16 @@ gId("frameRateInput").addEventListener("input", function () {
   autoDivWrapper();
   errDiffsAutoDivWrapper();
   matrixInputLUTCreate();
+
+  errDiffsBuffer = [];
+  setErrDiffsTarget = (d) => {
+    errDiffsBufferTarget = d;
+  };
+  if (useBuffer) {
+    getBufferValue = (i, c) => errDiffsBuffer[i + c]; // read from buffer
+  } else {
+    getBufferValue = () => 0; // always return 0
+  }
 
   matrixInput = JSON.parse(gId("matrixInput").value);
   divisionInput = Number(gId("divisionInput").value);
