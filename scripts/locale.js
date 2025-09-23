@@ -18,7 +18,7 @@ var locales = {
   false: "False",
   null: "Null",
 
-  webp_quality: "webP quality",
+  webp_quality: "WebP quality",
   enable_file_writer: "Enable file writer",
 
   start: "Start",
