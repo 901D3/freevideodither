@@ -101,7 +101,7 @@ async function render() {
       a.download = "video.webm";
       a.click();
       URL.revokeObjectURL(url);
-      printLog("Rendered video: " + url, null);
+      printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
 
       isRendering = false;
       startRend.removeAttribute("disabled", "");
