@@ -93,6 +93,8 @@ async function render() {
         (t1 + t3 + t4) +
         "ms\n" +
         "Rendered: " +
+        frameIndex +
+        "/" +
         (frameIndex / totalFrames) * 100 +
         "%",
       1
