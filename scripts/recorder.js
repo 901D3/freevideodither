@@ -67,7 +67,7 @@ function startRecording() {
     downloadLink.download = (gId("recorderFileName").value || "video") + "." + recorderVideoFileExt;
     downloadLink.href = recordedVideoUrl;
     downloadLink.click();
-    printLog("Download link: " + downloadLink);
+    printLog("Download link: <a href='" + downloadLink + "' target='_blank'>" + downloadLink + "</a>");
   };
 
   const mimeTypeString = recorderMimeType + ";" + " codecs=" + recorderVideoCodec;
