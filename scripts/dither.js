@@ -308,7 +308,7 @@ function errDiffs(d) {
         const bSRGB = getBufferValue(i, c);
         const cl = d[i + c];
 
-        const result = (round((cl + bSRGB) * scaled255) / color) * 255;
+        const result = (round((cl + bSRGB) * scaled255 * color) / color) * 255;
         const errStrength = (cl - result + bSRGB) * el;
 
         d[i + c] = result;
