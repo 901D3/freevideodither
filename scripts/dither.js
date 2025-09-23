@@ -102,7 +102,7 @@ function presets() {
         [2, 4, 5, 4, 2],
         [0, 2, 3, 2],
       ];
-    } else if (a === "sierralite") {
+    } else if (a === "sierraLite") {
       errDiffsMatrixInput = [
         [0, -1, 2],
         [1, 1],
@@ -187,7 +187,10 @@ function presets() {
   if (video.paused) processFrame();
 }
 
-gId("dither").addEventListener("change", presets);
+gId("dither").addEventListener("change", () => {
+  ditherDropdownValue = gIdV("dither");
+  presets();
+});
 gId("matrix").addEventListener("change", presets);
 gId("arithmetic").addEventListener("change", presets);
 gId("errDiffs").addEventListener("change", presets);
@@ -239,11 +242,11 @@ gId("buffer").addEventListener("change", () => {
   processFrame();
 });
 
+const scaled255 = 1 / 255;
+
 //--------------------------------------------------------------------------------------------------------------------
 
-function bayer(f) {
-  const d = f.data;
-
+function bayer(d) {
   const mY = matrixInputLUT.mY;
   const mX = matrixInputLUT.mX;
   const colorArray = [rLvls, gLvls, bLvls];
@@ -255,20 +258,15 @@ function bayer(f) {
       for (let x = 0; x < canvasWidth; x++) {
         const i = (x + yOffs) << 2;
         const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
-        const sRGB = d[i + c];
 
-        d[i + c] = (floor(((useLinear ? linearLUT[sRGB] : sRGB) / 255) * color + bVal) / color) * 255;
+        d[i + c] = (floor(d[i + c] * scaled255 * color + bVal) / color) * 255;
       }
     }
   }
 }
 
-function arithmetic(f) {
-  const d = f.data;
-
-  const scaled = 1 / 255;
+function arithmetic(d) {
   const cp = new Function("x", "y", "c", "return " + arithmeticInput + ";");
-
   const colorArray = [rLvls, gLvls, bLvls];
 
   for (let c = 0; c < 3; c++) {
@@ -277,526 +275,61 @@ function arithmetic(f) {
       const yOffs = y * canvasWidth;
       for (let x = 0; x < canvasWidth; x++) {
         const i = (x + yOffs) << 2;
-        const sRGB = d[i + c];
 
-        d[i + c] = (floor((useLinear ? linearLUT[sRGB] : sRGB) * scaled + cp(x, y, c)) / color) * 255;
+        d[i + c] = (floor(d[i + c] * scaled255 * color + cp(x, y, c)) / color) * 255;
       }
     }
   }
 }
 
-//function errDiffs(f) {
-//  const d = f.data;
-//
-//  const target = useBuffer ? errDiffsBuffer : d;
-//  if (useBuffer) errDiffsBuffer.fill(0);
-//
-//  const colorArray = [rLvls, gLvls, bLvls];
-//  const colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
-//  const errDiffsKernelLength = errDiffsKernel.length;
-//
-//  for (let c = 0; c < 3; c++) {
-//    const color = colorArray[c];
-//    const el = colorErrArray[c];
-//
-//    for (let y = 0; y < canvasHeight; y++) {
-//      const reverse = useSerpentine && y & 1;
-//      const yBase = y * canvasWidth;
-//
-//      for (let x = 0; x < canvasWidth; x++) {
-//        const rx = reverse ? canvasWidth - 1 - x : x;
-//        const i = (rx + yBase) << 2;
-//
-//        const sRGB = d[i + c];
-//        const bSRGB = useBuffer ? errDiffsBuffer[i + c] : 0;
-//        const cl = useLinear ? linearLUT[sRGB] : sRGB;
-//
-//        const result = (round((cl + bSRGB) / 255) / color) * 255;
-//        const errStrength = (cl - result + bSRGB) * el;
-//
-//        d[i + c] = result;
-//
-//        for (let k = 0; k < errDiffsKernelLength; k++) {
-//          let ox = errDiffsKernel[k].ox;
-//          const {oy, w} = errDiffsKernel[k];
-//
-//          if (reverse) ox = -ox;
-//
-//          const newX = rx + ox;
-//          const newY = y + oy;
-//
-//          if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-//            const ni = (newY * canvasWidth + newX) << 2;
-//            target[ni + c] += errStrength * w;
-//          }
-//        }
-//      }
-//    }
-//  }
-//}
-
-//--------------------------------------------------------------------------------------------------------------------
-
-function bayer(f) {
-  const d = f.data;
-
-  const mY = matrixInputLUT.mY;
-  const mX = matrixInputLUT.mX;
-
-  const colorArray = [rLvls, gLvls, bLvls];
-
-  if (useLinear) {
-    for (let c = 0; c < 3; c++) {
-      const color = colorArray[c];
-      for (let y = 0; y < canvasHeight; y++) {
-        const yOffs = y * canvasWidth;
-        for (let x = 0; x < canvasWidth; x++) {
-          const i = (x + yOffs) << 2;
-          const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
-
-          d[i + c] = (floor((linearLUT[d[i + c]] / 255) * color + bVal) / color) * 255;
-        }
-      }
-    }
-  } else {
-    for (let c = 0; c < 3; c++) {
-      const color = colorArray[c];
-      for (let y = 0; y < canvasHeight; y++) {
-        const yOffs = y * canvasWidth;
-        for (let x = 0; x < canvasWidth; x++) {
-          const i = (x + yOffs) << 2;
-          const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
-
-          d[i + c] = (floor((d[i + c] / 255) * color + bVal) / color) * 255;
-        }
-      }
-    }
-  }
-}
-
-function arithmetic(f) {
-  const d = f.data;
-
-  const scaled = 1 / 255;
-  const cp = new Function("x", "y", "c", "return " + arithmeticInput + ";");
-
-  const colorArray = [rLvls, gLvls, bLvls];
-
-  if (useLinear) {
-    for (let c = 0; c < 3; c++) {
-      const color = colorArray[c];
-      for (let y = 0; y < canvasHeight; y++) {
-        const yOffs = y * canvasWidth;
-        for (let x = 0; x < canvasWidth; x++) {
-          const i = (x + yOffs) << 2;
-
-          d[i + c] = (floor(linearLUT[d[i + c]] * scaled + cp(x, y, c)) / color) * 255;
-        }
-      }
-    }
-  } else {
-    for (let c = 0; c < 3; c++) {
-      const color = colorArray[c];
-      for (let y = 0; y < canvasHeight; y++) {
-        const yOffs = y * canvasWidth;
-        for (let x = 0; x < canvasWidth; x++) {
-          const i = (x + yOffs) << 2;
-
-          d[i + c] = (floor(d[i + c] * scaled + cp(x, y, c)) / color) * 255;
-        }
-      }
-    }
-  }
-}
-
-//Increased space complex for fps
-function errDiffs(f) {
-  const d = f.data;
+function errDiffs(d) {
+  setErrDiffsTarget(d);
+  if (useBuffer) errDiffsBuffer.fill(0);
 
   const colorArray = [rLvls, gLvls, bLvls];
   const colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
   const errDiffsKernelLength = errDiffsKernel.length;
 
-  //useLinear
-  if (useLinear) {
-    //useBuffer
-    if (useBuffer) {
-      errDiffsBuffer.fill(0);
+  for (let c = 0; c < 3; c++) {
+    const color = colorArray[c];
+    const el = colorErrArray[c];
 
-      //useLinear -> useBuffer -> useSerpentine
-      if (useSerpentine) {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
+    for (let y = 0; y < canvasHeight; y++) {
+      const yBase = y * canvasWidth;
+      const isOdd = useSerpentine && y % 2 === 1;
 
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
+      const xStart = isOdd ? canvasWidth - 1 : 0;
+      const xEnd = isOdd ? 0 : canvasWidth;
+      const xStep = isOdd ? -1 : 1;
 
-            if (y % 2 === 0) {
-              for (let x = 0; x < canvasWidth; x++) {
-                const i = (x + yBase) << 2;
+      for (let x = xStart; x !== xEnd; x += xStep) {
+        const i = (x + yBase) << 2;
 
-                const bSRGB = errDiffsBuffer[i + c];
-                const cl = linearLUT[d[i + c]];
+        const bSRGB = getBufferValue(i, c);
+        const cl = d[i + c];
 
-                const result = (round((cl + bSRGB) / 255) / color) * 255;
-                const errStrength = (cl - result + bSRGB) * el;
+        const result = (round((cl + bSRGB) * scaled255) / color) * 255;
+        const errStrength = (cl - result + bSRGB) * el;
 
-                d[i + c] = result;
+        d[i + c] = result;
 
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const {ox, oy, w} = errDiffsKernel[k];
+        for (let k = 0; k < errDiffsKernelLength; k++) {
+          const {ox, oy, w} = errDiffsKernel[k];
 
-                  const newX = x + ox;
-                  const newY = y + oy;
+          const newX = x + (isOdd ? -ox : ox);
+          const newY = y + oy;
 
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    errDiffsBuffer[ni + c] += errStrength * w;
-                  }
-                }
-              }
-            } else {
-              for (let x = canvasWidth - 1; x >= 0; x--) {
-                const i = (x + yBase) << 2;
-
-                const bSRGB = errDiffsBuffer[i + c];
-                const cl = linearLUT[d[i + c]];
-
-                const result = (round((cl + bSRGB) / 255) / color) * 255;
-                const errStrength = (cl - result + bSRGB) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const newX = x - errDiffsKernel[k].ox;
-                  const newY = y + errDiffsKernel[k].oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    errDiffsBuffer[ni + c] += errStrength * errDiffsKernel[k].w;
-                  }
-                }
-              }
-            }
-          }
-        }
-      } //End of useLinear -> useBuffer -> useSerpentine
-      //useLinear -> useBuffer
-      else {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            for (let x = 0; x < canvasWidth; x++) {
-              const i = (x + yBase) << 2;
-
-              const bSRGB = errDiffsBuffer[i + c];
-              const cl = linearLUT[d[i + c]];
-
-              const result = (round((cl + bSRGB) / 255) / color) * 255;
-              const errStrength = (cl - result + bSRGB) * el;
-
-              d[i + c] = result;
-
-              for (let k = 0; k < errDiffsKernelLength; k++) {
-                const newX = x + errDiffsKernel[k].ox;
-                const newY = y + errDiffsKernel[k].oy;
-
-                if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                  const ni = (newY * canvasWidth + newX) << 2;
-                  errDiffsBuffer[ni + c] += errStrength * errDiffsKernel[k].w;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    //End of useLinear -> useBuffer
-    else {
-      //useLinear -> useSerpentine
-      if (useSerpentine) {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            if (y % 2 === 0) {
-              for (let x = 0; x < canvasWidth; x++) {
-                const i = (x + yBase) << 2;
-
-                const cl = linearLUT[d[i + c]];
-
-                const result = (round(cl / 255) / color) * 255;
-                const errStrength = (cl - result) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const {ox, oy, w} = errDiffsKernel[k];
-
-                  const newX = x + ox;
-                  const newY = y + oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    d[ni + c] += errStrength * w;
-                  }
-                }
-              }
-            } else {
-              for (let x = canvasWidth - 1; x >= 0; x--) {
-                const i = (x + yBase) << 2;
-
-                const cl = linearLUT[d[i + c]];
-
-                const result = (round(cl / 255) / color) * 255;
-                const errStrength = (cl - result) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const newX = x - errDiffsKernel[k].ox;
-                  const newY = y + errDiffsKernel[k].oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    d[ni + c] += errStrength * errDiffsKernel[k].w;
-                  }
-                }
-              }
-            }
-          }
-        }
-      } //End of useLinear -> useSerpentine
-      else {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            for (let x = 0; x < canvasWidth; x++) {
-              const i = (x + yBase) << 2;
-
-              const cl = linearLUT[d[i + c]];
-
-              const result = (round(cl / 255) / color) * 255;
-              const errStrength = (cl - result) * el;
-
-              d[i + c] = result;
-
-              for (let k = 0; k < errDiffsKernelLength; k++) {
-                const newX = x + errDiffsKernel[k].ox;
-                const newY = y + errDiffsKernel[k].oy;
-
-                if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                  const ni = (newY * canvasWidth + newX) << 2;
-                  d[ni + c] += errStrength * errDiffsKernel[k].w;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  } else {
-    //useBuffer
-    if (useBuffer) {
-      errDiffsBuffer.fill(0);
-
-      //useBuffer -> useSerpentine
-      if (useSerpentine) {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            if (y % 2 === 0) {
-              for (let x = 0; x < canvasWidth; x++) {
-                const i = (x + yBase) << 2;
-
-                const bSRGB = errDiffsBuffer[i + c];
-                const cl = d[i + c];
-
-                const result = (round((cl + bSRGB) / 255) / color) * 255;
-                const errStrength = (cl - result + bSRGB) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const {ox, oy, w} = errDiffsKernel[k];
-
-                  const newX = x + ox;
-                  const newY = y + oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    errDiffsBuffer[ni + c] += errStrength * w;
-                  }
-                }
-              }
-            } else {
-              for (let x = canvasWidth - 1; x >= 0; x--) {
-                const i = (x + yBase) << 2;
-
-                const bSRGB = errDiffsBuffer[i + c];
-                const cl = d[i + c];
-
-                const result = (round((cl + bSRGB) / 255) / color) * 255;
-                const errStrength = (cl - result + bSRGB) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const newX = x - errDiffsKernel[k].ox;
-                  const newY = y + errDiffsKernel[k].oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    errDiffsBuffer[ni + c] += errStrength * errDiffsKernel[k].w;
-                  }
-                }
-              }
-            }
-          }
-        }
-      } //End of useBuffer -> useSerpentine
-      else {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            for (let x = 0; x < canvasWidth; x++) {
-              const i = (x + yBase) << 2;
-
-              const bSRGB = errDiffsBuffer[i + c];
-              const cl = d[i + c];
-
-              const result = (round((cl + bSRGB) / 255) / color) * 255;
-              const errStrength = (cl - result + bSRGB) * el;
-
-              d[i + c] = result;
-
-              for (let k = 0; k < errDiffsKernelLength; k++) {
-                const newX = x + errDiffsKernel[k].ox;
-                const newY = y + errDiffsKernel[k].oy;
-
-                if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                  const ni = (newY * canvasWidth + newX) << 2;
-                  errDiffsBuffer[ni + c] += errStrength * errDiffsKernel[k].w;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    //End of useBuffer
-    else {
-      //useSerpentine
-      if (useSerpentine) {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            if (y % 2 === 0) {
-              for (let x = 0; x < canvasWidth; x++) {
-                const i = (x + yBase) << 2;
-
-                const cl = d[i + c];
-
-                const result = (round(cl / 255) / color) * 255;
-                const errStrength = (cl - result) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const {ox, oy, w} = errDiffsKernel[k];
-
-                  const newX = x + ox;
-                  const newY = y + oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    d[ni + c] += errStrength * w;
-                  }
-                }
-              }
-            } else {
-              for (let x = canvasWidth - 1; x >= 0; x--) {
-                const i = (x + yBase) << 2;
-
-                const cl = d[i + c];
-
-                const result = (round(cl / 255) / color) * 255;
-                const errStrength = (cl - result) * el;
-
-                d[i + c] = result;
-
-                for (let k = 0; k < errDiffsKernelLength; k++) {
-                  const newX = x - errDiffsKernel[k].ox;
-                  const newY = y + errDiffsKernel[k].oy;
-
-                  if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                    const ni = (newY * canvasWidth + newX) << 2;
-                    d[ni + c] += errStrength * errDiffsKernel[k].w;
-                  }
-                }
-              }
-            }
-          }
-        }
-      } //End of useSerpentine
-      else {
-        for (let c = 0; c < 3; c++) {
-          const color = colorArray[c];
-          const el = colorErrArray[c];
-
-          for (let y = 0; y < canvasHeight; y++) {
-            const yBase = y * canvasWidth;
-
-            for (let x = 0; x < canvasWidth; x++) {
-              const i = (x + yBase) << 2;
-
-              const cl = d[i + c];
-
-              const result = (round(cl / 255) / color) * 255;
-              const errStrength = (cl - result) * el;
-
-              d[i + c] = result;
-
-              for (let k = 0; k < errDiffsKernelLength; k++) {
-                const newX = x + errDiffsKernel[k].ox;
-                const newY = y + errDiffsKernel[k].oy;
-
-                if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
-                  const ni = (newY * canvasWidth + newX) << 2;
-                  d[ni + c] += errStrength * errDiffsKernel[k].w;
-                }
-              }
-            }
+          if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
+            const ni = (newY * canvasWidth + newX) << 2;
+            errDiffsBufferTarget[ni + c] += errStrength * w;
           }
         }
       }
     }
   }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
 
 function varErrDiffsCustom(f) {
   const {data: d} = f,
