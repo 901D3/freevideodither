@@ -40,6 +40,7 @@ var locales = {
   LoopLimit: "Loop Limit",
   PDSInit: "PDS Init",
   RandMat: "Random Matrices",
+  mirror: "Mirror",
 
   video_settings_title: "Video",
   dither_settings_title: "Dither",
