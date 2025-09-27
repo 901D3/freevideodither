@@ -227,5 +227,4 @@ gId("frameRateInput").addEventListener("input", function () {
   errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
   errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
   varErrDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
-  varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
 })();
