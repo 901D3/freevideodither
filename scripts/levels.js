@@ -90,8 +90,8 @@ function autoDivWrapper() {
 
 function errDiffsAutoDivWrapper() {
   if (errDiffsAutoDiv) {
-    errDiffsDivisionInput = matrixSum(errDiffsMatrixInput) + 1;
-    gId("errDiffsDivisionInput").value = matrixSum(errDiffsMatrixInput) + 1;
+    errDiffsDivisionInput = matrixSum_2D(errDiffsMatrixInput) + 1;
+    gId("errDiffsDivisionInput").value = matrixSum_2D(errDiffsMatrixInput) + 1;
   } else if (!errDiffsAutoDiv) {
     errDiffsDivisionInput = Number(gId("errDiffsDivisionInput").value);
   }
@@ -148,17 +148,32 @@ gId("errDiffsMatrixInput").addEventListener("input", function () {
   }
 
   errDiffsAutoDivWrapper();
-  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
+  errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
 });
 
 gId("errDiffsDivisionInput").addEventListener("input", function () {
   errDiffsAutoDivWrapper();
-  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
+  errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
 });
 
 gId("errDiffsAutoDiv").addEventListener("input", function () {
   errDiffsAutoDiv = gId("errDiffsAutoDiv").checked;
   errDiffsAutoDivWrapper();
+});
+
+gId("varErrDiffsMatrixInput").addEventListener("input", function () {
+  try {
+    varErrDiffsMatrixInput = JSON.parse(gId("varErrDiffsMatrixInput").value);
+  } catch (e) {
+    printLog(e, 1, "red", "red");
+  }
+
+  varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
+});
+
+gId("useMirror").addEventListener("input", function () {
+  useMirror = gId("useMirror").checked;
+  varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
 });
 
 gId("frameRateRange").addEventListener("input", function () {
@@ -192,6 +207,7 @@ gId("frameRateInput").addEventListener("input", function () {
   buffer = gId("buffer").value;
   autoDiv = gId("autoDiv").checked;
   errDiffsAutoDiv = gId("errDiffsAutoDiv").checked;
+  useMirror = gId("useMirror").checked;
   autoDivWrapper();
   errDiffsAutoDivWrapper();
   matrixInputLUTCreate();
@@ -209,7 +225,7 @@ gId("frameRateInput").addEventListener("input", function () {
   matrixInput = JSON.parse(gId("matrixInput").value);
   divisionInput = Number(gId("divisionInput").value);
   errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
-  errDiffsKernel = parseKernel(errDiffsMatrixInput, errDiffsDivisionInput);
-  //arithmeticInput = new Function("x", "y", "c", "return " + gId("arithmeticInput").value + ";");
-  //errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+  errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
+  varErrDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+  varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
 })();
