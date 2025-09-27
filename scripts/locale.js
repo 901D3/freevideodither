@@ -51,8 +51,8 @@ var locales = {
   audio_volume: "Volume",
   matrix_thresh: "Matrix Threshhold",
   arithmetic: "Arithmetic",
-  errdiffs: "Error Diffusion",
-  varerrdiffs: "Variable Error Diffusion",
+  err_diffs: "Error Diffusion",
+  var_err_diffs: "Variable Error Diffusion",
   canvas_size_change: "Change canvas size",
   pixelated_render: "Pixelated Rendering",
   canvas_desync: "Canvas Desynchronize",
@@ -84,14 +84,13 @@ var locales = {
   halftone: "Halftone",
   color_shifted: "Color Shifted",
 
-  error_diffusion: "Error Diffusion",
-
   Int8Array: "8 Bits Int",
   Int16Array: "16 Bits Int",
   Int32Array: "32 Bits Int",
+  Float16Array: "16 Bits Float",
   Float32Array: "32 Bits Float",
   Float64Array: "64 Bits Float",
-  
+
   telemetry: "Telemetry(drop fps)",
   //: "",
   //: "",
