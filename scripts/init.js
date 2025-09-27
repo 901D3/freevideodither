@@ -83,6 +83,7 @@ var {
   LOG10E,
 } = Math;
 var PHI = (1 + sqrt(5)) / 2;
+var _2PI = 2 * PI;
 
 var recorderMimeType;
 var recorderCodec;
@@ -121,6 +122,11 @@ var errDiffsDivisionInput;
 var errDiffsAutoDiv;
 var errDiffsBuffer;
 var errDiffsBufferTarget;
+
+var varErrDiffsMatrixInput = [[-1], 1];
+var varErrDiffsKernel;
+var useMirror;
+
 var setErrDiffsTarget = () => {};
 var getBufferValue = () => {};
 
@@ -156,40 +162,96 @@ function escapeHTML(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function printLog(message) {
-  let console = gId("console");
+function printLog(message, logToConsole, color, flag) {
+  let consoleEl = gId("console");
   let maxLogEntries = 500;
-  let urlRegex = /https?:\/\/[^\s]+/g;
-  let codeRegex = /`([^`]+)`/g;
 
-  let messageWithLinks = escapeHTML(message).replace(urlRegex, function (url) {
-    return `<a href="${url}" target="_blank">${url}</a>`;
-  });
-
-  messageWithLinks = messageWithLinks.replace(codeRegex, function (_, code) {
-    return `<code style="background:#eee;padding:2px 4px;border-radius:4px;font-family:monospace">${code}</code>`;
-  });
-
-  logEntries.push(messageWithLinks);
+  logEntries.push(message);
 
   if (logEntries.length > maxLogEntries) {
     logEntries.shift();
   }
 
-  let logEntry = document.createElement("div");
-  logEntry.innerHTML = messageWithLinks + "<br>";
-  console.appendChild(logEntry);
+  let logEntry = document.createElement("span");
+  logEntry.innerHTML = message;
+  logEntry.style.color = color;
+  consoleEl.appendChild(logEntry);
+  if (flag === "red") redFlashChangeText(logEntry, 200);
+  if (flag === "orange") orangeFlashChangeText(logEntry, 200);
+  if (flag === "yellow") yellowFlashChangeText(logEntry, 200);
+  if (flag === "grey") greyFlashChangeText(logEntry, 200);
 
-  if (console.children.length > maxLogEntries) {
-    console.removeChild(console.firstChild);
+  if (consoleEl.children.length > maxLogEntries) {
+    consoleEl.removeChild(consoleEl.firstChild);
   }
 
-  console.scrollTop = console.scrollHeight;
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+
+  if (logToConsole === 1) {
+    console.log(message);
+  }
+}
+
+function flashChanges(el, fades, time, ...fadeColors) {
+  if (!el) return false;
+
+  for (let i = 0; i < fades; i++) {
+    setTimeout(() => {
+      const stepColor = fadeColors[i % fadeColors.length];
+      el.style.backgroundColor = stepColor;
+    }, i * time);
+  }
+}
+
+function redFlashChangeText(el, time) {
+  if (!el) return false;
+
+  flashChanges(el, 4, time, "rgba(255, 0, 0, 1)", "rgba(255, 0, 0, 0.6)", "rgba(255, 0, 0, 0.3)", "rgba(255, 0, 0, 0.0)");
+}
+
+function orangeFlashChangeText(el, time) {
+  if (!el) return false;
+
+  flashChanges(el, 4, time, "rgba(255, 127, 0, 1)", "rgba(255, 127, 0, 0.6)", "rgba(255, 127, 0, 0.3)", "rgba(255, 127, 0, 0)");
+}
+
+function yellowFlashChangeText(el, time) {
+  if (!el) return false;
+
+  flashChanges(
+    el,
+    4,
+    time,
+    "rgba(255, 255, 0, 1)",
+    "rgba(255, 255, 0, 0.6)",
+    "rgba(255, 255, 0, 0.3)",
+    "rgba(255, 255, 0, 0.0)"
+  );
+}
+
+function greyFlashChangeText(el, time) {
+  if (!el) return false;
+
+  flashChanges(
+    el,
+    4,
+    time,
+    "rgba(127, 127, 127, 1)",
+    "rgba(127, 127, 127, 0.6)",
+    "rgba(127, 127, 127, 0.3)",
+    "rgba(127, 127, 127, 0)"
+  );
 }
 
 function RAND(seed) {
   seed = (seed >> (PI * seed)) ^ (seed * 12902091);
   return seed;
+}
+
+function mirrorIdx(i, n) {
+  if (i < n) return i;
+  const j = i - n;
+  return n - 1 - j;
 }
 
 let linearLUT = new Float32Array(256);
@@ -233,12 +295,24 @@ function findHighest(matrix) {
   return highestValue;
 }
 
-function matrixSum(matrix) {
+function matrixSum_1D(matrix) {
+  let sum = 0;
+  const mX = matrix.length;
+
+  for (let i = 0; i < mX; i++) {
+    const v = matrix[i];
+    if (!isNaN(v) || v !== -1) sum += v;
+  }
+
+  return sum;
+}
+
+function matrixSum_2D(matrix, exclude) {
   let sum = 0;
 
   matrix.forEach((row) => {
     row.forEach((v) => {
-      if (!isNaN(v) || v !== -1) sum += v;
+      if (v != exclude) sum += v;
     });
   });
 
@@ -257,24 +331,58 @@ function findStart_2D(matrix, marker) {
   }
 }
 
-function parseKernel(matrix, division) {
-  const start = findStart_2D(matrix, -1);
-  const kernel = [];
+function findStart_3D(matrix, marker) {
+  const matrixLength = matrix.length;
+  for (let y = 0; y < matrixLength; y++) {
+    const matrixYLength = matrix[y].length;
+    for (let x = 0; x < matrixYLength; x++) {
+      const matrixXLength = matrix[y][x].length;
+      for (let z = 0; z < matrixXLength; z++) {
+        if (matrix[y][x][z] === marker) {
+          return {x, y, z};
+        }
+      }
+    }
+  }
+}
 
-  for (let y = 0; y < matrix.length; y++) {
-    for (let x = 0; x < matrix[y].length; x++) {
-      const w = matrix[y][x];
-      if (w === -1 || w === 0) continue;
+function blurTypedArray(width, height, kernel, inArray) {
+  const array = new Float32Array(width * height);
+  const kSize = kernel.length;
+  const kHalf = floor(kSize / 2);
 
-      kernel.push({
-        ox: x - start.x,
-        oy: y - start.y,
-        w: w / division,
-      });
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+
+      for (let ky = 0; ky < kSize; ky++) {
+        const iy = y + ky - kHalf;
+
+        for (let kx = 0; kx < kSize; kx++) {
+          const ix = x + kx - kHalf;
+
+          if (ix >= 0 && ix < width && iy >= 0 && iy < height) {
+            sum += inArray[iy * width + ix] * kernel[ky][kx];
+          }
+        }
+      }
+
+      array[y * width + x] = sum;
     }
   }
 
-  return kernel;
+  return array;
+}
+
+function unravelIndex(index, shape) {
+  const coords = [];
+
+  for (let i = shape.length - 1; i >= 0; i--) {
+    coords[i] = index % shape[i];
+    index = floor(index / shape[i]);
+  }
+
+  return coords;
 }
 
 function varSync(input, variable, defaultValue) {
@@ -357,15 +465,18 @@ function disableAll() {
   gId("matrix").classList.add("disabled");
   gId("arithmetic").classList.add("disabled");
   gId("errDiffs").classList.add("disabled");
+  gId("varErrDiffs").classList.add("disabled");
   gId("matrixThreshDisp").classList.add("disabled");
   gId("arithmeticDisp").classList.add("disabled");
   gId("errDiffsInputDisp").classList.add("disabled");
+  gId("varErrDiffsInputDisp").classList.add("disabled");
   gId("blueNoiseDisp").classList.add("disabled");
   gId("lvlsDisp").classList.add("disabled");
   gId("errLvlsDisp").classList.add("disabled");
   gId("linearDisp").classList.add("disabled");
   gId("serpentineDisp").classList.add("disabled");
   gId("bufferDisp").classList.add("disabled");
+  gId("mirrorDisp").classList.add("disabled");
 }
 
 gId("useLinear").addEventListener("change", function () {
@@ -406,5 +517,15 @@ gId("dither").addEventListener("change", function () {
     gId("linearDisp").classList.remove("disabled");
     gId("serpentineDisp").classList.remove("disabled");
     gId("bufferDisp").classList.remove("disabled");
+  } else if (dropdownValue === "varErrDiffs") {
+    disableAll();
+    gId("varErrDiffs").classList.remove("disabled");
+    gId("varErrDiffsInputDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    gId("errLvlsDisp").classList.remove("disabled");
+    gId("linearDisp").classList.remove("disabled");
+    gId("serpentineDisp").classList.remove("disabled");
+    gId("bufferDisp").classList.remove("disabled");
+    gId("mirrorDisp").classList.remove("disabled");
   }
 });
