@@ -3,6 +3,7 @@ const d = {
   matrixThreshold: bayer,
   arithmetic: arithmetic,
   errDiffs: errDiffs,
+  varErrDiffs: varErrDiffs,
 };
 
 function process() {
