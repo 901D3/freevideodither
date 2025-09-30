@@ -93,8 +93,8 @@ var recorderWebmWriterQuality;
 var isRecording = false;
 var isRendering = false;
 
-var canvasWidth = 1280;
-var canvasHeight = 720;
+var canvasWidth = 480;
+var canvasHeight = 270;
 
 var rLvls;
 var gLvls;
@@ -283,6 +283,20 @@ function defVAdv(v1, v2, vmin = 0, vmax = 100, ltvmin = false, gtvmax = false) {
   if (gtvmax && v1 > vmax) return v2;
 
   return v1;
+}
+
+function lengthRecursive(inArray) {
+  let count = 0;
+
+  for (const item of inArray) {
+    if (Array.isArray(item)) {
+      count += lengthRecursive(item);
+    } else {
+      count += 1;
+    }
+  }
+
+  return count;
 }
 
 function findHighest(matrix) {
@@ -480,5 +494,3 @@ gId("dither").addEventListener("change", function () {
     gId("mirrorDisp").classList.remove("disabled");
   }
 });
-
-video.addEventListener("loadedmetadata", adjustCanvasSize);
