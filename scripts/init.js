@@ -480,3 +480,5 @@ gId("dither").addEventListener("change", function () {
     gId("mirrorDisp").classList.remove("disabled");
   }
 });
+
+video.addEventListener("loadedmetadata", adjustCanvasSize);
