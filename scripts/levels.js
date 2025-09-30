@@ -81,8 +81,8 @@ gId("buffer").addEventListener("change", function () {
 
 function autoDivWrapper() {
   if (autoDiv) {
-    divisionInput = findHighest(matrixInput) + 1;
-    gId("divisionInput").value = findHighest(matrixInput) + 1;
+    divisionInput = findHighest(matrixInput.flat()) + 1;
+    gId("divisionInput").value = findHighest(matrixInput.flat()) + 1;
   } else if (!autoDiv) {
     divisionInput = Number(gId("divisionInput").value);
   }
