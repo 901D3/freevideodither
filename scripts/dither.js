@@ -24,7 +24,7 @@ function presets() {
       matrixInput = bayerGen(256);
     } else if (a === "blueNoise") {
       gId("blueNoiseDisp").classList.remove("disabled");
-      return
+      return;
     }
 
     gId("matrixInput").value = formatNestedArray(matrixInput);
