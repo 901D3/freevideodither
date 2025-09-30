@@ -2,6 +2,7 @@ function presets() {
   const dropdown = gIdV("dither");
   if (dropdown === "matrixThreshold") {
     const a = gId("matrix").value;
+    gId("blueNoiseDisp").classList.add("disabled");
 
     if (a === "threshold") {
       matrixInput = [[1]];
@@ -21,6 +22,9 @@ function presets() {
       matrixInput = bayerGen(128);
     } else if (a === "bayer256") {
       matrixInput = bayerGen(256);
+    } else if (a === "blueNoise") {
+      gId("blueNoiseDisp").classList.remove("disabled");
+      return
     }
 
     gId("matrixInput").value = formatNestedArray(matrixInput);
@@ -203,15 +207,6 @@ gId("matrix").addEventListener("change", presets);
 gId("arithmetic").addEventListener("change", presets);
 gId("errDiffs").addEventListener("change", presets);
 gId("varErrDiffs").addEventListener("change", presets);
-
-gId("blueNoiseGenerateButton").addEventListener("click", function () {
-  if (gId("matrix").value === "blueNoise") {
-    matrixInput = toRGBMat(blueNoiseCtx.getImageData(0, 0, blueNoiseCanvas.width, blueNoiseCanvas.height));
-    gId("matrixInput").value = JSON.stringify(matrixInput);
-  } else {
-    matrixInput = parseMat(gIdV("matrixInput"));
-  }
-});
 
 function toRGBMat(f) {
   let {width, height, data} = f,
