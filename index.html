@@ -35,17 +35,17 @@
         <span class="font-weight-bold" style="font-size: 20px" data-text="$recorder"></span>
         <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
           <button id="startRecording" class="sqrButton" type="button">
-            <div class="horizontal-align-center vertical-align-center-margin record"></div>
+            <div class="horizontal-align-center vertical-align-center-margin record" title="Start recording"></div>
           </button>
-          <button id="stopRecording" class="sqrButton" type="button" disabled="">
+          <button id="stopRecording" class="sqrButton" type="button" title="Stop recording" disabled="">
             <div class="horizontal-align-center vertical-align-center-margin stopRecord"></div>
           </button>
-          <button id="startRendering" type="button" class="sqrButton">
+          <button id="startRendering" type="button" class="sqrButton" title="Start rendering">
             <div>|-></div>
           </button>
         </div>
         <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
-          <button id="pauseRecording" class="sqrButton" disabled="" type="button">
+          <button id="pauseRecording" class="sqrButton" disabled="" type="button" title="Pause recording">
             <div
               class="horizontal-align-center width-fit-content height-fit-content display-flex left-right-flow"
               style="gap: 6px">
@@ -53,10 +53,10 @@
               <div class="vertical-align-center-margin" style="width: 5px; height: 16px; background-color: #fff"></div>
             </div>
           </button>
-          <button id="resumeRecording" class="sqrButton" type="button" disabled="">
+          <button id="resumeRecording" class="sqrButton" type="button" title="Resume recording" disabled="">
             <div>resume</div>
           </button>
-          <button id="stopRendering" class="sqrButton" type="button" disabled="">
+          <button id="stopRendering" class="sqrButton" type="button" title="Stop rendering" disabled="">
             <div>stop render-ing</div>
           </button>
         </div>
@@ -64,25 +64,31 @@
       <div class="settings_container">
         <div class="settings_label-input_long">
           <span data-text="$mime_type"></span>
-          <input id="recorderMimeTypeInput" placeholder="video/webm" value="video/webm" />
+          <input id="recorderMimeTypeInput" placeholder="video/webm" value="video/webm" title="MediaRecorder MIME type" />
         </div>
         <div class="settings_label-input_long">
           <span data-text="$codec"></span>
-          <input id="recorderCodecInput" placeholder="vp9" value="vp9" />
+          <input id="recorderCodecInput" placeholder="vp9" value="vp9" title="MediaRecorder codec" />
         </div>
         <div class="settings_label-slider-input">
           <span data-text="$frame_rate"></span>
-          <input type="range" id="recorderFrameRateRange" min="0" max="120" step="0.00000000001" />
+          <input
+            type="range"
+            id="recorderFrameRateRange"
+            min="0"
+            max="120"
+            step="0.00000000001"
+            title="MediaRecorder frame rate" />
           <input type="number" id="recorderFrameRateInput" placeholder="30" value="30" />
         </div>
         <div class="settings_label-slider-input">
           <span data-text="$bitrate"></span>
-          <input type="range" id="recorderVideoBitrateRange" min="0" max="100000000" step="1" />
+          <input type="range" id="recorderVideoBitrateRange" min="0" max="100000000" step="1" title="MediaRecorder bitrate" />
           <input type="number" id="recorderVideoBitrateInput" placeholder="2000000" value="2000000" />
         </div>
         <div class="settings_label-input_long">
           <span data-text="$file_name"></span>
-          <input id="recorderFileName" placeholder="" value="" />
+          <input id="recorderFileName" placeholder="" value="" title="MediaRecorder output file name" />
         </div>
       </div>
       <div class="settings_container">
@@ -130,7 +136,7 @@
             </select>
           </div>
           <div id="matrixThreshDisp" class="settings_container disabled">
-            <textarea id="matrixInput">[[1]]</textarea>
+            <textarea id="matrixInput" placeholder="2D matrix only"></textarea>
             <input id="divisionInput" type="number" value="2" />
             <div class="settings_checkbox-label">
               <input type="checkbox" id="autoDiv" checked="" />
@@ -138,45 +144,53 @@
             </div>
           </div>
           <div id="blueNoiseDisp" class="settings_container disabled">
-            <canvas id="blueNoiseCanvas" style="border: 3px solid #ffea00"></canvas>
-            <div class="settings_label-slider-input">
-              <span>Sigma</span>
-              <input type="range" id="blueNoiseSigmaRange" min="0" max="10" step="0.000000000001" />
-              <input type="number" id="blueNoiseSigmaInput" value="1.5" />
-            </div>
+            <canvas id="blueNoiseCanvas" data-text="$elN_A" style="border: 3px solid #ff0"></canvas>
+            <textarea id="blueNoiseInitArrayInput" placeholder="2D matrix only"></textarea>
             <div class="settings_label-input">
-              <span>Seed</span>
-              <input type="number" id="blueNoiseSeed" />
-            </div>
-            <div class="settings_label-input">
-              <span>Width</span>
+              <span data-text="$width"></span>
               <input type="number" id="blueNoiseWidth" value="64" />
             </div>
             <div class="settings_label-input">
-              <span>Height</span>
+              <span data-text="$height"></span>
               <input type="number" id="blueNoiseHeight" value="64" />
             </div>
             <div class="settings_label-input">
-              <span>Min Distance</span>
-              <input type="number" id="blueNoiseMinDistance" value="10" />
+              <span>PDS radius x</span>
+              <input type="number" id="blueNoisePDSRadiusX" value="5" />
             </div>
             <div class="settings_label-input">
-              <span>Max Points</span>
-              <input type="number" id="blueNoiseMaxPoints" value="5" />
+              <span>PDS radius y</span>
+              <input type="number" id="blueNoisePDSRadiusY" value="5" />
             </div>
             <div class="settings_label-input">
-              <span>Loop Limit</span>
-              <input type="number" id="blueNoiseSwapLoopLimit" value="100" />
+              <span>PDS k value</span>
+              <input type="number" id="blueNoisePDSKValue" value="30" />
             </div>
-            <div class="settings_checkbox-label">
-              <input type="checkbox" id="blueNoisePoissonDiskInit" />
-              <span>PDS Init</span>
+            <div class="settings_label-input">
+              <span>Phase 1 sigma</span>
+              <input type="number" id="blueNoisePhase1Sigma" value="1.5" />
             </div>
-            <div class="settings_checkbox-label">
-              <input type="checkbox" id="blueNoiseInvertColor" />
-              <span>Invert</span>
+            <div class="settings_label-input">
+              <span>Phase 2 sigma</span>
+              <input type="number" id="blueNoisePhase2Sigma" value="1.5" />
             </div>
-            <button id="blueNoiseGenerateButton">Generate</button>
+            <div class="settings_label-input">
+              <span>Phase 3 sigma</span>
+              <input type="number" id="blueNoisePhase3Sigma" value="1.5" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 1 kernel radius cap</span>
+              <input type="number" id="blueNoisePhase1KernelRadius" value="1000" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 2 kernel radius cap</span>
+              <input type="number" id="blueNoisePhase2KernelRadius" value="1000" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 3 kernel radius cap</span>
+              <input type="number" id="blueNoisePhase3KernelRadius" value="1000" />
+            </div>
+            <button onclick="setTimeout(blueNoiseWrapper, 0)" data-text="$change_canvas_size"></button>
           </div>
           <div class="whitehr"></div>
           <div class="settings_label-select">
@@ -220,7 +234,7 @@
             </select>
           </div>
           <div id="errDiffsInputDisp" class="settings_container disabled">
-            <textarea id="errDiffsMatrixInput">[[-1]]</textarea>
+            <textarea id="errDiffsMatrixInput" placeholder="2D matrix only"></textarea>
             <input id="errDiffsDivisionInput" type="number" />
             <div class="settings_checkbox-label">
               <input type="checkbox" id="errDiffsAutoDiv" checked="" />
@@ -253,7 +267,7 @@
             </select>
           </div>
           <div id="varErrDiffsInputDisp" class="settings_container disabled">
-            <textarea id="varErrDiffsMatrixInput">[[-1]]</textarea>
+            <textarea id="varErrDiffsMatrixInput" placeholder="3D + 1 matrix"></textarea>
           </div>
           <div id="mirrorDisp" class="settings_checkbox-label disabled">
             <input type="checkbox" id="useMirror" checked="" />
@@ -297,14 +311,14 @@
             </div>
           </div>
           <div id="linearDisp" class="settings_checkbox-label disabled">
-            <input type="checkbox" id="useLinear" />
+            <input type="checkbox" id="useLinear" title="Linear color space" />
             <span data-text="$linear"></span>
           </div>
           <div class="whitehr"></div>
           <div class="settings_label-slider-input">
             <span data-text="$frame_rate"></span>
             <input type="range" id="frameRateRange" min="0" max="120" step="0.00000000001" />
-            <input type="number" id="frameRateInput" placeholder="30" value="30" />
+            <input type="number" id="frameRateInput" placeholder="30" value="30" title="Preview frame rate" />
           </div>
           <div class="whitehr"></div>
           <div class="settings_container">
@@ -319,7 +333,11 @@
             </div>
             <button onclick="changeCanvasSize()" data-text="$change_canvas_size"></button>
             <div class="settings_checkbox-label">
-              <input type="checkbox" id="canvasRendering" checked="" />
+              <input
+                type="checkbox"
+                id="canvasRendering"
+                checked=""
+                oninput="gId('canvas').style.imageRendering=canvasRendering.checked?'pixelated':'normal'" />
               <span>Pixelated Rendering</span>
             </div>
             <div class="settings_checkbox-label">
@@ -366,6 +384,7 @@
 
   <!--Libraries-->
   <script src="scripts/lib/901D3/binUtils.js"></script>
+  <script src="scripts/lib/901D3/blue-noise.js"></script>
   <script src="scripts/lib/thenickdude/webm-writer-0.3.0.js"></script>
 
   <script src="scripts/locale.js"></script>
