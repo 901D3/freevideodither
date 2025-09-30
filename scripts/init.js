@@ -127,6 +127,10 @@ var varErrDiffsMatrixInput = [[-1], 1];
 var varErrDiffsKernel;
 var useMirror;
 
+var blueNoiseInitArray;
+var blueNoiseWidth = 64;
+var blueNoiseHeight = 64;
+
 var setErrDiffsTarget = () => {};
 var getBufferValue = () => {};
 
@@ -282,17 +286,15 @@ function defVAdv(v1, v2, vmin = 0, vmax = 100, ltvmin = false, gtvmax = false) {
 }
 
 function findHighest(matrix) {
-  let highestValue = 0;
+  let result = 0;
+  const matrixLength = matrix.length;
 
-  matrix.forEach((row) => {
-    row.forEach((v) => {
-      if (v > highestValue) {
-        highestValue = v;
-      }
-    });
-  });
+  for (let i = 0; i < matrixLength; i++) {
+    const v = matrix[i];
+    if (v > result) result = v;
+  }
 
-  return highestValue;
+  return result;
 }
 
 function matrixSum_1D(matrix) {
@@ -346,29 +348,13 @@ function findStart_3D(matrix, marker) {
   }
 }
 
-function blurTypedArray(width, height, kernel, inArray) {
-  const array = new Float32Array(width * height);
-  const kSize = kernel.length;
-  const kHalf = floor(kSize / 2);
+function noiseArray_1D(width, height, start = 0, end = 255) {
+  const sqSz = width * height;
+  const range = end - start;
+  const array = new Int32Array(sqSz);
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sum = 0;
-
-      for (let ky = 0; ky < kSize; ky++) {
-        const iy = y + ky - kHalf;
-
-        for (let kx = 0; kx < kSize; kx++) {
-          const ix = x + kx - kHalf;
-
-          if (ix >= 0 && ix < width && iy >= 0 && iy < height) {
-            sum += inArray[iy * width + ix] * kernel[ky][kx];
-          }
-        }
-      }
-
-      array[y * width + x] = sum;
-    }
+  for (let i = 0; i < sqSz; i++) {
+    array[i] = start + round(random() * range);
   }
 
   return array;
@@ -415,43 +401,6 @@ function sliderInputSync(slider, input, variable, defaultValue, source) {
   window[variable] = value;
 }
 
-let blueNoiseRunning = false;
-
-gId("blueNoiseSeed").value = RAND(random() * 1000);
-
-function blueNoiseGenerate() {
-  if (blueNoiseRunning) return;
-  blueNoiseRunning = true;
-  let width = pIn(gIdV("blueNoiseWidth")),
-    height = pIn(gIdV("blueNoiseHeight")),
-    seed = pFl(gIdV("blueNoiseSeed")) || random() * 1000,
-    maxPoints = pIn(gIdV("blueNoiseMaxPoints")),
-    swLoopLimit = pIn(gIdV("blueNoiseSwapLoopLimit")),
-    blueNoiseSqSz = width * height;
-
-  blueNoiseCanvas.width = pIn(gIdV("blueNoiseWidth"));
-  blueNoiseCanvas.height = pIn(gIdV("blueNoiseHeight"));
-  imageData = blueNoiseCtx.getImageData(0, 0, width, height);
-  px = imageData.data;
-
-  const t0 = performance.now();
-  const blueNoise = blueNoise(pFl(gIdV("blueNoiseSigma")), maxPoints, swLoopLimit, width, height, seed);
-
-  let a = 0;
-  for (i = 0; i < blueNoiseSqSz; i++) {
-    v = gId("blueNoiseInvertColor").checked
-      ? 256 - floor((blueNoise[a++] / blueNoiseSqSz) * 256)
-      : floor((blueNoise[a++] / blueNoiseSqSz) * 256);
-    p = i * 4;
-    px[p] = px[p + 1] = px[p + 2] = v;
-    px[p + 3] = 255;
-  }
-
-  blueNoiseCtx.putImageData(imageData, 0, 0);
-  printLog("Generated in " + (performance.now() - t0) + "ms");
-  blueNoiseRunning = false;
-}
-
 let bigContainer = document.getElementsByClassName("bigContainer")[0];
 
 if (bigContainer) {
@@ -467,10 +416,10 @@ function disableAll() {
   gId("errDiffs").classList.add("disabled");
   gId("varErrDiffs").classList.add("disabled");
   gId("matrixThreshDisp").classList.add("disabled");
+  gId("blueNoiseDisp").classList.add("disabled");
   gId("arithmeticDisp").classList.add("disabled");
   gId("errDiffsInputDisp").classList.add("disabled");
   gId("varErrDiffsInputDisp").classList.add("disabled");
-  gId("blueNoiseDisp").classList.add("disabled");
   gId("lvlsDisp").classList.add("disabled");
   gId("errLvlsDisp").classList.add("disabled");
   gId("linearDisp").classList.add("disabled");
@@ -499,9 +448,11 @@ gId("dither").addEventListener("change", function () {
     disableAll();
     gId("matrix").classList.remove("disabled");
     gId("matrixThreshDisp").classList.remove("disabled");
-    gId("blueNoiseDisp").classList.remove("disabled");
     gId("lvlsDisp").classList.remove("disabled");
     gId("linearDisp").classList.remove("disabled");
+    if (gId("matrix").value === "blueNoise") {
+      gId("blueNoiseDisp").classList.remove("disabled");
+    }
   } else if (dropdownValue === "arithmetic") {
     disableAll();
     gId("arithmetic").classList.remove("disabled");
