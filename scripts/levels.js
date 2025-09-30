@@ -187,6 +187,20 @@ gId("frameRateInput").addEventListener("input", function () {
   }
 });
 
+gId("blueNoiseInitArrayInput").addEventListener("input", function () {
+  try {
+    blueNoiseInitArray = JSON.parse(gId("blueNoiseInitArrayInput").value).flat();
+  } catch {} //silence it
+});
+
+gId("blueNoiseWidth").addEventListener("input", function () {
+  blueNoiseWidth = Number(gId("blueNoiseWidth").value);
+});
+
+gId("blueNoiseHeight").addEventListener("input", function () {
+  blueNoiseHeight = Number(gId("blueNoiseHeight").value);
+});
+
 (function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 2, "input");
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 2, "input");
@@ -222,9 +236,9 @@ gId("frameRateInput").addEventListener("input", function () {
     getBufferValue = () => 0; // always return 0
   }
 
-  matrixInput = JSON.parse(gId("matrixInput").value);
-  divisionInput = Number(gId("divisionInput").value);
-  errDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
-  errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
-  varErrDiffsMatrixInput = JSON.parse(gId("errDiffsMatrixInput").value);
+  try {
+    blueNoiseInitArray = JSON.parse(gId("blueNoiseInitArrayInput").value).flat();
+  } catch {}
+  blueNoiseWidth = Number(gId("blueNoiseWidth").value);
+  blueNoiseHeight = Number(gId("blueNoiseHeight").value);
 })();
