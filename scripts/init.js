@@ -111,7 +111,7 @@ var buffer;
 
 var matrixInput = [[1]];
 var matrixInputLUT;
-var divisionInput;
+var divisionInput = 1;
 var autoDiv;
 var arithmeticInput;
 var errDiffsMatrixInput = [[-1]];
