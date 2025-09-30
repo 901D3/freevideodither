@@ -27,9 +27,10 @@ function presets() {
       return;
     }
 
+    const highest = findHighest(matrixInput.flat()) + 1;
     gId("matrixInput").value = formatNestedArray(matrixInput);
-    gId("divisionInput").value = findHighest(matrixInput) + 1;
-    divisionInput = findHighest(matrixInput) + 1;
+    gId("divisionInput").value = highest;
+    divisionInput = highest;
     matrixInputLUTCreate();
   } else if (dropdown === "arithmetic") {
     const a = gId("arithmetic").value;
