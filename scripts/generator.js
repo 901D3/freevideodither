@@ -41,12 +41,16 @@ function blueNoiseWrapper() {
     Number(document.getElementById("blueNoisePDSRadiusX").value),
     Number(document.getElementById("blueNoisePDSRadiusY").value),
     Number(document.getElementById("blueNoisePDSKValue").value),
-    Number(document.getElementById("blueNoisePhase1Sigma").value),
-    Number(document.getElementById("blueNoisePhase2Sigma").value),
-    Number(document.getElementById("blueNoisePhase3Sigma").value),
+    Number(document.getElementById("blueNoisePhase1SigmaStart").value),
+    Number(document.getElementById("blueNoisePhase1SigmaEnd").value),
+    Number(document.getElementById("blueNoisePhase2SigmaStart").value),
+    Number(document.getElementById("blueNoisePhase2SigmaEnd").value),
+    Number(document.getElementById("blueNoisePhase3SigmaStart").value),
+    Number(document.getElementById("blueNoisePhase3SigmaEnd").value),
     Number(document.getElementById("blueNoisePhase1KernelRadius").value),
     Number(document.getElementById("blueNoisePhase2KernelRadius").value),
     Number(document.getElementById("blueNoisePhase3KernelRadius").value),
+    Number(document.getElementById("blueNoiseCandidateFillingRatio").value),
     blueNoiseInitArray
   );
   printLog("Generating took " + (performance.now() - t0) + "ms");
@@ -75,7 +79,7 @@ function blueNoiseWrapper() {
     const yOffs = y * blueNoiseWidth;
     if (!matrixInput[y]) matrixInput[y] = [];
     for (let x = 0; x < blueNoiseWidth; x++) {
-      matrixInput[y][x] = Math.floor(result[yOffs + x] * denom);
+      matrixInput[y][x] = Math.floor(result[yOffs + x]);
     }
   }
 
