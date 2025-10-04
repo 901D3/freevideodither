@@ -156,39 +156,55 @@
             </div>
             <div class="settings_label-input">
               <span>PDS radius x</span>
-              <input type="number" id="blueNoisePDSRadiusX" value="5" />
+              <input type="number" id="blueNoisePDSRadiusX" value="7" />
             </div>
             <div class="settings_label-input">
               <span>PDS radius y</span>
-              <input type="number" id="blueNoisePDSRadiusY" value="5" />
+              <input type="number" id="blueNoisePDSRadiusY" value="7" />
             </div>
             <div class="settings_label-input">
               <span>PDS k value</span>
               <input type="number" id="blueNoisePDSKValue" value="30" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 1 sigma</span>
-              <input type="number" id="blueNoisePhase1Sigma" value="1.5" />
+              <span>Phase 1 sigma start</span>
+              <input type="number" id="blueNoisePhase1SigmaStart" value="6" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 2 sigma</span>
-              <input type="number" id="blueNoisePhase2Sigma" value="1.5" />
+              <span>Phase 1 sigma end</span>
+              <input type="number" id="blueNoisePhase1SigmaEnd" value="6" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 3 sigma</span>
-              <input type="number" id="blueNoisePhase3Sigma" value="1.5" />
+              <span>Phase 2 sigma start</span>
+              <input type="number" id="blueNoisePhase2SigmaStart" value="1.5" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 2 sigma end</span>
+              <input type="number" id="blueNoisePhase2SigmaEnd" value="1.5" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 3 sigma start</span>
+              <input type="number" id="blueNoisePhase3SigmaStart" value="1.5" />
+            </div>
+            <div class="settings_label-input">
+              <span>Phase 3 sigma end</span>
+              <input type="number" id="blueNoisePhase3SigmaEnd" value="1.5" />
             </div>
             <div class="settings_label-input">
               <span>Phase 1 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase1KernelRadius" value="1000" />
+              <input type="number" id="blueNoisePhase1KernelRadius" value="10000" />
             </div>
             <div class="settings_label-input">
               <span>Phase 2 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase2KernelRadius" value="1000" />
+              <input type="number" id="blueNoisePhase2KernelRadius" value="10000" />
             </div>
             <div class="settings_label-input">
               <span>Phase 3 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase3KernelRadius" value="1000" />
+              <input type="number" id="blueNoisePhase3KernelRadius" value="10000" />
+            </div>
+            <div class="settings_label-input">
+              <span>Candidate filling ratio</span>
+              <input type="number" id="blueNoiseCandidateFillingRatio" value="0.5" />
             </div>
             <button onclick="setTimeout(blueNoiseWrapper, 0)">Generate</button>
           </div>
