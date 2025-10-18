@@ -17,7 +17,18 @@ For anyone using phones, it is recommended to go landscape mode for best UI view
 ----------
 
 ## ***Features***
-Dither and render, that's it!
+Ordered dithering(i call it matrix thresholding because it uses a matrix to threshold the frame/image)
+Arithmetic(very underated one)
+Error diffusion
+Variable error diffusion
+
+Blue noise(in matrix threshold)
+
+Linear color space
+Serpentine scanning for both error diffusion and variable error diffusion
+Error buffer array for both error diffusion and variable error diffusion
+
+Color limiting in R G B channels
 
 ----------
 
