@@ -1,10 +1,18 @@
 # _**freevideodither**_
 ## **A tool for dither video**
-This is a website for dithering videos with customizable Matrix Threshold(or you can call it "Ordered Dithering"), Error Diffusion and more...
+...that is fast, tons of features, _**hard to use**_ but it's all free!
+I was fascinated by dithering effect and i wanted to apply that dithering effect to a video...
+well someone did make a Resolve pluggin for video dithering but it was paid
+and the demo video shows that it's nothing compared to error diffusion or bayer.
 
-_Optimized for maximum peformance._
+Video dithering tools was rare as hell and most of them was paid,
+some tutorials is done in AE but i don't even have money to buy AE so i made this from those frustration yeah
+A middle finger to paid video dithering tools
 
-A middle finger to paid video dithering tools.
+It's kinda hard to use but i did make some tooltips so you over on some settings it will show the tooltip.
+Once you know how to use it, it becomes powerful as hell im not kidding
+
+For anyone using phones, it is recommended to go landscape mode for best UI viewing
 
 ----------
 
@@ -13,7 +21,7 @@ Dither and render, that's it!
 
 ----------
 
-Tool link: [901d3.github.io/freevideodither](https://901d3.github.io/freevideodither/)
+[901d3.github.io/freevideodither](https://901d3.github.io/freevideodither/)
 
 ----------
 
