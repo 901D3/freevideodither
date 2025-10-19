@@ -1,5 +1,5 @@
 # _**freevideodither**_
-## **A tool for dither video**
+## **A tool for video dithering**
 ...that is fast, tons of features, _**hard to use**_ but it's all free!\
 I was fascinated by dithering effect and i wanted to apply that dithering effect to a video...\
 well someone did make a Resolve pluggin for video dithering but it was paid\
