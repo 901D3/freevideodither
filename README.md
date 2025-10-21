@@ -41,3 +41,7 @@ Color limiting in R G B channels
 
 [dithermark.com](https://www.dithermark.com)
 
+# _Legal notices_
+
+thenickdude/webm-writer-js\
+https://en.wikipedia.org/wiki/WTFPL
