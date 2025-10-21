@@ -14,7 +14,7 @@ Once you know how to use it, it becomes powerful as hell im not kidding
 
 For anyone using phones, it is recommended to go landscape mode for best UI viewing
 
-----------
+──────────
 
 ## ***Features***
 Ordered dithering(i call it matrix thresholding because it uses a matrix to threshold the frame/image)
@@ -30,11 +30,11 @@ Error buffer array for both error diffusion and variable error diffusion
 
 Color limiting in R G B channels
 
-----------
+──────────
 
 [901d3.github.io/freevideodither](https://901d3.github.io/freevideodither/)
 
-----------
+──────────
 
 ### _**Credits:**_
 [cs559-5.ppt by University Of Wisconsin](http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt)
