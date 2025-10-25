@@ -8,6 +8,8 @@ var pauseRec = gId("pauseRecording");
 var resumeRec = gId("resumeRecording");
 var startRend = gId("startRendering");
 var stopRend = gId("stopRendering");
+var pauseRend = gId("pauseRendering");
+var resumeRend = gId("resumeRendering");
 
 function startRecording() {
   mediaRecorder = new MediaRecorder(canvasStream, {
@@ -81,7 +83,6 @@ function startRecording() {
   mediaRecorder.start();
   printLog("MediaRecorder started");
   isRecording = true;
-  //sessionStorage.setItem("isRecording", "1");
 
   startRec.setAttribute("disabled", "");
   stopRec.removeAttribute("disabled");
@@ -101,7 +102,6 @@ function stopRecording() {
   mediaRecorder.stop();
   printLog("MediaRecorder stopped");
   isRecording = false;
-  //sessionStorage.removeItem("isRecording");
 
   startRec.removeAttribute("disabled");
   stopRec.setAttribute("disabled", "");
@@ -120,8 +120,6 @@ function stopRecording() {
 function pauseRecording() {
   mediaRecorder.pause();
 
-  startRec.setAttribute("disabled", "");
-  stopRec.removeAttribute("disabled");
   pauseRec.setAttribute("disabled", "");
   resumeRec.removeAttribute("disabled");
 }
@@ -129,33 +127,46 @@ function pauseRecording() {
 function resumeRecording() {
   mediaRecorder.resume();
 
-  startRec.setAttribute("disabled", "");
-  stopRec.removeAttribute("disabled");
   pauseRec.removeAttribute("disabled");
   resumeRec.setAttribute("disabled", "");
 }
 
 function startRendering() {
-  render();
+  if (streamlinedRenderOption) streamlinedRender();
+  else render();
 
   startRend.setAttribute("disabled", "");
   stopRend.removeAttribute("disabled", "");
+  if (!streamlinedRenderOption) pauseRend.removeAttribute("disabled", "");
 
   startRec.setAttribute("disabled", "");
-  stopRec.setAttribute("disabled", "");
-  pauseRec.setAttribute("disabled", "");
-  resumeRec.setAttribute("disabled", "");
 }
 
 function stopRendering() {
   isRendering = false;
+  pausedRendering = false;
+
   startRend.removeAttribute("disabled", "");
   stopRend.setAttribute("disabled", "");
+  pauseRend.setAttribute("disabled", "");
+  resumeRend.setAttribute("disabled", "");
 
   startRec.removeAttribute("disabled");
-  stopRec.setAttribute("disabled", "");
-  pauseRec.setAttribute("disabled", "");
-  resumeRec.setAttribute("disabled", "");
+}
+
+function pauseRendering() {
+  pausedRendering = true;
+
+  pauseRend.setAttribute("disabled", "");
+  resumeRend.removeAttribute("disabled");
+}
+
+function resumeRendering() {
+  pausedRendering = false;
+  resolvePromise();
+
+  pauseRend.removeAttribute("disabled");
+  resumeRend.setAttribute("disabled", "");
 }
 
 (function () {
@@ -165,6 +176,8 @@ function stopRendering() {
   resumeRec.addEventListener("click", resumeRecording);
   startRend.addEventListener("click", startRendering);
   stopRend.addEventListener("click", stopRendering);
+  pauseRend.addEventListener("click", pauseRendering);
+  resumeRend.addEventListener("click", resumeRendering);
 
   gId("recorderMimeTypeInput").addEventListener("input", function () {
     recorderMimeType = gId("recorderMimeTypeInput").value.trim().toLowerCase();
@@ -187,6 +200,10 @@ function stopRendering() {
   gId("recorderFrameRateRange").addEventListener("input", function () {
     sliderInputSync(gId("recorderFrameRateRange"), gId("recorderFrameRateInput"), "recorderFrameRate", undefined, "slider");
     canvasStream = canvas.captureStream(recorderFrameRate);
+    recorderFrameTime = 1000 / recorderFrameRate;
+  });
+
+  gId("recorderFrameRateRange").addEventListener("change", function () {
     recorderOption = {
       mimeType: recorderMimeType + ";" + " codecs=" + recorderVideoCodec,
       videoBitsPerSecond: recorderVideoBitrate,
@@ -202,6 +219,7 @@ function stopRendering() {
       videoBitsPerSecond: recorderVideoBitrate,
       frameRate: recorderFrameRate,
     };
+    recorderFrameTime = 1000 / recorderFrameRate;
   });
 
   gId("recorderVideoBitrateRange").addEventListener("input", function () {
@@ -225,27 +243,15 @@ function stopRendering() {
     canvasStream = canvas.captureStream(recorderFrameRate);
   });
 
-  gId("recorderWebmWriterQualityRange").addEventListener("input", function () {
-    sliderInputSync(
-      gId("recorderWebmWriterQualityRange"),
-      gId("recorderWebmWriterQualityInput"),
-      "recorderWebmWriterQuality",
-      undefined,
-      "slider"
-    );
+  gId("blobQualityRange").addEventListener("input", function () {
+    sliderInputSync(gId("blobQualityRange"), gId("blobQualityInput"), "blobQuality", undefined, "slider");
   });
 
-  gId("recorderWebmWriterQualityInput").addEventListener("input", function () {
-    sliderInputSync(
-      gId("recorderWebmWriterQualityRange"),
-      gId("recorderWebmWriterQualityInput"),
-      "recorderWebmWriterQuality",
-      0.9,
-      "input"
-    );
+  gId("blobQualityInput").addEventListener("input", function () {
+    sliderInputSync(gId("blobQualityRange"), gId("blobQualityInput"), "blobQuality", 0.75, "input");
   });
 
-  //stop recording and download the video when user reload
+  //stop recording and download the video when user reload?
   window.addEventListener("load", () => {
     const nav = performance.getEntriesByType("navigation")[0];
     const reloaded = nav && nav.type === "reload";
@@ -284,11 +290,5 @@ function stopRendering() {
     videoBitsPerSecond: recorderVideoBitrate,
     frameRate: recorderFrameRate,
   };
-  sliderInputSync(
-    gId("recorderWebmWriterQualityRange"),
-    gId("recorderWebmWriterQualityInput"),
-    "recorderWebmWriterQuality",
-    0.9,
-    "input"
-  );
+  sliderInputSync(gId("blobQualityRange"), gId("blobQualityInput"), "blobQuality", 0.9, "input");
 })();
