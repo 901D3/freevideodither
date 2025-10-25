@@ -1,61 +1,75 @@
 gId("rLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", undefined, "slider");
   rLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 gId("rLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 2, "input");
   rLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 
 gId("gLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", undefined, "slider");
   gLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 gId("gLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 2, "input");
   gLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 
 gId("bLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", undefined, "slider");
   bLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 gId("bLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 2, "input");
   bLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 });
 
 gId("rErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", undefined, "slider");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 gId("rErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 
 gId("gErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", undefined, "slider");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 gId("gErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 
 gId("bErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", undefined, "slider");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 gId("bErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", 1, "input");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 });
 
 gId("useLinear").addEventListener("input", function () {
-  useLinear = gId("useLinear").checked ? true : false;
+  useLinear = gId("useLinear").checked;
+  process();
 });
 
 gId("useSerpentine").addEventListener("input", function () {
-  useSerpentine = gId("useSerpentine").checked ? true : false;
+  useSerpentine = gId("useSerpentine").checked;
+  process();
 });
 
 gId("useBuffer").addEventListener("input", function () {
-  useBuffer = gId("useBuffer").checked ? true : false;
+  useBuffer = gId("useBuffer").checked;
   if (useBuffer) {
     gId("bufferSelectDisp").classList.remove("disabled");
     errDiffsBuffer = bufferChange(canvasWidth, canvasHeight);
@@ -71,7 +85,7 @@ gId("useBuffer").addEventListener("input", function () {
     };
     getBufferValue = () => 0;
   }
-  processFrame();
+  process();
 });
 
 gId("buffer").addEventListener("change", function () {
@@ -178,13 +192,15 @@ gId("useMirror").addEventListener("input", function () {
 
 gId("frameRateRange").addEventListener("input", function () {
   sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", undefined, "slider");
+  frameTime = 1000 / frameRate;
 });
 
 gId("frameRateInput").addEventListener("input", function () {
   sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", 30, "input");
   if (frameRateInput == 0) {
-    frameRate = 9999999999;
+    frameRate = Infinity;
   }
+  frameTime = 1000 / frameRate;
 });
 
 gId("blueNoiseInitArrayInput").addEventListener("input", function () {
@@ -208,10 +224,12 @@ gId("blueNoiseHeight").addEventListener("input", function () {
   rLvls--;
   gLvls--;
   bLvls--;
+  colorLimitArray = [rLvls, gLvls, bLvls];
 
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
   sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", 1, "input");
+  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 
   sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", 30, "input");
 
