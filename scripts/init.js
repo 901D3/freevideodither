@@ -22,6 +22,31 @@ function setDisp(i, s) {
   return (gId(i).style.display = s);
 }
 
+function logVar(variable) {
+  let varName = (function () {
+    for (const key in window) {
+      if (window[key] === variable) return key;
+    }
+  })();
+  console.log(varName + ": ");
+  console.log(variable);
+}
+
+function defV(v1, v2, vx) {
+  //v1 for input value, v2 for default value, vx for returning v2 if v1 = vx
+  if (isNaN(vx) || !isFinite(vx)) vx = 1;
+  if (Number.isNaN(v1) || !isFinite(v1) || v1 === vx) return v2;
+  else return v1;
+}
+
+function defVAdv(v1, v2, vmin = 0, vmax = 100, ltvmin = false, gtvmax = false) {
+  if (Number.isNaN(v1) || !isFinite(v1)) return v2;
+  if (ltvmin && v1 < vmin) return v2;
+  if (gtvmax && v1 > vmax) return v2;
+
+  return v1;
+}
+
 let A = 1.7976931348623157e308,
   B = 5e-324;
 
@@ -30,71 +55,72 @@ function hideElements() {
 }
 
 var canvas = gId("canvas");
-var ctx = canvas.getContext("2d");
+var ctx = canvas.getContext("2d", {
+  willReadFrequently: true,
+  alpha: false,
+  colorSpace: "srgb",
+  colorType: "float16",
+  desynchronized: false,
+});
+ctx.imageSmoothingEnabled = false;
 var blueNoiseCanvas = gId("blueNoiseCanvas");
 var blueNoiseCtx = blueNoiseCanvas.getContext("2d");
 var video = gId("video");
 var ditherDropdown = gId("dither");
 var ditherDropdownValue = "none";
 var canvasStream = canvas.captureStream();
+var canvasWidth = canvas.width;
+var canvasHeight = canvas.height;
+var isProcessing = false;
 var frm = 0;
 var stT = 0;
 var lsUpdT = 0;
 var lLT = 0;
 var t = false;
 var sqSz;
+
 var {
-  floor,
-  ceil,
-  round,
-  trunc,
-  sign,
   abs,
-  exp,
-  log,
-  log2,
-  log10,
-  pow,
-  random,
-  min,
-  max,
-  sqrt,
-  cbrt,
-  sin,
-  cos,
-  tan,
-  asin,
   acos,
+  acosh,
+  asin,
+  asinh,
   atan,
   atan2,
-  sinh,
-  cosh,
-  tanh,
-  asinh,
-  acosh,
   atanh,
-  E,
-  PI,
-  SQRT2,
-  SQRT1_2,
-  LN2,
+  cbrt,
+  ceil,
+  cos,
+  cosh,
+  exp,
+  floor,
+  fround,
+  log,
+  log10,
+  log1p,
+  log2,
+  max,
+  min,
+  pow,
+  random,
+  round,
+  sign,
+  sin,
+  sinh,
+  sqrt,
+  tan,
+  tanh,
+  trunc,
   LN10,
-  LOG2E,
+  LN2,
   LOG10E,
+  LOG2E,
+  PI,
+  SQRT1_2,
+  SQRT2,
 } = Math;
-var PHI = (1 + sqrt(5)) / 2;
-var _2PI = 2 * PI;
 
-var recorderMimeType;
-var recorderCodec;
-var recorderFrameRate;
-var recorderVideoBitrate;
-var recorderWebmWriterQuality;
-var isRecording = false;
-var isRendering = false;
-
-var canvasWidth = 480;
-var canvasHeight = 270;
+var _2PI = PI * 2;
 
 var rLvls;
 var gLvls;
@@ -103,6 +129,9 @@ var bLvls;
 var rErrLvls;
 var gErrLvls;
 var bErrLvls;
+
+var colorLimitArray = [rLvls, gLvls, bLvls];
+var colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
 
 var useLinear;
 var useSerpentine;
@@ -131,6 +160,9 @@ var blueNoiseInitArray;
 var blueNoiseWidth = 64;
 var blueNoiseHeight = 64;
 
+var frameRate = 30;
+var frameTime = 1000 / frameRate;
+
 var setErrDiffsTarget = () => {};
 var getBufferValue = () => {};
 
@@ -140,15 +172,23 @@ var getIndex = useSerpentine
   ? (x, yOffs, y) => ((y & 1 ? canvasWidth - 1 - x : x) + yOffs) << 2
   : (x, yOffs) => (x + yOffs) << 2;
 
-var frameRate;
-
-ctx.imageSmoothingEnabled = false;
-
 Object.defineProperty(HTMLMediaElement.prototype, "playing", {
   get: function () {
     return !!(this.currentTime > 0 && !this.paused && !this.ended && this.readyState > 2);
   },
 });
+
+var recorderFrameRate = 30;
+var recorderFrameTime = 1000 / recorderFrameRate; // Optimization
+var recorderVideoBitrate = 5000000;
+var recorderMimeType = "video/webm";
+var recorderVideoCodec = "vp9";
+var blobQuality = 0.75;
+var isRecording = false;
+var isRendering = false;
+var pausedRendering = false;
+var resolvePromise = null;
+var streamlinedRenderOption = false;
 
 let logEntries = [];
 
@@ -194,6 +234,61 @@ function printLog(message, logToConsole, color, flag) {
   if (logToConsole === 1) {
     console.log(message);
   }
+}
+
+function createInputOmitter(fn, delay = 250) {
+  let waiting = false;
+
+  return function (...args) {
+    if (waiting) return false;
+
+    waiting = true;
+    setTimeout(() => {
+      fn(...args);
+      waiting = false;
+    }, delay);
+  };
+}
+
+function varSync(input, variable, defaultValue) {
+  let value = Number(input.value);
+
+  slider.value = defVAdv(value, defaultValue, sliderMin, sliderMax, true, true);
+  window[variable] = value;
+}
+
+function sliderInputSync(slider, input, variable, defaultValue, source) {
+  let value;
+  source = source.toLowerCase();
+
+  if (source === "input") {
+    value = Number(input.value);
+    const sliderMin = Number(slider.min);
+    const sliderMax = Number(slider.max);
+
+    if (value >= sliderMin && value <= sliderMax) {
+      slider.value = value;
+    } else {
+      const fixed = defVAdv(value, defaultValue, sliderMin, sliderMax, true, true);
+      slider.value = fixed;
+    }
+  } else if (source === "slider") {
+    value = Number(slider.value);
+    input.value = value;
+  }
+
+  window[variable] = value;
+}
+
+// binSearch moved to binUtils.js
+
+function createBlobFromElement(el) {
+  if (!el) return false;
+
+  const blob = new Blob([el.text], {type: "plain/text"});
+  const url = URL.createObjectURL(blob);
+
+  return url;
 }
 
 function flashChanges(el, fades, time, ...fadeColors) {
@@ -258,31 +353,10 @@ function mirrorIdx(i, n) {
   return n - 1 - j;
 }
 
-let linearLUT = new Float32Array(256);
+const linearLUT = new Float32Array(256);
 for (let i = 0; i < 256; i++) {
-  let c = i / 255;
-  linearLUT[i] = (c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)) * 255;
-}
-
-function defV(v1, v2, vx) {
-  //v1 for input value, v2 for default value, vx for returning v2 if v1 = vx
-  if (isNaN(vx) || !isFinite(vx)) {
-    vx = 1;
-  }
-  if (Number.isNaN(v1) || !isFinite(v1) || v1 === vx) {
-    printLog("Returned default value of " + v2);
-    return v2;
-  } else {
-    return v1;
-  }
-}
-
-function defVAdv(v1, v2, vmin = 0, vmax = 100, ltvmin = false, gtvmax = false) {
-  if (Number.isNaN(v1) || !isFinite(v1)) return v2;
-  if (ltvmin && v1 < vmin) return v2;
-  if (gtvmax && v1 > vmax) return v2;
-
-  return v1;
+  const c = i / 255;
+  linearLUT[i] = (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4) * 255;
 }
 
 function lengthRecursive(inArray) {
@@ -362,59 +436,6 @@ function findStart_3D(matrix, marker) {
   }
 }
 
-function noiseArray_1D(width, height, start = 0, end = 255) {
-  const sqSz = width * height;
-  const range = end - start;
-  const array = new Int32Array(sqSz);
-
-  for (let i = 0; i < sqSz; i++) {
-    array[i] = start + round(random() * range);
-  }
-
-  return array;
-}
-
-function unravelIndex(index, shape) {
-  const coords = [];
-
-  for (let i = shape.length - 1; i >= 0; i--) {
-    coords[i] = index % shape[i];
-    index = floor(index / shape[i]);
-  }
-
-  return coords;
-}
-
-function varSync(input, variable, defaultValue) {
-  let value = Number(input.value);
-
-  slider.value = defVAdv(value, defaultValue, sliderMin, sliderMax, true, true);
-  window[variable] = value;
-}
-
-function sliderInputSync(slider, input, variable, defaultValue, source) {
-  let value;
-  source = source.toLowerCase();
-
-  if (source === "input") {
-    value = Number(input.value);
-    const sliderMin = Number(slider.min);
-    const sliderMax = Number(slider.max);
-
-    if (value >= sliderMin && value <= sliderMax) {
-      slider.value = value;
-    } else {
-      const fixed = defVAdv(value, defaultValue, sliderMin, sliderMax, true, true);
-      slider.value = fixed;
-    }
-  } else if (source === "slider") {
-    value = Number(slider.value);
-    input.value = value;
-  }
-
-  window[variable] = value;
-}
-
 let bigContainer = document.getElementsByClassName("bigContainer")[0];
 
 if (bigContainer) {
@@ -422,6 +443,22 @@ if (bigContainer) {
     document.body.style.minWidth = bigContainer.offsetWidth + "px";
   });
   observer.observe(bigContainer);
+}
+
+function waitForResolve() {
+  return new Promise((resolve) => {
+    resolvePromise = resolve;
+  });
+}
+
+function waitForEvent(target, eventName) {
+  return new Promise((resolve) => {
+    const handler = () => {
+      target.removeEventListener(eventName, handler);
+      resolve();
+    };
+    target.addEventListener(eventName, handler);
+  });
 }
 
 function disableAll() {
@@ -436,23 +473,10 @@ function disableAll() {
   gId("varErrDiffsInputDisp").classList.add("disabled");
   gId("lvlsDisp").classList.add("disabled");
   gId("errLvlsDisp").classList.add("disabled");
-  gId("linearDisp").classList.add("disabled");
   gId("serpentineDisp").classList.add("disabled");
   gId("bufferDisp").classList.add("disabled");
   gId("mirrorDisp").classList.add("disabled");
 }
-
-gId("useLinear").addEventListener("change", function () {
-  useLinear = gId("useLinear").checked;
-});
-
-gId("useSerpentine").addEventListener("change", function () {
-  useSerpentine = gId("useSerpentine").checked;
-});
-
-gId("useBuffer").addEventListener("change", function () {
-  useBuffer = gId("useBuffer").checked;
-});
 
 gId("dither").addEventListener("change", function () {
   let dropdownValue = gId("dither").value;
@@ -463,7 +487,6 @@ gId("dither").addEventListener("change", function () {
     gId("matrix").classList.remove("disabled");
     gId("matrixThreshDisp").classList.remove("disabled");
     gId("lvlsDisp").classList.remove("disabled");
-    gId("linearDisp").classList.remove("disabled");
     if (gId("matrix").value === "blueNoise") {
       gId("blueNoiseDisp").classList.remove("disabled");
     }
