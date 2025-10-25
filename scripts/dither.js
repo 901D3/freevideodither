@@ -201,7 +201,7 @@ function formatNestedArray(arr, indent = 0) {
 }
 
 gId("dither").addEventListener("change", () => {
-  ditherDropdownValue = gIdV("dither");
+  ditherDropdownValue = gId("dither").value;
   presets();
 });
 gId("matrix").addEventListener("change", presets);
@@ -229,30 +229,13 @@ function toRGBMat(f) {
 function bufferChange(w, h) {
   const sqSz4 = w * h * 4;
   const v = gIdV("buffer");
-  if (v === "Int8Array") {
-    return new Int8Array(sqSz4);
-  }
-  if (v === "Int16Array") {
-    return new Int8Array(sqSz4);
-  }
-  if (v === "Int32Array") {
-    return new Int8Array(sqSz4);
-  }
-  if (v === "Float16Array") {
-    return new Float16Array(sqSz4); //new typed array
-  }
-  if (v === "Float32Array") {
-    return new Float32Array(sqSz4);
-  }
-  if (v === "Float64Array") {
-    return new Float32Array(sqSz4);
-  }
+  if (v === "Int8Array") return new Int8Array(sqSz4);
+  else if (v === "Int16Array") return new Int8Array(sqSz4);
+  else if (v === "Int32Array") return new Int8Array(sqSz4);
+  else if (v === "Float16Array") return new Float16Array(sqSz4); //new typed array
+  else if (v === "Float32Array") return new Float32Array(sqSz4);
+  else if (v === "Float64Array") return new Float32Array(sqSz4);
 }
-
-gId("buffer").addEventListener("change", () => {
-  bufferChange();
-  processFrame();
-});
 
 function parseKernelErrDiffs(matrix, division) {
   const start = findStart_2D(matrix, -1);
@@ -306,13 +289,21 @@ const scaled255 = 1 / 255;
 
 //--------------------------------------------------------------------------------------------------------------------
 
+/**
+ * http://caca.zoy.org/study
+ */
+
+/**
+ * https://en.wikipedia.org/wiki/Ordered_dithering
+ */
+
 function bayer(d) {
   const mY = matrixInputLUT.mY;
   const mX = matrixInputLUT.mX;
-  const colorArray = [rLvls, gLvls, bLvls];
 
   for (let c = 0; c < 3; c++) {
-    const color = colorArray[c];
+    const colorLimit = colorLimitArray[c];
+    const colorLimitScaled = 1 / colorLimit;
 
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
@@ -321,40 +312,55 @@ function bayer(d) {
         const i = (x + yOffs) << 2;
         const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
 
-        d[i + c] = (floor(d[i + c] * scaled255 * color + bVal) / color) * 255;
+        d[i + c] = floor(d[i + c] * scaled255 * colorLimit + bVal) * colorLimitScaled * 255;
       }
     }
   }
 }
 
+/**
+ * Arithmetic dither
+ * By Øyvind Kolås
+ *
+ * https://pippin.gimp.org/a_dither
+ *
+ * Added "v" variable for current pixel value. Can be used with ternary operator for whatever you want
+ */
+
 function arithmetic(d) {
-  const cp = new Function("x", "y", "c", "return " + arithmeticInput + ";");
-  const colorArray = [rLvls, gLvls, bLvls];
+  const cp = new Function("x", "y", "c", "v", "return " + arithmeticInput + ";");
 
   for (let c = 0; c < 3; c++) {
-    const color = colorArray[c];
+    const colorLimit = colorLimitArray[c];
+    const colorLimitScaled = 1 / colorLimit;
+
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
 
       for (let x = 0; x < canvasWidth; x++) {
         const i = (x + yOffs) << 2;
+        const v = d[i + c];
 
-        d[i + c] = (floor(d[i + c] * scaled255 * color + cp(x, y, c)) / color) * 255;
+        d[i + c] = floor(v * scaled255 * colorLimit + cp(x, y, c, v)) * colorLimitScaled * 255;
       }
     }
   }
 }
 
+/**
+ * https://en.wikipedia.org/wiki/Error_diffusion
+ * http://caca.zoy.org/study
+ */
+
 function errDiffs(d) {
   setErrDiffsTarget(d);
   if (useBuffer) errDiffsBuffer.fill(0);
 
-  const colorArray = [rLvls, gLvls, bLvls];
-  const colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
   const errDiffsKernelLength = errDiffsKernel.length;
 
   for (let c = 0; c < 3; c++) {
-    const color = colorArray[c];
+    const colorLimit = colorLimitArray[c];
+    const colorLimitScaled = 1 / colorLimit;
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
@@ -371,7 +377,7 @@ function errDiffs(d) {
         const bSRGB = getBufferValue(i, c);
         const cl = d[i + c];
 
-        const result = (round((cl + bSRGB) * scaled255 * color) / color) * 255;
+        const result = round((cl + bSRGB) * scaled255 * colorLimit) * colorLimitScaled * 255;
         const errStrength = (cl - result + bSRGB) * el;
 
         d[i + c] = result;
@@ -392,15 +398,19 @@ function errDiffs(d) {
   }
 }
 
+/**
+ * Variable Error Diffusion
+ * By Victor Ostromoukhov
+ * https://perso.liris.cnrs.fr/ostrom/publications/pdf/SIGGRAPH01_varcoeffED.pdf
+ */
+
 function varErrDiffs(d) {
   setErrDiffsTarget(d);
   if (useBuffer) errDiffsBuffer.fill(0);
 
-  const colorArray = [rLvls, gLvls, bLvls];
-  const colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
-
   for (let c = 0; c < 3; c++) {
-    const color = colorArray[c];
+    const colorLimit = colorLimitArray[c];
+    const colorLimitScaled = 1 / colorLimit;
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
@@ -419,7 +429,7 @@ function varErrDiffs(d) {
         const coeff = varErrDiffsKernel[cl];
         const varErrDiffsKernelMatrixLength = varErrDiffsKernel[cl].length;
 
-        const result = (round((cl + bSRGB) * scaled255 * color) / color) * 255;
+        const result = round((cl + bSRGB) * scaled255 * colorLimit) * colorLimitScaled * 255;
         const errStrength = (cl - result + bSRGB) * el;
 
         d[i + c] = result;
@@ -439,20 +449,3 @@ function varErrDiffs(d) {
     }
   }
 }
-
-//--------------------------------------------------------------------------------------------------------------------
-
-/**
- * Credits
- *
- * https://en.wikipedia.org/wiki/Error_diffusion
- * https://pippin.gimp.org/a_dither/
- * https://potch.me/demos/playdither
- * https://github.com/robertkist/libdither
- * https://app.dithermark.com
- * https://perso.liris.cnrs.fr/ostrom/publications/pdf/SIGGRAPH01_varcoeffED.pdf
- * https://observablehq.com/@jobleonard/variable-coefficient-dithering
- * http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt
- * http://caca.zoy.org/study
- *
- */
