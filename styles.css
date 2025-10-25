@@ -81,6 +81,24 @@
   border-top-left-radius: 50%;
 }
 
+::-webkit-range-thumb {
+  width: 4px;
+  height: 100%;
+  border-radius: 0px;
+  background: #111;
+  background-color: #ea7010;
+  border: none;
+}
+
+::-moz-range-thumb {
+  width: 4px;
+  height: 100%;
+  border-radius: 0px;
+  background: #111;
+  background-color: #ea7010;
+  border: none;
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -138,7 +156,6 @@ input {
   color: #e0e0e0;
   border: 2px solid #ea7010;
   padding: 2px;
-  border-radius: 2px;
   font-family: Unifont;
   font-size: 16px;
   vertical-align: middle;
@@ -149,18 +166,17 @@ input {
 input:disabled {
   background-color: #333333;
   color: #e0e0e0;
-  border: 2px solid #555555;
+  border: 3px solid #555555;
   cursor: not-allowed;
 }
 
 select {
   background-color: #000;
-  color: #ffffff;
+  color: #e0e0e0;
   border: 2px solid #ea7010;
   padding: 2px;
-  border-radius: 2px;
   font-family: UbuntuR;
-  font-size: 14px;
+  font-size: 15px;
   margin-right: 5px;
   cursor: pointer;
 }
@@ -168,7 +184,7 @@ select {
 select:disabled {
   background-color: #333333;
   color: #e0e0e0;
-  border: 2px solid #555555;
+  border: 3px solid #555555;
   cursor: not-allowed;
 }
 
@@ -176,22 +192,18 @@ textarea {
   background-color: #000;
   color: #e0e0e0;
   border: 2px solid #ea7010;
-  padding: 2px;
-  border-radius: 2px;
+  padding: 4px;
   font-family: Unifont;
   font-size: 16px;
   height: 150px;
-  text-overflow: ellipsis;
 }
 
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  padding: 2px;
-  cursor: e-resize;
   display: inline-block;
   width: 200px;
-  height: 17px;
+  height: 18px;
 }
 
 input[type="range"]:hover {
@@ -200,23 +212,24 @@ input[type="range"]:hover {
 
 input[type="range"]:disabled {
   background-color: #333333;
-  color: #e0e0e0;
-  border: 2px solid #555555;
+  color: #b3b3b3;
+  border: 3px solid #555555;
   cursor: not-allowed;
 }
 
 input[type="checkbox"] {
   display: inline-flex;
   justify-content: center;
-  width: 13px;
-  height: 13px;
+  position: relative;
+  width: 15px;
+  height: 15px;
   cursor: pointer;
 }
 
 input[type="file"] {
   padding: 3px;
   cursor: pointer;
-  border-radius: 2px;
+  width: 400px;
 }
 
 input:hover,
@@ -231,16 +244,15 @@ button {
   color: #e0e0e0;
   border: 2px solid #ea7010;
   padding: 3px;
-  border-radius: 2px;
   font-family: UbuntuBold;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
 }
 
 button[disabled] {
   background-color: #333333;
   color: #e0e0e0;
-  border: 2px solid #555555;
+  border: 3px solid #555555;
   cursor: not-allowed;
 }
 
@@ -278,12 +290,21 @@ canvas {
   white-space: pre-wrap;
 }
 
+hr {
+  width: 100%;
+}
+
 .glowfire {
   background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00);
   background-size: cover;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
+}
+
+select {
+  background-color: #000;
+  color: #fff;
 }
 
 #docs {
@@ -312,7 +333,6 @@ canvas {
   background-color: #e14f00;
   border: 8px solid #1b1b1b;
   padding: 10px;
-  border-radius: 2px;
   max-width: max-content;
 }
 
@@ -321,7 +341,7 @@ a {
 }
 
 span {
-  font-size: 15px;
+  font-size: 16px;
   margin: 0px;
   padding: 0px;
 }
@@ -381,6 +401,42 @@ span {
   margin-right: auto;
   border: 2px solid #ea7010;
   line-height: 0;
+}
+
+.tooltipTextRight {
+  visibility: hidden;
+  background-color: #424242ee;
+  text-align: left;
+  position: absolute;
+  padding: 3px;
+  z-index: 1;
+}
+
+.tooltipTextBottom {
+  visibility: hidden;
+  background-color: #424242ee;
+  text-align: left;
+  position: absolute;
+  padding: 3px;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltipTextRight {
+  visibility: visible;
+  margin-top: auto;
+  margin-bottom: auto;
+  width: fit-content;
+  height: fit-content;
+  left: 100%;
+}
+
+.tooltip:hover .tooltipTextBottom {
+  visibility: visible;
+  margin-top: auto;
+  margin-bottom: auto;
+  width: fit-content;
+  height: fit-content;
+  bottom: 100%;
 }
 
 .firehr {
@@ -494,13 +550,13 @@ span {
   flex-direction: row;
   width: fit-content;
   height: fit-content;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .settings_checkbox-label input[type="checkbox"] {
   margin-top: auto;
-  margin-left: 0px;
+  margin-left: auto;
   margin-right: auto;
   margin-bottom: auto;
 }
