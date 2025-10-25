@@ -6,20 +6,23 @@ var locales = {
 
   upload: "Upload",
   paste_link: "Paste link",
-  recorder: "Recorder",
 
+  recorder_renderer: "Recorder/Renderer",
   mime_type: "MIME type",
   codec: "Codec",
-  file_name: "File name(ext is auto)",
+  file_name: "File name",
   frame_rate: "Frame rate",
+  frame_rate_cap: "Frame rate cap",
   bitrate: "Bitrate",
 
   true: "True",
   false: "False",
   null: "Null",
 
-  webp_quality: "WebP quality",
+  blob_quality: "Blob quality",
   enable_file_writer: "Enable file writer",
+  max_concurrent_encodes: "Max concurrent encodes",
+  start_position: "Start position",
 
   start: "Start",
   stop: "Stop",
@@ -92,7 +95,7 @@ var locales = {
   Float32Array: "32 Bits Float",
   Float64Array: "64 Bits Float",
 
-  telemetry: "Telemetry(drop fps)",
+  telemetry: "Show telemetry(drop fps)",
   //: "",
   //: "",
   //: "",
