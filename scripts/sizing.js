@@ -16,7 +16,7 @@ function changeCanvasSize() {
       canvasWidth = canvas.width;
       canvasHeight = canvas.height;
     } else {
-      alert("width and height cannot be blank or negative.");
+      throw new Error("Width and height cannot be blank or negative.");
     }
   }
   if (video.paused || video.ended) {
@@ -26,9 +26,11 @@ function changeCanvasSize() {
       canvasWidth = canvas.width;
       canvasHeight = canvas.height;
     } else {
-      alert("width and height cannot be blank or negative.");
+      throw new Error("Width and height cannot be blank or negative.");
     }
   }
+
+  buffer = bufferChange(width, height);
 }
 
 function fullscreenCanvas() {
