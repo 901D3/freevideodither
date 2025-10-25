@@ -27,25 +27,35 @@
           class="height-fit-content"
           title=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv"
           accept=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv" />
-        <span class="font-weight-bold" style="font-size: 20px" data-text="$paste_link"></span>
-        <input type="text" id="linkUrl" />
-        <button onclick="updateAudioSrc()" data-text="$update"></button>
+        <input type="text" id="linkUrl" placeholder="Video link(must point to a video file)" />
+        <button onclick="video.src = gId('linkUrl').value;" data-text="$update"></button>
       </div>
       <div class="display-flex top-bottom-flow width-fit-content" style="gap: 12px">
-        <span class="font-weight-bold" style="font-size: 20px" data-text="$recorder"></span>
+        <span class="font-weight-bold" style="font-size: 20px" data-text="$recorder_renderer"></span>
+        <div class="settings_checkbox-label">
+          <input
+            type="checkbox"
+            id="streamlinedRenderOption"
+            onchange="streamlinedRenderOption = document.getElementById('streamlinedRenderOption').checked" />
+          <span>Streamlined</span>
+        </div>
         <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
           <button id="startRecording" class="sqrButton" type="button">
-            <div class="horizontal-align-center vertical-align-center-margin record" title="Start recording"></div>
+            <div class="horizontal-align-center vertical-align-center-margin record"></div>
           </button>
-          <button id="stopRecording" class="sqrButton" type="button" title="Stop recording" disabled="">
+          <button id="stopRecording" class="sqrButton" type="button" disabled="">
             <div class="horizontal-align-center vertical-align-center-margin stopRecord"></div>
           </button>
-          <button id="startRendering" type="button" class="sqrButton" title="Start rendering">
+          <!--<span class="vertical-align-center-margin">[F1] [SHIFT + F1]</span>-->
+          <button id="startRendering" type="button" class="sqrButton">
             <div>|-></div>
+          </button>
+          <button id="stopRendering" class="sqrButton" type="button" disabled="">
+            <div>stop render-ing</div>
           </button>
         </div>
         <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
-          <button id="pauseRecording" class="sqrButton" disabled="" type="button" title="Pause recording">
+          <button id="pauseRecording" class="sqrButton" disabled="" type="button">
             <div
               class="horizontal-align-center width-fit-content height-fit-content display-flex left-right-flow"
               style="gap: 6px">
@@ -53,12 +63,27 @@
               <div class="vertical-align-center-margin" style="width: 5px; height: 16px; background-color: #fff"></div>
             </div>
           </button>
-          <button id="resumeRecording" class="sqrButton" type="button" title="Resume recording" disabled="">
+          <button id="resumeRecording" class="sqrButton" type="button" disabled="">
             <div>resume</div>
           </button>
-          <button id="stopRendering" class="sqrButton" type="button" title="Stop rendering" disabled="">
-            <div>stop render-ing</div>
+          <button id="pauseRendering" class="sqrButton" disabled="" type="button">
+            <div
+              class="horizontal-align-center width-fit-content height-fit-content display-flex left-right-flow"
+              style="gap: 6px">
+              <div class="vertical-align-center-margin" style="width: 5px; height: 16px; background-color: #f70"></div>
+              <div class="vertical-align-center-margin" style="width: 5px; height: 16px; background-color: #f70"></div>
+            </div>
           </button>
+          <button id="resumeRendering" class="sqrButton" type="button" disabled="">
+            <div>resume</div>
+          </button>
+          <!--<span class="vertical-align-center-margin">[F4]</span>-->
+        </div>
+      </div>
+      <div class="settings_container">
+        <div class="settings_label-input_long">
+          <span data-text="$start_position"></span>
+          <input id="rendererStartPosition" value="" placeholder="In seconds" />
         </div>
       </div>
       <div class="settings_container">
@@ -79,29 +104,39 @@
             max="120"
             step="0.00000000001"
             title="MediaRecorder frame rate" />
-          <input type="number" id="recorderFrameRateInput" placeholder="30" value="30" />
+          <input type="number" id="recorderFrameRateInput" value="30" />
         </div>
         <div class="settings_label-slider-input">
           <span data-text="$bitrate"></span>
-          <input type="range" id="recorderVideoBitrateRange" min="0" max="100000000" step="1" title="MediaRecorder bitrate" />
-          <input type="number" id="recorderVideoBitrateInput" placeholder="2000000" value="2000000" />
+          <input type="range" id="recorderVideoBitrateRange" min="0" max="100000000" step="1" />
+          <input type="number" id="recorderVideoBitrateInput" value="20000000" />
         </div>
         <div class="settings_label-input_long">
           <span data-text="$file_name"></span>
-          <input id="recorderFileName" placeholder="" value="" title="MediaRecorder output file name" />
+          <input id="recorderFileName" value="" title="MediaRecorder output file name" />
         </div>
       </div>
       <div class="settings_container">
+        <span>Render specific</span>
         <div class="settings_label-slider-input">
-          <span data-text="$webp_quality"></span>
-          <input type="range" id="recorderWebmWriterQualityRange" min="0" max="1" step="0.00000000001" />
-          <input type="number" id="recorderWebmWriterQualityInput" placeholder="0.90" value="0.90" />
+          <span data-text="$blob_quality"></span>
+          <input type="range" id="blobQualityRange" min="0" max="1" step="0.00000000001" />
+          <input type="number" id="blobQualityInput" value="0.90" />
         </div>
         <div class="settings_label-select">
-          <span data-text="$enable_file_writer"></span>
-          <select id="webmWriterFileWriterSelect">
-            <option value="null" selected="true" data-text="$null"></option>
+          <span data-text="$codec"></span>
+          <select id="renderCodec">
+            <option value="vp8">vp8</option>
+            <option value="vp09">vp09</option>
           </select>
+        </div>
+        <div class="settings_label-slider-input">
+          <span>Buffer size(keyframe interval)</span>
+          <input type="number" id="bufferSizeInput" value="30" />
+        </div>
+        <div class="settings_label-input">
+          <span data-text="$max_concurrent_encodes"></span>
+          <input type="number" id="rendererMaxConcurrentEncodes" value="2" />
         </div>
       </div>
     </div>
@@ -145,7 +180,24 @@
           </div>
           <div id="blueNoiseDisp" class="settings_container disabled">
             <canvas id="blueNoiseCanvas" data-text="$elN_A" style="border: 3px solid #ff0"></canvas>
-            <textarea id="blueNoiseInitArrayInput" placeholder="2D matrix only"></textarea>
+            <textarea id="blueNoiseInitArrayInput" placeholder="Custom initial binary array. 2D array only"></textarea>
+            <div class="display-flex left-right-flow">
+              <textarea
+                type="number"
+                id="blueNoisePhase1Kernel"
+                placeholder="Phase 1 kernel"
+                style="width: 150px; height: 150px"></textarea>
+              <textarea
+                type="number"
+                id="blueNoisePhase2Kernel"
+                placeholder="Phase 2 kernel"
+                style="width: 150px; height: 150px"></textarea>
+              <textarea
+                type="number"
+                id="blueNoisePhase3Kernel"
+                placeholder="Phase 3 kernel"
+                style="width: 150px; height: 150px"></textarea>
+            </div>
             <div class="settings_label-input">
               <span data-text="$width"></span>
               <input type="number" id="blueNoiseWidth" value="64" />
@@ -156,51 +208,27 @@
             </div>
             <div class="settings_label-input">
               <span>PDS radius x</span>
-              <input type="number" id="blueNoisePDSRadiusX" value="7" />
+              <input type="number" id="blueNoisePDSRadiusX" value="8" />
             </div>
             <div class="settings_label-input">
               <span>PDS radius y</span>
-              <input type="number" id="blueNoisePDSRadiusY" value="7" />
+              <input type="number" id="blueNoisePDSRadiusY" value="8" />
             </div>
             <div class="settings_label-input">
               <span>PDS k value</span>
               <input type="number" id="blueNoisePDSKValue" value="30" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 1 sigma start</span>
-              <input type="number" id="blueNoisePhase1SigmaStart" value="6" />
+              <span>Phase 1 sigma</span>
+              <input type="number" id="blueNoisePhase1Sigma" value="6" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 1 sigma end</span>
-              <input type="number" id="blueNoisePhase1SigmaEnd" value="6" />
+              <span>Phase 2 sigma</span>
+              <input type="number" id="blueNoisePhase2Sigma" value="2" />
             </div>
             <div class="settings_label-input">
-              <span>Phase 2 sigma start</span>
-              <input type="number" id="blueNoisePhase2SigmaStart" value="1.5" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 2 sigma end</span>
-              <input type="number" id="blueNoisePhase2SigmaEnd" value="1.5" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 3 sigma start</span>
-              <input type="number" id="blueNoisePhase3SigmaStart" value="1.5" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 3 sigma end</span>
-              <input type="number" id="blueNoisePhase3SigmaEnd" value="1.5" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 1 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase1KernelRadius" value="10000" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 2 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase2KernelRadius" value="10000" />
-            </div>
-            <div class="settings_label-input">
-              <span>Phase 3 kernel radius cap</span>
-              <input type="number" id="blueNoisePhase3KernelRadius" value="10000" />
+              <span>Phase 3 sigma</span>
+              <input type="number" id="blueNoisePhase3Sigma" value="2" />
             </div>
             <div class="settings_label-input">
               <span>Candidate filling ratio</span>
@@ -326,26 +354,26 @@
               <input type="number" id="bLvlsInput" value="2" />
             </div>
           </div>
-          <div id="linearDisp" class="settings_checkbox-label disabled">
+          <div id="linearDisp" class="settings_checkbox-label">
             <input type="checkbox" id="useLinear" title="Linear color space" />
             <span data-text="$linear"></span>
           </div>
           <div class="whitehr"></div>
           <div class="settings_label-slider-input">
-            <span data-text="$frame_rate"></span>
+            <span data-text="$frame_rate_cap"></span>
             <input type="range" id="frameRateRange" min="0" max="120" step="0.00000000001" />
-            <input type="number" id="frameRateInput" placeholder="30" value="30" title="Preview frame rate" />
+            <input type="number" id="frameRateInput" value="30" title="Preview frame rate" />
           </div>
           <div class="whitehr"></div>
           <div class="settings_container">
             <h2>Canvas</h2>
             <div class="settings_label-input">
               <span>Width</span>
-              <input type="number" id="canvasWidth" placeholder="480" value="480" />
+              <input type="number" id="canvasWidth" value="480" />
             </div>
             <div class="settings_label-input">
               <span>Height</span>
-              <input type="number" id="canvasHeight" placeholder="480" value="270" />
+              <input type="number" id="canvasHeight" value="270" />
             </div>
             <button onclick="changeCanvasSize()" data-text="$change_canvas_size"></button>
             <div class="settings_checkbox-label">
@@ -400,15 +428,16 @@
 
   <!--Libraries-->
   <script src="scripts/lib/901D3/binUtils.js"></script>
-  <script src="scripts/lib/901D3/blue-noise.js"></script>
-  <script src="scripts/lib/thenickdude/webm-writer-0.3.0.js"></script>
+  <script src="scripts/lib/901D3/blue-noise-utils.js"></script>
+  <script src="scripts/lib/901D3/blue-noise-float32.js"></script>
+  <script src="scripts/lib/901D3/WebM-muxer.js"></script>
 
   <script src="scripts/locale.js"></script>
   <script src="scripts/generator.js"></script>
   <script src="scripts/sizing.js"></script>
   <script src="scripts/videocontrols.js"></script>
   <script src="scripts/dither.js"></script>
-  <script src="scripts/levels.js"></script>
+  <script src="scripts/misc.js"></script>
   <script src="scripts/process.js"></script>
   <script src="scripts/recorder.js"></script>
   <script>
@@ -430,10 +459,6 @@
         processFrame();
       } else if (event.code === "KeyF" && activeElement !== "input" && activeElement !== "textarea") fullscreenCanvas();
     });
-
-    function updateVideoSrc() {
-      video.src = gId("linkUrl").value;
-    }
 
     gId("canvasRendering").addEventListener("change", function () {
       var currentStyle = canvas.getAttribute("style");
