@@ -9,18 +9,18 @@ const d = {
 function process() {
   const t0 = performance.now();
   processFrame();
-  if (video.paused || video.ended) return;
   if (t) frameCounter();
-  setTimeout(process, max(0, 1000 / frameRate - (performance.now() - t0)));
+  if (video.paused || video.ended || isRendering) return;
+  setTimeout(process, max(0, frameTime - (performance.now() - t0)));
 }
 
 async function render() {
   if (isRecording == true) {
-    printLog("Stop recording to start rendering", null, "yellow", "yellow");
+    printLog("Stop recording to start rendering");
     return false;
   }
   if (isRendering == true) {
-    printLog("Rendering process has already started", null, "yellow", "yellow");
+    printLog("Rendering process has already started");
     return false;
   }
   isRendering = true;
@@ -30,117 +30,281 @@ async function render() {
   resumeRec.setAttribute("disabled", "");
 
   printLog("Starting rendering");
-  recorderWebmWriterSettings = new WebMWriter({
-    quality: recorderWebmWriterQuality,
-    fileWriter: gId("webmWriterFileWriterSelect").value,
 
+  const muxer = new WebMMuxer({
+    codec: "vp8", // Has to be VP8
+    width: canvasWidth,
+    height: canvasHeight,
     frameRate: recorderFrameRate,
-    transparent: false, //enabling transparent is kinda useless
+    bufferSize: Number(gId("bufferSizeInput").value),
   });
+  const chunks = [];
 
+  const startPositionSeconds = Number(gId("rendererStartPosition").value ?? 0);
+  const startFrame = floor(startPositionSeconds * recorderFrameRate);
   const totalFrames = ceil(video.duration * recorderFrameRate);
   printLog("Total frames:" + totalFrames);
-  let frameIndex = 0;
-  let blob;
-  video.currentTime = 0;
   video.pause();
+  video.currentTime = startPositionSeconds;
   video.muted = true;
   video.loop = false;
-  video.controls = false;
-  video.classList.add("offscreen_hide");
 
-  function seek(time) {
-    return new Promise((resolve) => {
-      video.currentTime = time;
-      video.addEventListener("seeked", function handler() {
-        video.removeEventListener("seeked", handler);
-        resolve();
-      });
-    });
+  let maxConcurrentEncodes = Number(gId("rendererMaxConcurrentEncodes").value);
+  if (!Number.isInteger(maxConcurrentEncodes)) {
+    printLog("Max concurrent encodes default to 2");
+    maxConcurrentEncodes = 2;
   }
 
-  function canvasToWebPBlob(canvas, quality) {
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/webp", quality);
-    });
-  }
+  const encodeQueue = new Set();
 
-  const t0 = performance.now();
-  while (frameIndex < totalFrames && !video.ended) {
+  performance.mark("renderStart");
+
+  for (let frameIndex = startFrame; frameIndex < totalFrames && !video.ended; frameIndex++) {
     const frameTime = frameIndex / recorderFrameRate;
-    let t1 = performance.now();
-    await seek(frameTime);
-    t1 = performance.now() - t1;
 
-    let t3 = performance.now();
-    blob = await canvasToWebPBlob(canvas, recorderWebmWriterQuality);
-    t3 = performance.now() - t3;
+    performance.mark("videoDrawStart");
+    await new Promise((r) => {
+      video.currentTime = frameTime;
+      video.addEventListener("seeked", r, {once: true});
+    });
+    processFrame();
+    performance.mark("videoDrawEnd");
 
-    let t4 = performance.now();
-    recorderWebmWriterSettings.addFrame(new Uint8Array(await blob.arrayBuffer()), canvasWidth, canvasHeight);
-    t4 = performance.now() - t4;
+    const encodePromise = (async () => {
+      performance.mark("toBlobStart");
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", blobQuality));
+      performance.mark("toBlobEnd");
 
-    printLog(
-      "Dither: " +
-        t1 +
-        "ms\n" +
-        "Canvas to WebP: " +
-        t3 +
-        "ms\n" +
-        "WebM Writer addFrame: " +
-        t4 +
-        "ms\n" +
-        "Total: " +
-        (t1 + t3 + t4) +
-        "ms\n" +
-        "Rendered: " +
-        frameIndex +
-        "/" +
-        (frameIndex / totalFrames) * 100 +
-        "%",
-      1
-    );
+      const buffer = new Uint8Array(await blob.arrayBuffer());
+      muxer.addFrameFromBlob(buffer, chunks);
+    })();
+
+    encodeQueue.add(encodePromise);
+    encodePromise.finally(() => encodeQueue.delete(encodePromise));
+
+    if (encodeQueue.size >= maxConcurrentEncodes) await Promise.race(encodeQueue);
 
     if (isRendering == false) {
       printLog("Rendering stopped manually");
+      isRendering = false;
+      video.muted = false;
+      video.loop = true;
 
       onComplete();
       return true;
     }
-    frameIndex++;
+
+    if (t) {
+      performance.measure("videoDraw", "videoDrawStart", "videoDrawEnd");
+      videoDraw = performance.getEntriesByName("videoDraw").at(-1)?.duration ?? 0;
+
+      performance.measure("toBlob", "toBlobStart", "toBlobEnd");
+      const toBlob = performance.getEntriesByName("toBlob").at(-1)?.duration ?? 0;
+
+      printLog("Video draw: " + videoDraw + "ms\n" + "toBlob: " + toBlob + "ms\n");
+
+      performance.clearMarks("videoDrawStart");
+      performance.clearMarks("videoDrawEnd");
+      performance.clearMarks("toBlobStart");
+      performance.clearMarks("toBlobEnd");
+      performance.clearMeasures("videoDraw");
+      performance.clearMeasures("toBlob");
+    }
+
+    if (pausedRendering) await waitForResolve();
+    // Yields so the UI stays responsive
+    await new Promise((r) => setTimeout(r, 0));
   }
-  const totalTime = performance.now() - t0;
+
+  performance.mark("renderEnd");
+  performance.measure("render", "renderStart", "renderEnd");
+  const renderTime = performance.getEntriesByName("render").at(-1)?.duration ?? 0;
   printLog(
-    "Elapsed: " + totalTime + "ms\n" + "Rendering takes " + (totalTime / (video.duration * 1000)) * 100 + "% of video duration"
+    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
   );
+
   onComplete();
 
   async function onComplete() {
+    await Promise.all(encodeQueue);
     isRendering = false;
     video.muted = false;
     video.loop = true;
     video.controls = true;
-    video.classList.remove("offscreen_hide");
 
-    await recorderWebmWriterSettings.complete().then((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "video.webm";
-      a.click();
-      URL.revokeObjectURL(url);
-      printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
+    const blob = muxer.finalize(chunks);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "video.webm";
+    a.click();
+    URL.revokeObjectURL(url);
+    printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
 
-      isRendering = false;
-      startRend.removeAttribute("disabled", "");
-      stopRend.setAttribute("disabled", "");
+    isRendering = false;
+    startRend.removeAttribute("disabled", "");
+    stopRend.setAttribute("disabled", "");
 
-      startRec.removeAttribute("disabled");
-      stopRec.setAttribute("disabled", "");
-      pauseRec.setAttribute("disabled", "");
-      resumeRec.setAttribute("disabled", "");
-      return true;
+    startRec.removeAttribute("disabled");
+    stopRec.setAttribute("disabled", "");
+    pauseRec.setAttribute("disabled", "");
+    resumeRec.setAttribute("disabled", "");
+    return true;
+  }
+}
+
+async function streamlinedRender() {
+  if (isRecording == true) {
+    printLog("Stop recording to start render");
+    return false;
+  }
+  if (isRendering == true) {
+    printLog("Rendering process has already started");
+    return false;
+  }
+  isRendering = true;
+
+  printLog("Starting rendering");
+
+  const bufferSize = Number(gId("bufferSizeInput").value);
+  const muxer = new WebMMuxer({
+    codec: gId("renderCodec").value === "vp09" ? "vp9" : gId("renderCodec").value,
+    width: canvasWidth,
+    height: canvasHeight,
+    frameRate: recorderFrameRate,
+    bufferSize: bufferSize,
+    profile: 0,
+    level: 0xff,
+    bitDepth: 8,
+    chromaSubsampling: 1,
+    colorRange: 1,
+    colorPrimaries: 1,
+    transferCharacteristics: 1,
+  });
+  const chunks = [];
+
+  const startPositionSeconds = Number(gId("rendererStartPosition").value ?? 0);
+  const startFrame = floor(startPositionSeconds * recorderFrameRate);
+  const totalFrames = ceil(video.duration * recorderFrameRate);
+  printLog("Total frames:" + totalFrames);
+  video.pause();
+  video.currentTime = startPositionSeconds;
+  video.muted = true;
+  video.loop = false;
+  video.controls = false;
+  canvas.style.hidden = true;
+
+  performance.mark("WebCodecsSetupStart");
+  const WCodecEncoder = new VideoEncoder({
+    output: (chunk) => {
+      const buffer = new Uint8Array(chunk.byteLength);
+      chunk.copyTo(buffer);
+      muxer.addFramePreEncoded(buffer, chunks);
+    },
+    error: (err) => console.error(err),
+  });
+
+  WCodecEncoder.configure({
+    codec: gId("renderCodec").value === "vp09" ? "vp09.00.10.8.01" : gId("renderCodec").value,
+    width: canvasWidth,
+    height: canvasHeight,
+    framerate: recorderFrameRate,
+    bitrate: recorderVideoBitrate,
+  });
+  performance.mark("WebCodecsSetupEnd");
+  performance.measure("WebCodecsSetup", "WebCodecsSetupStart", "WebCodecsSetupEnd");
+  printLog("WebCodecs setup: " + (performance.getEntriesByName("WebCodecsSetup").at(-1)?.duration ?? 0) + "ms");
+
+  performance.mark("renderStart");
+
+  for (let frameIndex = startFrame; frameIndex < totalFrames && !video.ended; frameIndex++) {
+    const frameTime = frameIndex / recorderFrameRate;
+
+    performance.mark("videoDrawStart");
+    await new Promise((r) => {
+      video.currentTime = frameTime;
+      video.addEventListener("seeked", r, {once: true});
     });
+    processFrame();
+    performance.mark("videoDrawEnd");
+
+    performance.mark("toFrameStart");
+    const videoFrame = new VideoFrame(canvas, {
+      timestamp: frameTime * 1000000,
+    });
+    performance.mark("toFrameEnd");
+
+    WCodecEncoder.encode(videoFrame, {
+      keyframe: frameIndex >= bufferSize ? true : false,
+    });
+    videoFrame.close();
+
+    if (isRendering == false) {
+      printLog("Rendering stopped manually");
+      isRendering = false;
+      video.muted = false;
+      video.loop = true;
+
+      onComplete();
+      return true;
+    }
+
+    if (t) {
+      performance.measure("videoDraw", "videoDrawStart", "videoDrawEnd");
+      videoDraw = performance.getEntriesByName("videoDraw").at(-1)?.duration ?? 0;
+
+      performance.measure("toFrame", "toFrameStart", "toFrameEnd");
+      const toFrame = performance.getEntriesByName("toFrame").at(-1)?.duration ?? 0;
+
+      printLog("Video draw: " + videoDraw + "ms\n" + "toFrame: " + toFrame + "ms\n");
+
+      performance.clearMarks("videoDrawStart");
+      performance.clearMarks("videoDrawEnd");
+      performance.clearMarks("toFrameStart");
+      performance.clearMarks("toFrameEnd");
+      performance.clearMeasures("videoDraw");
+      performance.clearMeasures("toFrame");
+    }
+
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  performance.mark("renderEnd");
+  performance.measure("render", "renderStart", "renderEnd");
+
+  const renderTime = performance.getEntriesByName("render").at(-1)?.duration ?? 0;
+  printLog(
+    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
+  );
+
+  onComplete();
+
+  async function onComplete() {
+    await WCodecEncoder.flush();
+    WCodecEncoder.close();
+
+    isRendering = false;
+    video.muted = false;
+    video.loop = true;
+    video.controls = true;
+
+    const blob = muxer.finalize(chunks);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "video.webm";
+    a.click();
+    URL.revokeObjectURL(url);
+    printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
+
+    isRendering = false;
+    startRend.removeAttribute("disabled", "");
+    stopRend.setAttribute("disabled", "");
+
+    startRec.removeAttribute("disabled");
+    stopRec.setAttribute("disabled", "");
+    pauseRec.setAttribute("disabled", "");
+    resumeRec.setAttribute("disabled", "");
+    return true;
   }
 }
 
@@ -170,8 +334,8 @@ function frameCounter() {
   }
 }
 
-gId("showTelemetry").addEventListener("change", function (e) {
-  t = e.target.checked;
+gId("showTelemetry").addEventListener("change", function () {
+  t = gId("showTelemetry").checked;
 });
 
 video.addEventListener("play", function () {
