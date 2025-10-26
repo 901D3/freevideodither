@@ -7,13 +7,24 @@
  * https://github.com/901D3/blue-noise.js
  *
  * Copyright (c) 901D3
- * This project/code is licensed with GPLv3 license
+ * This code is licensed with GPLv3 license
  */
 
 "use strict";
 
 var blueNoiseUtils = (function () {
   //Helpers
+
+  /**
+   *
+   * @param {*} width
+   * @param {*} height
+   * @param {*} radiusX
+   * @param {*} radiusY
+   * @param {*} k
+   * @returns
+   */
+
   function _poissonDiskSampling(width, height, radiusX, radiusY, k = 30) {
     const points = [];
     const active = [];
@@ -75,7 +86,7 @@ var blueNoiseUtils = (function () {
     const sqSz = width * height;
     const array = new Uint8Array(sqSz);
     for (let i = 0; i < sqSz; i++) {
-      array[i] = Math.random() > threshold ? 1 : 0;
+      array[i] = Math.random() < threshold ? 0 : 1;
     }
 
     return array;
@@ -84,13 +95,13 @@ var blueNoiseUtils = (function () {
   /**
    * Blurring with wrap around
    *
-   * @param {array} inArray - Input array
-   * @param {int} width
-   * @param {int} height
-   * @param {array} kernel - Input kernel
-   * @param {array} blurred - Modify in place
-   * @param {array} kernelWidth
-   * @param {array} kernelHeight
+   * @param {*} inArray
+   * @param {*} width
+   * @param {*} height
+   * @param {*} kernel
+   * @param {*} blurred
+   * @param {*} kernelWidth
+   * @param {*} kernelHeight
    */
 
   function _blurWrapInPlace(inArray, width, height, kernel, blurred, kernelWidth, kernelHeight) {
@@ -137,12 +148,14 @@ var blueNoiseUtils = (function () {
   /**
    * Blur delta updater
    *
-   * @param {int} width
-   * @param {int} height
-   * @param {int} idx - The index of the blurred array that is going to be added by <amount>
-   * @param {float} amount
-   * @param {binary[]} blurredArray Blurred array input, also known as energy array
-   * @param {array} kernel - Input kernel
+   * @param {*} width
+   * @param {*} height
+   * @param {*} idx
+   * @param {*} amount
+   * @param {*} blurred
+   * @param {*} kernel
+   * @param {*} kernelWidth
+   * @param {*} kernelHeight
    */
 
   function _deltaBlurUpdateInPlace(width, height, idx, amount, blurred, kernel, kernelWidth, kernelHeight) {
@@ -165,6 +178,12 @@ var blueNoiseUtils = (function () {
   }
 
   const gaussianKernelLUTArrayLiteral = new Map();
+
+  /**
+   *
+   * @param {*} sigma
+   * @returns
+   */
 
   function _getGaussianKernelLUTArrayLiteral(sigma) {
     const radius = Math.ceil(3 * sigma);
@@ -190,6 +209,15 @@ var blueNoiseUtils = (function () {
 
     return gaussianKernelLUTArrayLiteral.get(sigma);
   }
+
+  /**
+   *
+   * @param {*} width
+   * @param {*} height
+   * @param {*} equation
+   * @param {*} kernel
+   * @param {*} normalize
+   */
 
   function _generateWindowedKernelInPlace(width, height, equation, kernel, normalize) {
     if ((width & 1) === 0) throw new Error("Odd width required");
@@ -221,6 +249,15 @@ var blueNoiseUtils = (function () {
       for (let i = 0; i < sqSz; i++) kernel[i] /= maxValue;
     }
   }
+
+  /**
+   *
+   * @param {*} width
+   * @param {*} height
+   * @param {*} equation
+   * @param {*} normalize
+   * @returns
+   */
 
   function _generateWindowedKernelArrayLiteral(width, height, equation, normalize) {
     if ((width & 1) === 0) throw new Error("Odd width required");
@@ -274,5 +311,3 @@ var blueNoiseUtils = (function () {
     generateWindowedKernelArrayLiteral: _generateWindowedKernelArrayLiteral,
   };
 })();
-
-const kernel = new Float32Array(81).fill(1);
