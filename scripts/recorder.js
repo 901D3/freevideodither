@@ -1,15 +1,15 @@
-var chunks = [];
+let chunks = [];
 
-var mediaRecorder = new MediaRecorder(canvasStream);
+let mediaRecorder = new MediaRecorder(canvasStream);
 
-var startRec = gId("startRecording");
-var stopRec = gId("stopRecording");
-var pauseRec = gId("pauseRecording");
-var resumeRec = gId("resumeRecording");
-var startRend = gId("startRendering");
-var stopRend = gId("stopRendering");
-var pauseRend = gId("pauseRendering");
-var resumeRend = gId("resumeRendering");
+let startRec = gId("startRecording");
+let stopRec = gId("stopRecording");
+let pauseRec = gId("pauseRecording");
+let resumeRec = gId("resumeRecording");
+let startRend = gId("startRendering");
+let stopRend = gId("stopRendering");
+let pauseRend = gId("pauseRendering");
+let resumeRend = gId("resumeRendering");
 
 function startRecording() {
   mediaRecorder = new MediaRecorder(canvasStream, {
@@ -69,6 +69,7 @@ function startRecording() {
     downloadLink.download = (gId("recorderFileName").value || "video") + "." + recorderVideoFileExt;
     downloadLink.href = recordedVideoUrl;
     downloadLink.click();
+    URL.revokeObjectURL(recordedVideoUrl);
     printLog("Download link: <a href='" + downloadLink + "' target='_blank'>" + downloadLink + "</a>");
   };
 
@@ -80,9 +81,6 @@ function startRecording() {
   printLog("isTypeSupported: " + isTypeSupportedMimeType);
 
   chunks = [];
-  mediaRecorder.start();
-  printLog("MediaRecorder started");
-  isRecording = true;
 
   startRec.setAttribute("disabled", "");
   stopRec.removeAttribute("disabled");
@@ -96,13 +94,13 @@ function startRecording() {
   gId("recorderFrameRateInput").setAttribute("disabled", "");
   gId("recorderVideoBitrateRange").setAttribute("disabled", "");
   gId("recorderVideoBitrateInput").setAttribute("disabled", "");
+
+  mediaRecorder.start();
+  printLog("MediaRecorder started");
+  isRecording = true;
 }
 
 function stopRecording() {
-  mediaRecorder.stop();
-  printLog("MediaRecorder stopped");
-  isRecording = false;
-
   startRec.removeAttribute("disabled");
   stopRec.setAttribute("disabled", "");
   pauseRec.setAttribute("disabled", "");
@@ -115,43 +113,47 @@ function stopRecording() {
   gId("recorderFrameRateInput").removeAttribute("disabled", "");
   gId("recorderVideoBitrateRange").removeAttribute("disabled", "");
   gId("recorderVideoBitrateInput").removeAttribute("disabled", "");
+
+  mediaRecorder.stop();
+  printLog("MediaRecorder stopped");
+  isRecording = false;
 }
 
 function pauseRecording() {
-  mediaRecorder.pause();
-
   pauseRec.setAttribute("disabled", "");
   resumeRec.removeAttribute("disabled");
+
+  mediaRecorder.pause();
 }
 
 function resumeRecording() {
-  mediaRecorder.resume();
-
   pauseRec.removeAttribute("disabled");
   resumeRec.setAttribute("disabled", "");
+
+  mediaRecorder.resume();
 }
 
 function startRendering() {
-  if (streamlinedRenderOption) streamlinedRender();
-  else render();
-
   startRend.setAttribute("disabled", "");
   stopRend.removeAttribute("disabled", "");
-  if (!streamlinedRenderOption) pauseRend.removeAttribute("disabled", "");
+  if (!webCodecsRenderOption) pauseRend.removeAttribute("disabled", "");
 
   startRec.setAttribute("disabled", "");
+
+  if (webCodecsRenderOption) webCodecsRender();
+  else render();
 }
 
 function stopRendering() {
-  isRendering = false;
-  pausedRendering = false;
-
   startRend.removeAttribute("disabled", "");
   stopRend.setAttribute("disabled", "");
   pauseRend.setAttribute("disabled", "");
   resumeRend.setAttribute("disabled", "");
 
   startRec.removeAttribute("disabled");
+
+  isRendering = false;
+  pausedRendering = false;
 }
 
 function pauseRendering() {
