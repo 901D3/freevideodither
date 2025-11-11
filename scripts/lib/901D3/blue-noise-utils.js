@@ -1,9 +1,8 @@
 /**
  * Free JS implementation of Void and Cluster method by Robert Ulichney and other methods
- * Ultra optimized while keeping it readable
- * The result is high quality blue noise but somehow very fast
  * Remember to link this script
  *
+ * v0.2.21
  * https://github.com/901D3/blue-noise.js
  *
  * Copyright (c) 901D3
@@ -12,85 +11,22 @@
 
 "use strict";
 
-var blueNoiseUtils = (function () {
+const blueNoiseUtils = (function () {
+  let _gaussianSigmaRadiusMultiplier = 4;
   //Helpers
 
   /**
    *
-   * @param {*} width
-   * @param {*} height
-   * @param {*} radiusX
-   * @param {*} radiusY
-   * @param {*} k
-   * @returns
+   * @param {*} inArray
    */
 
-  function _poissonDiskSampling(width, height, radiusX, radiusY, k = 30) {
-    const points = [];
-    const active = [];
-    const twoPI = 2 * Math.PI;
-    const binArray = new Uint8Array(width * height);
+  const _shuffle = (inArray) => {
+    for (let length = inArray.length, i = length - 1; i >= 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
 
-    function isValid(p) {
-      const pointLength = points.length;
-      for (let i = 0; i < pointLength; i++) {
-        const {x: pointX, y: pointY} = points[i];
-        const {x, y} = p;
-        let dx = Math.abs(pointX - x);
-        let dy = Math.abs(pointY - y);
-        dx = Math.min(dx, width - dx);
-        dy = Math.min(dy, height - dy);
-        if (dx < radiusX && dy < radiusY) return false;
-      }
-      return true;
+      [inArray[i], inArray[j]] = [inArray[j], inArray[i]];
     }
-
-    const initial = {x: Math.random() * width, y: Math.random() * height};
-    points.push(initial);
-    active.push(initial);
-
-    while (active.length > 0) {
-      const idx = Math.floor(Math.random() * active.length);
-      const {x: centerX, y: centerY} = active[idx];
-      let found = false;
-
-      for (let i = 0; i < k; i++) {
-        const angle = Math.random() * twoPI;
-        const rX = Math.cos(angle) * radiusX * (1 + Math.random());
-        const rY = Math.sin(angle) * radiusY * (1 + Math.random());
-        const candidate = {
-          x: centerX + rX,
-          y: centerY + rY,
-        };
-
-        if (candidate.x >= 0 && candidate.x < width && candidate.y >= 0 && candidate.y < height && isValid(candidate)) {
-          points.push(candidate);
-          active.push(candidate);
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) active.splice(idx, 1);
-    }
-
-    const pointsLength = points.length;
-    for (let i = 0; i < pointsLength; i++) {
-      binArray[Math.round(points[i].y) * width + Math.round(points[i].x)] = 1;
-    }
-
-    return binArray;
-  }
-
-  function _noiseArray(width, height, threshold) {
-    const sqSz = width * height;
-    const array = new Uint8Array(sqSz);
-    for (let i = 0; i < sqSz; i++) {
-      array[i] = Math.random() < threshold ? 0 : 1;
-    }
-
-    return array;
-  }
+  };
 
   /**
    * Blurring with wrap around
@@ -98,117 +34,135 @@ var blueNoiseUtils = (function () {
    * @param {*} inArray
    * @param {*} width
    * @param {*} height
-   * @param {*} kernel
    * @param {*} blurred
-   * @param {*} kernelWidth
-   * @param {*} kernelHeight
+   * @param {*} kernel
+   * @param {*} radiusWidth
+   * @param {*} radiusHeight
    */
 
-  function _blurWrapInPlace(inArray, width, height, kernel, blurred, kernelWidth, kernelHeight) {
-    // divide by 2 + flooring
-    const kHalfW = kernelWidth >> 1;
-    const kHalfH = kernelHeight >> 1;
-
-    const wMask = width - 1;
-    const hMask = height - 1;
-
-    const isPowerOf2W = (width & wMask) === 0;
-    const isPowerOf2H = (height & hMask) === 0;
+  const _blurWrapInPlace = (inArray, width, height, blurred, kernel, radiusWidth, radiusHeight) => {
+    const kernelHalfWidth = radiusWidth >> 1;
+    const kernelHalfHeight = radiusHeight >> 1;
 
     for (let y = 0; y < height; y++) {
       const yOffs = y * width;
+      const ykernelHalfHeight = y - kernelHalfHeight;
 
       for (let x = 0; x < width; x++) {
+        const xkernelHalfWidth = x - kernelHalfWidth;
         let sum = 0;
 
-        for (let ky = 0; ky < kernelHeight; ky++) {
-          let iy = y + ky - kHalfH;
-          if (isPowerOf2H) iy &= hMask;
-          else if (iy < 0) iy += height;
-          else if (iy >= height) iy -= height;
+        for (let kernelY = 0; kernelY < radiusHeight; kernelY++) {
+          let inArrayY = (kernelY + ykernelHalfHeight) % height;
+          if (inArrayY < 0) inArrayY += height;
 
-          const iyOffs = iy * width;
-          const kernelYOffs = ky * kernelWidth;
+          const inArrayYOffs = inArrayY * width;
+          const kernelYOffs = kernelY * radiusWidth;
 
-          for (let kx = 0; kx < kernelWidth; kx++) {
-            let ix = x + kx - kHalfW;
-            if (isPowerOf2W) ix &= wMask;
-            else if (ix < 0) ix += width;
-            else if (ix >= width) ix -= width;
+          for (let kernelX = 0; kernelX < radiusWidth; kernelX++) {
+            let inArrayX = (kernelX + xkernelHalfWidth) % width;
+            if (inArrayX < 0) inArrayX += width;
 
-            sum += inArray[iyOffs + ix] * kernel[kernelYOffs + kx];
+            sum += inArray[inArrayYOffs + inArrayX] * kernel[kernelYOffs + kernelX];
           }
         }
 
         blurred[yOffs + x] = sum;
       }
     }
-  }
+  };
 
   /**
    * Blur delta updater
-   *
-   * @param {*} width
-   * @param {*} height
-   * @param {*} idx
-   * @param {*} amount
-   * @param {*} blurred
-   * @param {*} kernel
-   * @param {*} kernelWidth
-   * @param {*} kernelHeight
+   * 
+   * @param {*} width 
+   * @param {*} height 
+   * @param {*} idx 
+   * @param {*} amount 
+   * @param {*} blurred 
+   * @param {*} kernel 
+   * @param {*} radiusWidth 
+   * @param {*} radiusHeight 
    */
 
-  function _deltaBlurUpdateInPlace(width, height, idx, amount, blurred, kernel, kernelWidth, kernelHeight) {
-    const iy = Math.floor(idx / width);
-    const ix = idx % width;
-    const kHalfW = -(kernelWidth >> 1) + width;
-    const kHalfH = -(kernelHeight >> 1) + height;
+  const _deltaBlurUpdateInPlace = (width, height, idx, amount, blurred, kernel, radiusWidth, radiusHeight) => {
+    const inArrayX = idx - Math.floor(idx / width) * width;
+    const inArrayY = Math.floor(idx / width);
 
-    const iyOffs = iy + kHalfH;
-    const ixOffs = ix + kHalfW;
+    const kernelHalfWidth = -(radiusWidth >> 1) + width;
+    const kernelHalfHeight = -(radiusHeight >> 1) + height;
 
-    for (let ky = 0; ky < kernelHeight; ky++) {
-      const yOffs = ((ky + iyOffs) % height) * width;
-      const kyOffs = ky * kernelWidth;
+    const inArrayYOffs = inArrayY + kernelHalfHeight;
+    const inArrayXOffs = inArrayX + kernelHalfWidth;
 
-      for (let kx = 0; kx < kernelWidth; kx++) {
-        blurred[yOffs + ((kx + ixOffs) % width)] += kernel[kyOffs + kx] * amount;
+    for (let kernelY = 0; kernelY < radiusHeight; kernelY++) {
+      let blurredY = (kernelY + inArrayYOffs) % height;
+      if (blurredY < 0) blurredY += height;
+
+      const yOffs = blurredY * width;
+      const kernelYOffs = kernelY * radiusWidth;
+
+      for (let kernelX = 0; kernelX < radiusWidth; kernelX++) {
+        let blurredX = (kernelX + inArrayXOffs) % width;
+        if (blurredX < 0) blurredX += width;
+
+        blurred[yOffs + blurredX] += kernel[kernelYOffs + kernelX] * amount;
       }
     }
-  }
-
-  const gaussianKernelLUTArrayLiteral = new Map();
+  };
 
   /**
-   *
-   * @param {*} sigma
-   * @returns
+   * 
+   * @param {*} inArray 
+   * @param {*} width 
+   * @param {*} height 
+   * @param {*} idx 
+   * @param {*} sigmaImage 
+   * @param {*} sigmaSample 
+   * @param {*} d 
+   * @returns 
    */
 
-  function _getGaussianKernelLUTArrayLiteral(sigma) {
-    const radius = Math.ceil(3 * sigma);
+  const _computeEnergySigmaAt = (inArray, width, height, idx, sigmaImage, sigmaSample, d) => {
+    const x = idx - Math.floor(idx / width) * width;
+    const y = Math.floor(idx / width);
+    const radius = Math.ceil(_gaussianSigmaRadiusMultiplier * sigmaImage);
+    const invSigmaImage2 = sigmaImage * sigmaImage;
+    const invSigmaSample2 = sigmaSample * sigmaSample;
+    const dimension = d / 2;
 
-    if (!gaussianKernelLUTArrayLiteral.has(sigma)) {
-      const kernelSize = 2 * radius + 1;
-      const kernel = Array(kernelSize)
-        .fill(null)
-        .map(() => Array(kernelSize).fill(0));
-      const denom = 2 * sigma * sigma;
+    let total = 0;
+    const ps = inArray[idx];
 
-      for (let y = -radius; y <= radius; y++) {
-        const dbY = y * y;
-        const yOffs = y + radius;
+    const yHeight = y + height;
+    const xWidth = x + width;
 
-        for (let x = -radius; x <= radius; x++) {
-          kernel[yOffs][x + radius] = Math.exp(-(x * x + dbY) / denom);
-        }
+    for (let radiusIdxY = -radius; radiusIdxY < radius; radiusIdxY++) {
+      let ny = (radiusIdxY + yHeight) % height;
+      if (ny < 0) ny += height;
+
+      const rowOffs = ny * width;
+
+      let dyWrap = Math.abs(y - ny);
+      if (dyWrap > height >> 1) dyWrap = height - dyWrap;
+      dyWrap *= dyWrap;
+
+      for (let radiusIdxX = -radius; radiusIdxX < radius; radiusIdxX++) {
+        let nx = (radiusIdxX + xWidth) % width;
+        if (nx < 0) nx += width;
+
+        let dxWrap = Math.abs(x - nx);
+        if (dxWrap > width >> 1) dxWrap = width - dxWrap;
+
+        total += Math.exp(
+          -(dxWrap * dxWrap + dyWrap) * invSigmaImage2 -
+            (Math.sqrt(Math.abs(ps - inArray[rowOffs + nx])) * invSigmaSample2) ** dimension
+        );
       }
-
-      gaussianKernelLUTArrayLiteral.set(sigma, kernel);
     }
 
-    return gaussianKernelLUTArrayLiteral.get(sigma);
-  }
+    return total;
+  };
 
   /**
    *
@@ -216,10 +170,9 @@ var blueNoiseUtils = (function () {
    * @param {*} height
    * @param {*} equation
    * @param {*} kernel
-   * @param {*} normalize
    */
 
-  function _generateWindowedKernelInPlace(width, height, equation, kernel, normalize) {
+  const _generateWindowedKernelInPlace = (width, height, equation, kernel) => {
     if ((width & 1) === 0) throw new Error("Odd width required");
     if ((height & 2) === 0) throw new Error("Odd height required");
     const cp = new Function("r", "N", "return " + equation);
@@ -243,71 +196,21 @@ var blueNoiseUtils = (function () {
       }
     }
 
-    for (let i = 0; i < sqSz; i++) kernel[i] = maxValue - kernel[i];
-
-    if (normalize) {
-      for (let i = 0; i < sqSz; i++) kernel[i] /= maxValue;
-    }
-  }
-
-  /**
-   *
-   * @param {*} width
-   * @param {*} height
-   * @param {*} equation
-   * @param {*} normalize
-   * @returns
-   */
-
-  function _generateWindowedKernelArrayLiteral(width, height, equation, normalize) {
-    if ((width & 1) === 0) throw new Error("Odd width required");
-    if ((height & 1) === 0) throw new Error("Odd height required");
-    const cp = new Function("r", "N", "return " + equation);
-
-    const halfX = (width - 1) / 2;
-    const halfY = (height - 1) / 2;
-    const kernel = Array(height)
-      .fill(null)
-      .map(() => Array(width).fill(0));
-
-    const N = Math.sqrt(halfX * halfX + halfY * halfY);
-
-    let maxValue = 0;
-    for (let y = -halfY; y <= halfY; y++) {
-      const y2 = y * y;
-
-      for (let x = -halfX; x <= halfX; x++) {
-        const r = Math.sqrt(x * x + y2);
-        const calculated = cp(r, N * 2);
-        kernel[y + halfY][x + halfX] = calculated;
-        if (maxValue < calculated) maxValue = calculated;
-      }
-    }
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        kernel[y][x] = maxValue - kernel[y][x];
-      }
-    }
-
-    if (normalize) {
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          kernel[y][x] /= maxValue;
-        }
-      }
-    }
-
-    return kernel;
-  }
+    for (let i = 0; i < sqSz; i++) kernel[i] = (maxValue - kernel[i]) / maxValue;
+  };
 
   return {
-    poissonDiskSampling: _poissonDiskSampling,
-    noiseArray: _noiseArray,
+    get gaussianSigmaRadiusMultiplier() {
+      return _gaussianSigmaRadiusMultiplier;
+    },
+    set gaussianSigmaRadiusMultiplier(value) {
+      _gaussianSigmaRadiusMultiplier = value;
+    },
+
+    shuffle: _shuffle,
     blurWrapInPlace: _blurWrapInPlace,
     deltaBlurUpdateInPlace: _deltaBlurUpdateInPlace,
-    getGaussianKernelLUTArrayLiteral: _getGaussianKernelLUTArrayLiteral,
+    computeEnergySigmaAt: _computeEnergySigmaAt,
     generateWindowedKernelInPlace: _generateWindowedKernelInPlace,
-    generateWindowedKernelArrayLiteral: _generateWindowedKernelArrayLiteral,
   };
 })();
