@@ -76,7 +76,7 @@ var frm = 0;
 var stT = 0;
 var lsUpdT = 0;
 var lLT = 0;
-var t = false;
+var telemetry = false;
 var sqSz;
 
 var {
@@ -156,9 +156,9 @@ var varErrDiffsMatrixInput = [[-1], 1];
 var varErrDiffsKernel;
 var useMirror;
 
-var blueNoiseInitArray;
 var blueNoiseWidth = 64;
 var blueNoiseHeight = 64;
+var blueNoiseAlgo = "VACluster";
 
 var frameRate = 30;
 var frameTime = 1000 / frameRate;
@@ -188,7 +188,9 @@ var isRecording = false;
 var isRendering = false;
 var pausedRendering = false;
 var resolvePromise = null;
-var streamlinedRenderOption = false;
+var webCodecsRenderOption = false;
+
+let webCodecsEncoder = null;
 
 let logEntries = [];
 
@@ -463,6 +465,7 @@ function waitForEvent(target, eventName) {
 
 function disableAll() {
   gId("matrix").classList.add("disabled");
+  gId("uploadDitherImage").classList.add("disabled");
   gId("arithmetic").classList.add("disabled");
   gId("errDiffs").classList.add("disabled");
   gId("varErrDiffs").classList.add("disabled");
@@ -485,6 +488,7 @@ gId("dither").addEventListener("change", function () {
   } else if (dropdownValue === "matrixThreshold") {
     disableAll();
     gId("matrix").classList.remove("disabled");
+    gId("uploadDitherImage").classList.remove("disabled");
     gId("matrixThreshDisp").classList.remove("disabled");
     gId("lvlsDisp").classList.remove("disabled");
     if (gId("matrix").value === "blueNoise") {
