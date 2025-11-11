@@ -9,7 +9,7 @@ const d = {
 function process() {
   const t0 = performance.now();
   processFrame();
-  if (t) frameCounter();
+  if (telemetry) frameCounter();
   if (video.paused || video.ended || isRendering) return;
   setTimeout(process, max(0, frameTime - (performance.now() - t0)));
 }
@@ -31,7 +31,7 @@ async function render() {
 
   printLog("Starting rendering");
 
-  const muxer = new WebMMuxer({
+  WebMMuxer.init({
     codec: "vp8", // Has to be VP8
     width: canvasWidth,
     height: canvasHeight,
@@ -48,41 +48,25 @@ async function render() {
   video.currentTime = startPositionSeconds;
   video.muted = true;
   video.loop = false;
-
-  let maxConcurrentEncodes = Number(gId("rendererMaxConcurrentEncodes").value);
-  if (!Number.isInteger(maxConcurrentEncodes)) {
-    printLog("Max concurrent encodes default to 2");
-    maxConcurrentEncodes = 2;
-  }
-
-  const encodeQueue = new Set();
+  canvas.style.hidden = true;
 
   performance.mark("renderStart");
-
   for (let frameIndex = startFrame; frameIndex < totalFrames && !video.ended; frameIndex++) {
     const frameTime = frameIndex / recorderFrameRate;
 
     performance.mark("videoDrawStart");
-    await new Promise((r) => {
+    await new Promise((resolve) => {
       video.currentTime = frameTime;
-      video.addEventListener("seeked", r, {once: true});
+      video.addEventListener("seeked", resolve, {once: true});
     });
     processFrame();
     performance.mark("videoDrawEnd");
 
-    const encodePromise = (async () => {
-      performance.mark("toBlobStart");
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", blobQuality));
-      performance.mark("toBlobEnd");
+    performance.mark("toBlobStart");
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", blobQuality));
+    performance.mark("toBlobEnd");
 
-      const buffer = new Uint8Array(await blob.arrayBuffer());
-      muxer.addFrameFromBlob(buffer, chunks);
-    })();
-
-    encodeQueue.add(encodePromise);
-    encodePromise.finally(() => encodeQueue.delete(encodePromise));
-
-    if (encodeQueue.size >= maxConcurrentEncodes) await Promise.race(encodeQueue);
+    WebMMuxer.addFrameFromBlob(new Uint8Array(await blob.arrayBuffer()), chunks);
 
     if (isRendering == false) {
       printLog("Rendering stopped manually");
@@ -94,7 +78,7 @@ async function render() {
       return true;
     }
 
-    if (t) {
+    if (telemetry) {
       performance.measure("videoDraw", "videoDrawStart", "videoDrawEnd");
       videoDraw = performance.getEntriesByName("videoDraw").at(-1)?.duration ?? 0;
 
@@ -112,27 +96,24 @@ async function render() {
     }
 
     if (pausedRendering) await waitForResolve();
+
     // Yields so the UI stays responsive
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
 
   performance.mark("renderEnd");
   performance.measure("render", "renderStart", "renderEnd");
   const renderTime = performance.getEntriesByName("render").at(-1)?.duration ?? 0;
-  printLog(
-    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
-  );
 
   onComplete();
 
   async function onComplete() {
-    await Promise.all(encodeQueue);
     isRendering = false;
     video.muted = false;
     video.loop = true;
     video.controls = true;
 
-    const blob = muxer.finalize(chunks);
+    const blob = WebMMuxer.finalize(chunks);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -151,9 +132,14 @@ async function render() {
     resumeRec.setAttribute("disabled", "");
     return true;
   }
+
+  printLog(
+    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
+  );
 }
 
-async function streamlinedRender() {
+// WebCodecs seems to be screwing up
+async function webCodecsRender() {
   if (isRecording == true) {
     printLog("Stop recording to start render");
     return false;
@@ -167,12 +153,14 @@ async function streamlinedRender() {
   printLog("Starting rendering");
 
   const bufferSize = Number(gId("bufferSizeInput").value);
-  const muxer = new WebMMuxer({
+
+  const WebMMuxerConfig = {
     codec: gId("renderCodec").value === "vp09" ? "vp9" : gId("renderCodec").value,
     width: canvasWidth,
     height: canvasHeight,
     frameRate: recorderFrameRate,
     bufferSize: bufferSize,
+
     profile: 0,
     level: 0xff,
     bitDepth: 8,
@@ -180,7 +168,9 @@ async function streamlinedRender() {
     colorRange: 1,
     colorPrimaries: 1,
     transferCharacteristics: 1,
-  });
+  };
+
+  WebMMuxer.init(WebMMuxerConfig);
   const chunks = [];
 
   const startPositionSeconds = Number(gId("rendererStartPosition").value ?? 0);
@@ -191,52 +181,50 @@ async function streamlinedRender() {
   video.currentTime = startPositionSeconds;
   video.muted = true;
   video.loop = false;
-  video.controls = false;
   canvas.style.hidden = true;
 
-  performance.mark("WebCodecsSetupStart");
-  const WCodecEncoder = new VideoEncoder({
-    output: (chunk) => {
+  const init = {
+    output(chunk) {
       const buffer = new Uint8Array(chunk.byteLength);
       chunk.copyTo(buffer);
-      muxer.addFramePreEncoded(buffer, chunks);
+      WebMMuxer.addFramePreEncoded(buffer, chunks);
     },
-    error: (err) => console.error(err),
-  });
+    error(err) {
+      console.error(err);
+    },
+  };
 
-  WCodecEncoder.configure({
-    codec: gId("renderCodec").value === "vp09" ? "vp09.00.10.8.01" : gId("renderCodec").value,
+  const config = {
+    codec: gId("renderCodec").value === "vp09" ? "vp09.00.10.08" : "vp8",
     width: canvasWidth,
     height: canvasHeight,
     framerate: recorderFrameRate,
     bitrate: recorderVideoBitrate,
-  });
-  performance.mark("WebCodecsSetupEnd");
-  performance.measure("WebCodecsSetup", "WebCodecsSetupStart", "WebCodecsSetupEnd");
-  printLog("WebCodecs setup: " + (performance.getEntriesByName("WebCodecsSetup").at(-1)?.duration ?? 0) + "ms");
+  };
+
+  webCodecsEncoder = new VideoEncoder(init);
+  console.log((await VideoEncoder.isConfigSupported(config)).supported);
+  webCodecsEncoder.configure(config);
 
   performance.mark("renderStart");
 
   for (let frameIndex = startFrame; frameIndex < totalFrames && !video.ended; frameIndex++) {
+    performance.mark("totalStart");
     const frameTime = frameIndex / recorderFrameRate;
 
-    performance.mark("videoDrawStart");
-    await new Promise((r) => {
+    await new Promise((resolve) => {
       video.currentTime = frameTime;
-      video.addEventListener("seeked", r, {once: true});
+      video.addEventListener("seeked", resolve, {once: true});
     });
+
+    performance.mark("videoDrawStart");
     processFrame();
     performance.mark("videoDrawEnd");
 
-    performance.mark("toFrameStart");
-    const videoFrame = new VideoFrame(canvas, {
-      timestamp: frameTime * 1000000,
-    });
-    performance.mark("toFrameEnd");
+    const videoFrame = new VideoFrame(canvas, {timestamp: frameTime * 1e6, format: "I420"});
 
-    WCodecEncoder.encode(videoFrame, {
-      keyframe: frameIndex >= bufferSize ? true : false,
-    });
+    const keyframe = frameIndex % bufferSize === 0;
+    webCodecsEncoder.encode(videoFrame, {keyframe});
     videoFrame.close();
 
     if (isRendering == false) {
@@ -249,14 +237,24 @@ async function streamlinedRender() {
       return true;
     }
 
-    if (t) {
+    performance.mark("totalEnd");
+    if (telemetry) {
       performance.measure("videoDraw", "videoDrawStart", "videoDrawEnd");
-      videoDraw = performance.getEntriesByName("videoDraw").at(-1)?.duration ?? 0;
-
       performance.measure("toFrame", "toFrameStart", "toFrameEnd");
-      const toFrame = performance.getEntriesByName("toFrame").at(-1)?.duration ?? 0;
+      performance.measure("total", "totalStart", "totalEnd");
 
-      printLog("Video draw: " + videoDraw + "ms\n" + "toFrame: " + toFrame + "ms\n");
+      printLog(
+        "Frames: " +
+          frameIndex +
+          "/" +
+          totalFrames +
+          "\n" +
+          "Video draw: " +
+          performance.getEntriesByName("videoDraw").at(-1)?.duration ??
+          0 + "ms\n" + "toFrame: " + performance.getEntriesByName("toFrame").at(-1)?.duration ??
+          0 + "ms\n" + "total: " + performance.getEntriesByName("toFrame").at(-1)?.duration ??
+          0 + "ms\n"
+      );
 
       performance.clearMarks("videoDrawStart");
       performance.clearMarks("videoDrawEnd");
@@ -264,10 +262,12 @@ async function streamlinedRender() {
       performance.clearMarks("toFrameEnd");
       performance.clearMeasures("videoDraw");
       performance.clearMeasures("toFrame");
+      performance.clearMeasures("total");
     }
 
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
+  
   performance.mark("renderEnd");
   performance.measure("render", "renderStart", "renderEnd");
 
@@ -279,15 +279,15 @@ async function streamlinedRender() {
   onComplete();
 
   async function onComplete() {
-    await WCodecEncoder.flush();
-    WCodecEncoder.close();
+    await webCodecsEncoder.flush();
+    webCodecsEncoder.close();
 
     isRendering = false;
     video.muted = false;
     video.loop = true;
     video.controls = true;
 
-    const blob = muxer.finalize(chunks);
+    const blob = WebMMuxer.finalize(chunks);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -312,16 +312,17 @@ function processFrame() {
   ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
   const frame = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
   const imageData = frame.data;
-  const imageDataLength = imageData.length;
+
   if (useLinear) {
-    for (let i = 0; i < imageDataLength; i++) {
-      imageData[i] = floor(linearLUT[imageData[i]]);
-    }
+    for (let i = 0, length = imageData.length; i < length; i++) imageData[i] = floor(linearLUT[imageData[i]]);
   }
+
   d[ditherDropdownValue](imageData);
 
   ctx.putImageData(frame, 0, 0);
 }
+
+let lastUpdatedTime = 0;
 
 function frameCounter() {
   frm++;
@@ -333,10 +334,6 @@ function frameCounter() {
     lLT = performance.now();
   }
 }
-
-gId("showTelemetry").addEventListener("change", function () {
-  t = gId("showTelemetry").checked;
-});
 
 video.addEventListener("play", function () {
   frm = 0;
