@@ -203,18 +203,33 @@ gId("frameRateInput").addEventListener("input", function () {
   frameTime = 1000 / frameRate;
 });
 
-gId("blueNoiseInitArrayInput").addEventListener("input", function () {
-  try {
-    blueNoiseInitArray = JSON.parse(gId("blueNoiseInitArrayInput").value).flat();
-  } catch {} //silence it
-});
-
 gId("blueNoiseWidth").addEventListener("input", function () {
   blueNoiseWidth = Number(gId("blueNoiseWidth").value);
 });
 
 gId("blueNoiseHeight").addEventListener("input", function () {
   blueNoiseHeight = Number(gId("blueNoiseHeight").value);
+});
+
+gId("blueNoiseAlgo").addEventListener("change", function () {
+  blueNoiseAlgo = gId("blueNoiseAlgo").value;
+  if (blueNoiseAlgo === "VACluster") {
+    gId("blueNoiseInitialSigmaScale").classList.add("disabled");
+    gId("blueNoiseSigmaSample").classList.add("disabled");
+    gId("blueNoiseIterations").classList.add("disabled");
+  } else if (blueNoiseAlgo === "extendedVACluster") {
+    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
+    gId("blueNoiseSigmaSample").classList.add("disabled");
+    gId("blueNoiseIterations").classList.add("disabled");
+  } else if (blueNoiseAlgo === "bartWronskiVACluster") {
+    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
+    gId("blueNoiseSigmaSample").classList.add("disabled");
+    gId("blueNoiseIterations").classList.add("disabled");
+  } else if (blueNoiseAlgo === "georgievFajardo") {
+    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
+    gId("blueNoiseSigmaSample").classList.remove("disabled");
+    gId("blueNoiseIterations").classList.remove("disabled");
+  }
 });
 
 (function () {
