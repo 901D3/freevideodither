@@ -191,7 +191,13 @@ gId("useMirror").addEventListener("input", function () {
 });
 
 gId("frameRateRange").addEventListener("input", function () {
-  sliderInputSync(gId("frameRateRange"), gId("frameRateInput"), "frameRate", undefined, "slider");
+  sliderInputSync(
+    gId("frameRateRange"),
+    gId("frameRateInput"),
+    "frameRate",
+    undefined,
+    "slider"
+  );
   frameTime = 1000 / frameRate;
 });
 
@@ -229,6 +235,77 @@ gId("blueNoiseAlgo").addEventListener("change", function () {
     gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
     gId("blueNoiseSigmaSample").classList.remove("disabled");
     gId("blueNoiseIterations").classList.remove("disabled");
+  }
+});
+
+function disableAll() {
+  gId("matrix").classList.add("disabled");
+  gId("uploadDitherImage").classList.add("disabled");
+  gId("arithmetic").classList.add("disabled");
+  gId("errDiffs").classList.add("disabled");
+  gId("varErrDiffs").classList.add("disabled");
+  gId("matrixThreshDisp").classList.add("disabled");
+  gId("blueNoiseDisp").classList.add("disabled");
+  gId("arithmeticDisp").classList.add("disabled");
+  gId("errDiffsInputDisp").classList.add("disabled");
+  gId("varErrDiffsInputDisp").classList.add("disabled");
+  gId("lvlsDisp").classList.add("disabled");
+  gId("errLvlsDisp").classList.add("disabled");
+  gId("serpentineDisp").classList.add("disabled");
+  gId("bufferDisp").classList.add("disabled");
+  gId("mirrorDisp").classList.add("disabled");
+}
+
+gId("dither").addEventListener("change", function () {
+  let dropdownValue = gId("dither").value;
+  if (dropdownValue === "none") {
+    disableAll();
+  } else if (dropdownValue === "matrixThreshold") {
+    disableAll();
+    gId("matrix").classList.remove("disabled");
+    gId("uploadDitherImage").classList.remove("disabled");
+    gId("matrixThreshDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    if (gId("matrix").value === "blueNoise") {
+      gId("blueNoiseDisp").classList.remove("disabled");
+    }
+  } else if (dropdownValue === "arithmetic") {
+    disableAll();
+    gId("arithmetic").classList.remove("disabled");
+    gId("arithmeticDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    gId("linearDisp").classList.remove("disabled");
+  } else if (dropdownValue === "errDiffs") {
+    disableAll();
+    gId("errDiffs").classList.remove("disabled");
+    gId("errDiffsInputDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    gId("errLvlsDisp").classList.remove("disabled");
+    gId("linearDisp").classList.remove("disabled");
+    gId("serpentineDisp").classList.remove("disabled");
+    gId("bufferDisp").classList.remove("disabled");
+  } else if (dropdownValue === "varErrDiffs") {
+    disableAll();
+    gId("varErrDiffs").classList.remove("disabled");
+    gId("varErrDiffsInputDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    gId("errLvlsDisp").classList.remove("disabled");
+    gId("linearDisp").classList.remove("disabled");
+    gId("serpentineDisp").classList.remove("disabled");
+    gId("bufferDisp").classList.remove("disabled");
+    gId("mirrorDisp").classList.remove("disabled");
+  } else if (dropdownValue === "dotDiffs") {
+    disableAll();
+    gId("matrix").classList.remove("disabled");
+    gId("uploadDitherImage").classList.remove("disabled");
+    gId("matrixThreshDisp").classList.remove("disabled");
+
+    gId("errDiffs").classList.remove("disabled");
+    gId("errDiffsInputDisp").classList.remove("disabled");
+    gId("lvlsDisp").classList.remove("disabled");
+    gId("errLvlsDisp").classList.remove("disabled");
+    gId("linearDisp").classList.remove("disabled");
+    gId("bufferDisp").classList.remove("disabled");
   }
 });
 
