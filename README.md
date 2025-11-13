@@ -32,7 +32,7 @@ Color limiting in R G B channels
 
 ──────────
 
-### _**Credits:**_
+### _**Reference:**_
 [cs559-5.ppt by University Of Wisconsin](http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt)
 
 [dithermark.com](https://www.dithermark.com)
