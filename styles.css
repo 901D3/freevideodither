@@ -179,7 +179,7 @@ input[type="checkbox"] {
 input[type="file"] {
   padding: 3px;
   cursor: pointer;
-  width: 400px;
+  width: max-content;
 }
 
 input:hover,
