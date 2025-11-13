@@ -4,6 +4,7 @@ const d = {
   arithmetic: arithmetic,
   errDiffs: errDiffs,
   varErrDiffs: varErrDiffs,
+  dotDiffs: dotDiffs,
 };
 
 function process() {
@@ -63,7 +64,9 @@ async function render() {
     performance.mark("videoDrawEnd");
 
     performance.mark("toBlobStart");
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", blobQuality));
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/webp", blobQuality)
+    );
     performance.mark("toBlobEnd");
 
     WebMMuxer.addFrameFromBlob(new Uint8Array(await blob.arrayBuffer()), chunks);
@@ -120,7 +123,10 @@ async function render() {
     a.download = "video.webm";
     a.click();
     URL.revokeObjectURL(url);
-    printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
+    printLog(
+      "Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>",
+      null
+    );
 
     isRendering = false;
     startRend.removeAttribute("disabled", "");
@@ -134,7 +140,12 @@ async function render() {
   }
 
   printLog(
-    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
+    "Elapsed: " +
+      renderTime +
+      "\n" +
+      "Rendering takes " +
+      (renderTime / (video.duration * 1000)) * 100 +
+      "% of video duration"
   );
 }
 
@@ -267,13 +278,18 @@ async function webCodecsRender() {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
-  
+
   performance.mark("renderEnd");
   performance.measure("render", "renderStart", "renderEnd");
 
   const renderTime = performance.getEntriesByName("render").at(-1)?.duration ?? 0;
   printLog(
-    "Elapsed: " + renderTime + "\n" + "Rendering takes " + (renderTime / (video.duration * 1000)) * 100 + "% of video duration"
+    "Elapsed: " +
+      renderTime +
+      "\n" +
+      "Rendering takes " +
+      (renderTime / (video.duration * 1000)) * 100 +
+      "% of video duration"
   );
 
   onComplete();
@@ -294,7 +310,10 @@ async function webCodecsRender() {
     a.download = "video.webm";
     a.click();
     URL.revokeObjectURL(url);
-    printLog("Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>", null);
+    printLog(
+      "Rendered video: " + "<a href='" + url + "' target='_blank'>" + url + "</a>",
+      null
+    );
 
     isRendering = false;
     startRend.removeAttribute("disabled", "");
@@ -312,9 +331,10 @@ function processFrame() {
   ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
   const frame = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
   const imageData = frame.data;
-
   if (useLinear) {
-    for (let i = 0, length = imageData.length; i < length; i++) imageData[i] = floor(linearLUT[imageData[i]]);
+    for (let i = 0, length = imageData.length; i < length; i++) {
+      imageData[i] = floor(linearLUT[imageData[i]]);
+    }
   }
 
   d[ditherDropdownValue](imageData);
@@ -330,7 +350,12 @@ function frameCounter() {
   let currentFps = 1 / dlT;
   lastUpdatedTime = performance.now();
   if (performance.now() - lLT >= 1000) {
-    printLog("Fps: " + currentFps.toString().padEnd(22) + " | Latency: " + (dlT * 1000).toString().padEnd(22));
+    printLog(
+      "Fps: " +
+        currentFps.toString().padEnd(22) +
+        " | Latency: " +
+        (dlT * 1000).toString().padEnd(22)
+    );
     lLT = performance.now();
   }
 }
