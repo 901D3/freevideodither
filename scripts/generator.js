@@ -1,3 +1,22 @@
+function matrixInputLUTCreate() {
+  const mY = matrixInput.length;
+  const mX = matrixInput[0].length;
+  const div = 255 / divisionInput;
+
+  matrixInputLUT = new Float32Array(mY * mX);
+
+  for (let y = 0; y < mY; y++) {
+    const yOffs = y * mX;
+
+    for (let x = 0; x < mX; x++) {
+      matrixInputLUT[yOffs + x] = (matrixInput[y][x] * div) / 255;
+    }
+  }
+
+  matrixInputLUT.mY = mY;
+  matrixInputLUT.mX = mX;
+}
+
 function bayerGen(size) {
   let seed = [
     [0, 2],
@@ -89,52 +108,100 @@ const dotDiffsClassInputLUTCreate = () => {
 function blueNoiseWrapper() {
   blueNoiseCanvas.width = blueNoiseWidth;
   blueNoiseCanvas.height = blueNoiseHeight;
+
   const sqSz = blueNoiseWidth * blueNoiseHeight;
+  const blueNoiseAlgo = gId("blueNoiseAlgo").value;
   const t0 = performance.now();
   let result;
 
-  blueNoiseFloat32.gaussianSigmaRadiusMultiplier = Number(
+  blueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
     document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
   );
 
-  blueNoiseFloat32.initialSigmaScale = Number(
+  blueNoiseFloat64.useAdaptiveSigmaCandidateAlgo = document.getElementById(
+    "blueNoiseUseAdaptiveSigma"
+  ).checked;
+
+  blueNoiseFloat64.initialSigmaScale = Number(
     document.getElementById("blueNoiseInitialSigmaScale").value
   );
 
-  if (blueNoiseAlgo === "VACluster") {
-    result = blueNoiseFloat32.originalVoidAndCluster(
+  if (blueNoiseAlgo === "extendedVACluster") {
+    let kernel = null;
+
+    if (document.getElementById("blueNoiseCustomKernel").value) {
+      kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
+    }
+
+    result = blueNoiseFloat64.extendedVoidAndCluster(
       blueNoiseWidth,
       blueNoiseHeight,
       Number(document.getElementById("blueNoiseSigmaImage").value),
-      Number(document.getElementById("blueNoiseDensity").value)
-    );
-  } else if (blueNoiseAlgo === "extendedVACluster") {
-    result = blueNoiseFloat32.extendedVoidAndCluster(
-      blueNoiseWidth,
-      blueNoiseHeight,
-      Number(document.getElementById("blueNoiseSigmaImage").value),
-      null,
-      Number(document.getElementById("blueNoiseDensity").value)
-    );
-  } else if (blueNoiseAlgo === "bartWronskiVACluster") {
-    result = blueNoiseFloat32.bartWronskiVoidAndCluster(
-      blueNoiseWidth,
-      blueNoiseHeight,
-      Number(document.getElementById("blueNoiseSigmaImage").value),
-      Number(document.getElementById("blueNoiseDensity").value)
+      Number(document.getElementById("blueNoiseSigmaSample").value),
+      Number(document.getElementById("blueNoiseDensity").value),
+      kernel
     );
   } else if (blueNoiseAlgo === "georgievFajardo") {
-    result = new Float32Array(sqSz);
-    for (let i = 0; i < sqSz; i++) result[i] = Math.floor(Math.random() * sqSz);
+    let kernel = null;
 
-    blueNoiseFloat32.georgievFajardoInPlace(
+    if (document.getElementById("blueNoiseCustomKernel").value) {
+      kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
+    }
+
+    result = new Uint32Array(sqSz);
+    for (let i = 0; i < sqSz; i++) result[i] = i;
+
+    blueNoiseFloat64.georgievFajardoInPlace(
       result,
       blueNoiseWidth,
       blueNoiseHeight,
       Number(document.getElementById("blueNoiseSigmaImage").value),
       Number(document.getElementById("blueNoiseSigmaSample").value),
-      Number(document.getElementById("blueNoiseIterations").value)
+      Number(document.getElementById("blueNoiseIterations").value),
+      1,
+      kernel
     );
+  } else if (blueNoiseAlgo === "candidateMethodVACluster") {
+    let kernel = null;
+
+    if (document.getElementById("blueNoiseCustomKernel").value) {
+      kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
+    }
+
+    if (
+      Number(document.getElementById("blueNoiseDensity").value) !== 0 &&
+      Number(document.getElementById("blueNoiseDensity").value) !== 1
+    ) {
+      result = new Uint32Array(sqSz);
+
+      for (
+        let i =
+          Math.floor(sqSz * Number(document.getElementById("blueNoiseDensity").value)) - 1;
+        i >= 0;
+        i--
+      ) {
+        result[i] = 1;
+      }
+
+      blueNoiseUtils.shuffle(result);
+
+      if (blueNoiseFloat64.useAdaptiveSigmaCandidateAlgo) {
+        blueNoiseFloat64.adaptiveCandidateMethodInPlace(
+          result,
+          blueNoiseWidth,
+          blueNoiseHeight,
+          blueNoiseFloat64.gaussianSigmaRadiusMultiplier
+        );
+      } else {
+        blueNoiseFloat64.candidateMethodInPlace(
+          result,
+          blueNoiseWidth,
+          blueNoiseHeight,
+          Number(document.getElementById("blueNoiseSigmaSample").value),
+          kernel
+        );
+      }
+    } else if (Number(document.getElementById("blueNoiseDensity").value) === 1) result.fill(1);
   }
 
   const highest = findHighest(result);
@@ -174,4 +241,6 @@ function blueNoiseWrapper() {
   gId("divisionInput").value = highest + 1;
   divisionInput = highest + 1;
   matrixInputLUTCreate();
+
+  if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
 }
