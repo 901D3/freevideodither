@@ -22,6 +22,11 @@ const matrixThresholdPresets = () => {
     matrixInput = bayerGen(256);
   } else if (a === "blueNoise") {
     gId("blueNoiseDisp").classList.remove("disabled");
+  } else if (a === "checkerboard") {
+    matrixInput = [
+      [0, 1],
+      [1, 0],
+    ];
   } else if (a === "cluster") {
     matrixInput = [
       [11, 5, 9, 3],
@@ -166,6 +171,13 @@ const matrixThresholdPresets = () => {
       [1, 2, 2, 3, 3, 2, 2, 1],
       [0, 1, 2, 2, 2, 2, 1, 0],
       [0, 0, 1, 1, 1, 1, 0, 0],
+    ];
+  } else if (a === "rylander") {
+    matrixInput = [
+      [0, 8, 2, 10],
+      [4, 12, 6, 14],
+      [3, 11, 1, 9],
+      [7, 15, 5, 3],
     ];
   }
 
@@ -398,9 +410,10 @@ function toRGBMat(f) {
   return rgbMatrix;
 }
 
-function bufferChange(w, h) {
-  const sqSz4 = w * h * 4;
-  const v = gIdV("buffer");
+function bufferChange(width, height) {
+  const sqSz4 = (width * height) << 2;
+  const v = gId("buffer").value;
+
   if (v === "Int8Array") return new Int8Array(sqSz4);
   else if (v === "Int16Array") return new Int8Array(sqSz4);
   else if (v === "Int32Array") return new Int8Array(sqSz4);
@@ -413,15 +426,16 @@ function parseKernelErrDiffs(matrix, division) {
   const start = findStart_2D(matrix, -1);
   const kernel = [];
 
-  for (let y = 0; y < matrix.length; y++) {
-    for (let x = 0; x < matrix[y].length; x++) {
-      const w = matrix[y][x];
-      if (w === -1 || w === 0) continue;
+  for (let y = 0, length = matrix.length; y < length; y++) {
+    for (let x = 0, length2 = matrix[y].length; x < length2; x++) {
+      let errWeight = matrix[y][x];
+      if (errWeight === -1 || errWeight === 0) continue;
+      errWeight /= division;
 
       kernel.push({
-        ox: x - start.x,
-        oy: y - start.y,
-        w: w / division,
+        errIdxX: x - start.x,
+        errIdxY: y - start.y,
+        errWeight,
       });
     }
   }
@@ -445,13 +459,13 @@ function parseKernelVarErrDiffs(matrix) {
     for (let y = 0; y < idx[0].length; y++) {
       const yIdx = idx[0];
       for (let x = 0; x < yIdx[y].length; x++) {
-        const w = yIdx[y][x];
-        if (w === -1 || w === 0) continue;
+        const errWeight = yIdx[y][x];
+        if (errWeight === -1 || errWeight === 0) continue;
 
         kernel.push({
-          ox: x - start.x,
-          oy: y - start.y,
-          w: w / idx[1],
+          errIdxX: x - start.x,
+          errIdxY: y - start.y,
+          errWeight: errWeight / idx[1],
         });
       }
     }
@@ -497,7 +511,6 @@ function bayer(d) {
 /**
  * Arithmetic dither
  * By Øyvind Kolås
- *
  * https://pippin.gimp.org/a_dither
  *
  * Added "v" variable for current pixel value. Can be used with ternary operator for whatever you want
@@ -525,7 +538,6 @@ function arithmetic(d) {
 
 /**
  * https://en.wikipedia.org/wiki/Error_diffusion
- * http://caca.zoy.org/study
  */
 
 function errDiffs(d) {
@@ -559,14 +571,14 @@ function errDiffs(d) {
         d[i + c] = result;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
-          const {ox, oy, w} = errDiffsKernel[k];
+          const {errIdxX, errIdxY, errWeight} = errDiffsKernel[k];
 
-          const newX = x + (isOdd ? -ox : ox);
-          const newY = y + oy;
+          const newX = x + (isOdd ? -errIdxX : errIdxX);
+          const newY = y + errIdxY;
 
           if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
             const ni = (newY * canvasWidth + newX) << 2;
-            errDiffsBufferTarget[ni + c] += errStrength * w;
+            errDiffsBufferTarget[ni + c] += errStrength * errWeight;
           }
         }
       }
@@ -611,14 +623,14 @@ function varErrDiffs(d) {
         d[i + c] = result;
 
         for (let k = 0; k < varErrDiffsKernelMatrixLength; k++) {
-          const {ox, oy, w} = coeff[k];
+          const {errIdxX, errIdxY, errWeight} = coeff[k];
 
-          const newX = x + (isOdd ? -ox : ox);
-          const newY = y + oy;
+          const newX = x + (isOdd ? -errIdxX : errIdxX);
+          const newY = y + errIdxY;
 
           if (newX >= 0 && newX < canvasWidth && newY >= 0 && newY < canvasHeight) {
             const ni = (newY * canvasWidth + newX) << 2;
-            errDiffsBufferTarget[ni + c] += errStrength * w;
+            errDiffsBufferTarget[ni + c] += errStrength * errWeight;
           }
         }
       }
@@ -670,23 +682,23 @@ const dotDiffs = (data) => {
         let totalWeight = 0;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
-          const {ox, oy, w} = errDiffsKernel[k];
-          const newX = x + ox;
-          const newY = y + oy;
+          const {errIdxX, errIdxY, errWeight} = errDiffsKernel[k];
+          const newX = x + errIdxX;
+          const newY = y + errIdxY;
           if (newX < 0 || newY < 0 || newX >= canvasWidth || newY >= canvasHeight) continue;
 
           if (matrixInput[newY % classHeight][newX % classWidth] > classValue) {
-            totalWeight += w;
-            weightedNeighbors.push({newX, newY, w});
+            totalWeight += errWeight;
+            weightedNeighbors.push({newX, newY, errWeight});
           }
         }
         if (totalWeight > 0) {
           const scale = errStrength / totalWeight;
 
           for (let i = 0, length = weightedNeighbors.length; i < length; i++) {
-            const {newX, newY, w} = weightedNeighbors[i];
+            const {newX, newY, errWeight} = weightedNeighbors[i];
 
-            errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] += w * scale;
+            errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] += errWeight * scale;
           }
         }
       }
