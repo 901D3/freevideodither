@@ -11,23 +11,7 @@ A middle finger to paid video dithering tools
 It's kinda hard to use but i did make some tooltips so you over on some settings it will show the tooltip.\
 Once you know how to use it, it becomes powerful as hell im not kidding
 
-For anyone using phones, it is recommended to go landscape mode for best UI viewing
-
-──────────
-
-## ***Features***
-Ordered dithering(i call it matrix thresholding because it uses a matrix to threshold the frame/image)
-Arithmetic(very underated one)
-Error diffusion
-Variable error diffusion
-
-Blue noise(in matrix threshold)
-
-Linear color space
-Serpentine scanning for both error diffusion and variable error diffusion
-Error buffer array for both error diffusion and variable error diffusion
-
-Color limiting in R G B channels
+For anyone on mobile, it is recommended to go landscape mode for best UX
 
 ──────────
 
