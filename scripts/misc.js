@@ -111,23 +111,6 @@ function errDiffsAutoDivWrapper() {
   }
 }
 
-function matrixInputLUTCreate() {
-  const mY = matrixInput.length;
-  const mX = matrixInput[0].length;
-  const div = 255 / divisionInput;
-
-  matrixInputLUT = new Float32Array(mY * mX);
-
-  for (let y = 0; y < mY; y++) {
-    for (let x = 0; x < mX; x++) {
-      matrixInputLUT[y * mX + x] = (matrixInput[y][x] * div) / 255;
-    }
-  }
-
-  matrixInputLUT.mY = mY;
-  matrixInputLUT.mX = mX;
-}
-
 gId("matrixInput").addEventListener("input", function () {
   try {
     matrixInput = JSON.parse(gId("matrixInput").value);
