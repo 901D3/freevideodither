@@ -12,10 +12,9 @@
       href="https://cdn.jsdelivr.net/npm/@fontsource/unifont@5.1.0/index.min.css" />
 
     <link rel="preload" as="script" href="scripts/init.js" />
-    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc.base.js" />
-    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc.ostromoukhov.js" />
-    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc.zhouFang.js" />
-    <link rel="preload" as="script" href="scripts/lib/901D3/binUtils.js" />
+    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc-base.js" />
+    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc-ostromoukhov.js" />
+    <link rel="preload" as="script" href="scripts/resources/varErrDiffsRsrc-zhouFang.js" />
     <link rel="preload" as="script" href="scripts/lib/901D3/blue-noise-utils.js" />
     <link rel="preload" as="script" href="scripts/lib/901D3/blue-noise-float32.js" />
     <link rel="preload" as="script" href="scripts/lib/901D3/WebM-muxer.js" />
@@ -211,9 +210,11 @@
 
               <option value="blueNoise">Blue Noise</option>
 
+              <option value="checkerboard">Checkerboard</option>
               <option value="cluster">Cluster</option>
               <option value="fishnet">Fishnet</option>
               <option value="halftone">Halftone</option>
+              <option value="rylander">Rylander</option>
 
               <option value="hatchLeft">Hatch Left</option>
               <option value="hatchRight">Hatch Right</option>
@@ -259,40 +260,32 @@
             <div class="settings_label-select">
               <span>Algorithm</span>
               <select id="blueNoiseAlgo">
-                <option value="VACluster">Void and Cluster</option>
                 <option value="extendedVACluster">Extended Void and Cluster</option>
-                <option value="bartWronskiVACluster">Bart Wronski's Void and Cluster</option>
                 <option value="georgievFajardo">Georgiev-Fajardo(Relaxation)</option>
               </select>
             </div>
-            <textarea id="blueNoiseCustomKernel" placeholder="2D matrix"></textarea>
+            <textarea
+              id="blueNoiseCustomKernel"
+              placeholder="Convolve kernel. 2D array"></textarea>
             <div class="settings_label-input">
-              <span data-text="$width"></span>
+              <span>Width</span>
               <input type="number" id="blueNoiseWidth" value="64" />
             </div>
             <div class="settings_label-input">
-              <span data-text="$height"></span>
+              <span>Height</span>
               <input type="number" id="blueNoiseHeight" value="64" />
             </div>
             <div class="settings_label-input">
               <span>Sigma radius multiplier</span>
-              <input type="number" id="blueNoiseGaussianSigmaRadiusMultiplier" value="6" />
-            </div>
-            <div class="settings_label-input">
-              <span>Initial sigma scale</span>
-              <input
-                type="number"
-                id="blueNoiseInitialSigmaScale"
-                class="disabled"
-                value="0.3" />
+              <input type="number" id="blueNoiseGaussianSigmaRadiusMultiplier" value="10" />
             </div>
             <div class="settings_label-input">
               <span>Sigma(Image)</span>
               <input type="number" id="blueNoiseSigmaImage" value="1.9" />
             </div>
             <div class="settings_label-input">
-              <span>Sigma sample</span>
-              <input type="number" id="blueNoiseSigmaSample" class="disabled" value="1" />
+              <span>Sigma sample(candidate method)</span>
+              <input type="number" id="blueNoiseSigmaSample" value="1" />
             </div>
             <div class="settings_label-input">
               <span>Density</span>
@@ -300,9 +293,14 @@
             </div>
             <div class="settings_label-input">
               <span>Iterations</span>
-              <input type="number" id="blueNoiseIterations" class="disabled" value="500000" />
+              <input type="number" id="blueNoiseIterations" value="100000" />
             </div>
-            <button onclick="setTimeout(blueNoiseWrapper, 0)">Generate</button>
+            <div class="settings_checkbox-label-input">
+              <input type="checkbox" id="blueNoiseUseAdaptiveSigma" />
+              <span>Use adaptive sigma(uneven dots fix)</span>
+              <input type="number" id="blueNoiseInitialSigmaScale" value="0.4" />
+            </div>
+            <button onclick="blueNoiseWrapper()">Generate</button>
           </div>
           <div class="whitehr"></div>
           <div class="settings_label-select">
@@ -402,11 +400,11 @@
             <span data-text="$buffer"></span>
             <div id="bufferSelectDisp" class="disabled">
               <select id="buffer">
-                <option value="Int8Array" selected="" data-text="$Int8Array"></option>
+                <option value="Int8Array" data-text="$Int8Array"></option>
                 <option value="Int16Array" data-text="$Int16Array"></option>
                 <option value="Int32Array" data-text="$Int32Array"></option>
                 <option value="Float16Array" data-text="$Float16Array"></option>
-                <option value="Float32Array" data-text="$Float32Array"></option>
+                <option value="Float32Array" selected="" data-text="$Float32Array"></option>
                 <option value="Float64Array" data-text="$Float64Array"></option>
               </select>
             </div>
@@ -502,12 +500,11 @@
   <script src="scripts/init.js"></script>
 
   <!--Resources-->
-  <script src="scripts/resources/varErrDiffsRsrc.base.js"></script>
-  <script src="scripts/resources/varErrDiffsRsrc.ostromoukhov.js"></script>
-  <script src="scripts/resources/varErrDiffsRsrc.zhouFang.js"></script>
+  <script src="scripts/resources/varErrDiffsRsrc-base.js"></script>
+  <script src="scripts/resources/varErrDiffsRsrc-ostromoukhov.js"></script>
+  <script src="scripts/resources/varErrDiffsRsrc-zhouFang.js"></script>
 
   <!--Libraries-->
-  <script src="scripts/lib/901D3/binUtils.js"></script>
   <script src="scripts/lib/901D3/blue-noise-utils.js"></script>
   <script src="scripts/lib/901D3/blue-noise-float32.js"></script>
   <script src="scripts/lib/901D3/WebM-muxer.js"></script>
