@@ -158,9 +158,14 @@ var useMirror;
 var dotDiffsClassMatrixCanvasLUT;
 var dotDiffsAvailableClassValues;
 
-var blueNoiseWidth = 64;
-var blueNoiseHeight = 64;
-var blueNoiseAlgo = "VACluster";
+let useDBS = false;
+let DBSSigma = 1;
+let DBSIterations = 1;
+let DBSGaussianSigmaRadiusMultiplier = 3;
+
+let blueNoiseWidth = 64;
+let blueNoiseHeight = 64;
+let blueNoiseCustomKernel;
 
 var frameRate = 30;
 var frameTime = 1000 / frameRate;
