@@ -120,6 +120,8 @@ gId("matrixInput").addEventListener("input", function () {
   autoDiv = gId("autoDiv").checked;
   autoDivWrapper();
   matrixInputLUTCreate();
+
+  if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
 });
 
 gId("divisionInput").addEventListener("input", function () {
@@ -146,23 +148,30 @@ gId("errDiffsMatrixInput").addEventListener("input", function () {
 
   errDiffsAutoDivWrapper();
   errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
+
+  if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
 });
 
 gId("errDiffsDivisionInput").addEventListener("input", function () {
   errDiffsAutoDivWrapper();
   errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
+
+  if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
 });
 
 gId("errDiffsAutoDiv").addEventListener("input", function () {
   errDiffsAutoDiv = gId("errDiffsAutoDiv").checked;
   errDiffsAutoDivWrapper();
+  errDiffsKernel = parseKernelErrDiffs(errDiffsMatrixInput, errDiffsDivisionInput);
+
+  if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
 });
 
 gId("varErrDiffsMatrixInput").addEventListener("input", function () {
   try {
     varErrDiffsMatrixInput = JSON.parse(gId("varErrDiffsMatrixInput").value);
   } catch (e) {
-    printLog(e, 1, "red", "red");
+    printLog(e, null, "red", "red");
   }
 
   varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
@@ -198,6 +207,35 @@ gId("blueNoiseWidth").addEventListener("input", function () {
 
 gId("blueNoiseHeight").addEventListener("input", function () {
   blueNoiseHeight = Number(gId("blueNoiseHeight").value);
+});
+
+gId("useDBS").addEventListener("change", function () {
+  useDBS = gId("useDBS").checked;
+
+  if (useDBS) gId("blueNoiseDisp").classList.remove("disabled");
+  else gId("blueNoiseDisp").classList.add("disabled");
+});
+
+gId("blueNoiseGaussianSigmaRadiusMultiplier").addEventListener("change", function () {
+  DBSGaussianSigmaRadiusMultiplier = Number(
+    gId("blueNoiseGaussianSigmaRadiusMultiplier").value
+  );
+
+  blueNoiseFloat64.gaussianSigmaRadiusMultiplier = DBSGaussianSigmaRadiusMultiplier;
+});
+
+gId("blueNoiseSigmaImage").addEventListener("change", function () {
+  DBSSigma = Number(gId("blueNoiseSigmaImage").value);
+});
+
+gId("DBSIterations").addEventListener("change", function () {
+  DBSIterations = Number(gId("DBSIterations").value);
+});
+
+gId("blueNoiseCustomKernel").addEventListener("input", function () {
+  if (document.getElementById("blueNoiseCustomKernel").value) {
+    blueNoiseCustomKernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
+  }
 });
 
 gId("blueNoiseAlgo").addEventListener("change", function () {
@@ -258,6 +296,7 @@ gId("dither").addEventListener("change", function () {
     gId("arithmeticDisp").classList.remove("disabled");
     gId("lvlsDisp").classList.remove("disabled");
     gId("linearDisp").classList.remove("disabled");
+    if (useDBS) gId("blueNoiseDisp").classList.remove("disabled");
   } else if (dropdownValue === "errDiffs") {
     disableAll();
     gId("errDiffs").classList.remove("disabled");
@@ -267,6 +306,7 @@ gId("dither").addEventListener("change", function () {
     gId("linearDisp").classList.remove("disabled");
     gId("serpentineDisp").classList.remove("disabled");
     gId("bufferDisp").classList.remove("disabled");
+    if (useDBS) gId("blueNoiseDisp").classList.remove("disabled");
   } else if (dropdownValue === "varErrDiffs") {
     disableAll();
     gId("varErrDiffs").classList.remove("disabled");
@@ -277,6 +317,7 @@ gId("dither").addEventListener("change", function () {
     gId("serpentineDisp").classList.remove("disabled");
     gId("bufferDisp").classList.remove("disabled");
     gId("mirrorDisp").classList.remove("disabled");
+    if (useDBS) gId("blueNoiseDisp").classList.remove("disabled");
   } else if (dropdownValue === "dotDiffs") {
     disableAll();
     gId("matrix").classList.remove("disabled");
@@ -289,6 +330,7 @@ gId("dither").addEventListener("change", function () {
     gId("errLvlsDisp").classList.remove("disabled");
     gId("linearDisp").classList.remove("disabled");
     gId("bufferDisp").classList.remove("disabled");
+    if (useDBS) gId("blueNoiseDisp").classList.remove("disabled");
   }
 });
 
@@ -329,9 +371,10 @@ gId("dither").addEventListener("change", function () {
     getBufferValue = () => 0; // always return 0
   }
 
+  blueNoiseWidth = Number(gId("blueNoiseWidth").value);
+  blueNoiseHeight = Number(gId("blueNoiseHeight").value);
+
   try {
     blueNoiseInitArray = JSON.parse(gId("blueNoiseInitArrayInput").value).flat();
   } catch {}
-  blueNoiseWidth = Number(gId("blueNoiseWidth").value);
-  blueNoiseHeight = Number(gId("blueNoiseHeight").value);
 })();
