@@ -114,15 +114,15 @@ function blueNoiseWrapper() {
   const t0 = performance.now();
   let result;
 
-  blueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
+  BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
     document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
   );
 
-  blueNoiseFloat64.useAdaptiveSigmaCandidateAlgo = document.getElementById(
+  BlueNoiseFloat64.useAdaptiveSigmaCandidateAlgo = document.getElementById(
     "blueNoiseUseAdaptiveSigma"
   ).checked;
 
-  blueNoiseFloat64.initialSigmaScale = Number(
+  BlueNoiseFloat64.initialSigmaScale = Number(
     document.getElementById("blueNoiseInitialSigmaScale").value
   );
 
@@ -133,7 +133,7 @@ function blueNoiseWrapper() {
       kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
     }
 
-    result = blueNoiseFloat64.extendedVoidAndCluster(
+    result = BlueNoiseFloat64.extendedVoidAndCluster(
       blueNoiseWidth,
       blueNoiseHeight,
       Number(document.getElementById("blueNoiseSigmaImage").value),
@@ -151,7 +151,7 @@ function blueNoiseWrapper() {
     result = new Uint32Array(sqSz);
     for (let i = 0; i < sqSz; i++) result[i] = i;
 
-    blueNoiseFloat64.georgievFajardoInPlace(
+    BlueNoiseFloat64.georgievFajardoInPlace(
       result,
       blueNoiseWidth,
       blueNoiseHeight,
@@ -183,17 +183,17 @@ function blueNoiseWrapper() {
         result[i] = 1;
       }
 
-      blueNoiseUtils.shuffle(result);
+      BlueNoiseUtils.shuffle(result);
 
-      if (blueNoiseFloat64.useAdaptiveSigmaCandidateAlgo) {
-        blueNoiseFloat64.adaptiveCandidateMethodInPlace(
+      if (BlueNoiseFloat64.useAdaptiveSigmaCandidateAlgo) {
+        BlueNoiseFloat64.adaptiveCandidateMethodInPlace(
           result,
           blueNoiseWidth,
           blueNoiseHeight,
-          blueNoiseFloat64.gaussianSigmaRadiusMultiplier
+          BlueNoiseFloat64.gaussianSigmaRadiusMultiplier
         );
       } else {
-        blueNoiseFloat64.candidateMethodInPlace(
+        BlueNoiseFloat64.candidateMethodInPlace(
           result,
           blueNoiseWidth,
           blueNoiseHeight,
