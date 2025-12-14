@@ -380,7 +380,7 @@ function processFrame() {
   }
 
   if (useDBS) {
-    blueNoiseFloat64.directBinarySearch(
+    BlueNoiseFloat64.directBinarySearch(
       rChannel,
       rChannelDithered,
       canvasWidth,
@@ -390,7 +390,7 @@ function processFrame() {
       blueNoiseCustomKernel
     );
 
-    blueNoiseFloat64.directBinarySearch(
+    BlueNoiseFloat64.directBinarySearch(
       gChannel,
       gChannelDithered,
       canvasWidth,
@@ -400,7 +400,7 @@ function processFrame() {
       blueNoiseCustomKernel
     );
 
-    blueNoiseFloat64.directBinarySearch(
+    BlueNoiseFloat64.directBinarySearch(
       bChannel,
       bChannelDithered,
       canvasWidth,
