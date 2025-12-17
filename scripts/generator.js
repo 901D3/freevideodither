@@ -50,6 +50,86 @@ function bayerGen(size) {
   return seed;
 }
 
+const parseKernelErrDiffs = (matrix, division) => {
+  const start = findStart_2D(matrix, -1);
+  let count = 0;
+
+  for (let y = matrix.length - 1; y >= 0; y--) {
+    for (let x = matrix[y].length - 1; x >= 0; x--) {
+      const errWeight = matrix[y][x];
+      if (errWeight === -1 || errWeight === 0) continue;
+
+      count++;
+    }
+  }
+
+  errDiffsKernelErrIdxX = new Int32Array(count);
+  errDiffsKernelErrIdxY = new Int32Array(count);
+  errDiffsKernelErrWeight = new Float32Array(count);
+
+  let idx = 0;
+  for (let y = matrix.length - 1; y >= 0; y--) {
+    for (let x = matrix[y].length - 1; x >= 0; x--) {
+      let errWeight = matrix[y][x];
+      if (errWeight === -1 || errWeight === 0) continue;
+
+      errDiffsKernelErrIdxX[idx] = x - start.x;
+      errDiffsKernelErrIdxY[idx] = y - start.y;
+      errDiffsKernelErrWeight[idx++] = errWeight / division;
+    }
+  }
+};
+
+const parseKernelVarErrDiffs = (matrix) => {
+  const matrixLength = useMirror
+    ? matrix.length === 256
+      ? matrix.length
+      : matrix.length * 2
+    : matrix.length;
+
+  varErrDiffsKernel = [];
+
+  for (let i = 0; i < matrixLength; i++) {
+    const kernel = useMirror ? matrix[mirrorIdx(i, 128)] : matrix[i];
+    const errDiffsKernel = kernel[0];
+    const division = kernel[1];
+
+    let count = 0;
+    for (let y = errDiffsKernel.length - 1; y >= 0; y--) {
+      for (let x = errDiffsKernel[y].length - 1; x >= 0; x--) {
+        const errWeight = errDiffsKernel[y][x];
+        if (errWeight === -1 || errWeight === 0) continue;
+
+        count++;
+      }
+    }
+
+    const kernelErrIdxX = new Int32Array(count);
+    const kernelErrIdxY = new Int32Array(count);
+    const kernelErrWeight = new Float32Array(count);
+
+    const start = findStart_2D(errDiffsKernel, -1);
+
+    let idx = 0;
+    for (let y = errDiffsKernel.length - 1; y >= 0; y--) {
+      for (let x = errDiffsKernel[y].length - 1; x >= 0; x--) {
+        const errWeight = errDiffsKernel[y][x];
+        if (errWeight === -1 || errWeight === 0) continue;
+
+        kernelErrIdxX[idx] = x - start.x;
+        kernelErrIdxY[idx] = y - start.y;
+        kernelErrWeight[idx++] = errWeight / division;
+      }
+    }
+
+    varErrDiffsKernel.push({
+      kernelErrIdxX,
+      kernelErrIdxY,
+      kernelErrWeight,
+    });
+  }
+};
+
 const dotDiffsClassInputLUTCreate = () => {
   const classHeight = matrixInput.length;
   const classWidth = matrixInput[0].length;
@@ -108,11 +188,17 @@ const dotDiffsClassInputLUTCreate = () => {
 function blueNoiseWrapper() {
   blueNoiseCanvas.width = blueNoiseWidth;
   blueNoiseCanvas.height = blueNoiseHeight;
+  let result;
 
   const sqSz = blueNoiseWidth * blueNoiseHeight;
   const blueNoiseAlgo = gId("blueNoiseAlgo").value;
+
+  const density = Number(document.getElementById("blueNoiseDensity").value);
+  const filled1 = (sqSz * density) | 0;
+  const sigmaImage = Number(document.getElementById("blueNoiseSigmaImage").value);
+  const sigmaSample = Number(document.getElementById("blueNoiseSigmaSample").value);
+
   const t0 = performance.now();
-  let result;
 
   BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
     document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
@@ -133,12 +219,12 @@ function blueNoiseWrapper() {
       kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
     }
 
-    result = BlueNoiseFloat64.extendedVoidAndCluster(
+    result = BlueNoiseFloat64.extendedVoidAndClusterWrapAround(
       blueNoiseWidth,
       blueNoiseHeight,
-      Number(document.getElementById("blueNoiseSigmaImage").value),
-      Number(document.getElementById("blueNoiseSigmaSample").value),
-      Number(document.getElementById("blueNoiseDensity").value),
+      sigmaImage,
+      sigmaSample,
+      density,
       kernel
     );
   } else if (blueNoiseAlgo === "georgievFajardo") {
@@ -151,63 +237,23 @@ function blueNoiseWrapper() {
     result = new Uint32Array(sqSz);
     for (let i = 0; i < sqSz; i++) result[i] = i;
 
-    BlueNoiseFloat64.georgievFajardoInPlace(
+    BlueNoiseFloat64.georgievFajardoWrapAroundInPlace(
       result,
       blueNoiseWidth,
       blueNoiseHeight,
-      Number(document.getElementById("blueNoiseSigmaImage").value),
-      Number(document.getElementById("blueNoiseSigmaSample").value),
+      sigmaImage,
+      sigmaSample,
       Number(document.getElementById("blueNoiseIterations").value),
       1,
       kernel
     );
-  } else if (blueNoiseAlgo === "candidateMethodVACluster") {
-    let kernel = null;
-
-    if (document.getElementById("blueNoiseCustomKernel").value) {
-      kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
-    }
-
-    if (
-      Number(document.getElementById("blueNoiseDensity").value) !== 0 &&
-      Number(document.getElementById("blueNoiseDensity").value) !== 1
-    ) {
-      result = new Uint32Array(sqSz);
-
-      for (
-        let i =
-          Math.floor(sqSz * Number(document.getElementById("blueNoiseDensity").value)) - 1;
-        i >= 0;
-        i--
-      ) {
-        result[i] = 1;
-      }
-
-      BlueNoiseUtils.shuffle(result);
-
-      if (BlueNoiseFloat64.useAdaptiveSigmaCandidateAlgo) {
-        BlueNoiseFloat64.adaptiveCandidateMethodInPlace(
-          result,
-          blueNoiseWidth,
-          blueNoiseHeight,
-          BlueNoiseFloat64.gaussianSigmaRadiusMultiplier
-        );
-      } else {
-        BlueNoiseFloat64.candidateMethodInPlace(
-          result,
-          blueNoiseWidth,
-          blueNoiseHeight,
-          Number(document.getElementById("blueNoiseSigmaSample").value),
-          kernel
-        );
-      }
-    } else if (Number(document.getElementById("blueNoiseDensity").value) === 1) result.fill(1);
   }
+
+  printLog("Generating took " + (performance.now() - t0) + "ms");
 
   const highest = findHighest(result);
   const denom = (1 / highest) * 255;
 
-  printLog("Generating took " + (performance.now() - t0) + "ms");
   const frame = blueNoiseCtx.getImageData(0, 0, blueNoiseWidth, blueNoiseHeight);
   const imageData = frame.data;
 
