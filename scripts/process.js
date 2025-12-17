@@ -334,7 +334,7 @@ function processFrame() {
 
   if (useLinear) {
     for (let i = imageData.length; i >= 0; i--) {
-      imageData[i] = linearLUT[imageData[i]] | 0;
+      imageData[i] = linearLUT[imageData[i]];
     }
   }
 
@@ -361,14 +361,14 @@ function processFrame() {
 
   d[ditherDropdownValue](imageData);
 
-  let rChannelDithered;
-  let gChannelDithered;
-  let bChannelDithered;
-
   if (useDBS) {
-    rChannelDithered = new Uint8Array(sqSz);
-    gChannelDithered = new Uint8Array(sqSz);
-    bChannelDithered = new Uint8Array(sqSz);
+    const rChannelDithered = new Uint8Array(sqSz);
+    const gChannelDithered = new Uint8Array(sqSz);
+    const bChannelDithered = new Uint8Array(sqSz);
+    const customIndexesArray = new Uint32Array(sqSz);
+
+    for (let i = 0; i < sqSz; i++) customIndexesArray[i] = i;
+    BlueNoiseUtils.shuffle(customIndexesArray);
 
     for (let i = 0; i < sqSz; i++) {
       const channelIdx = i * 4;
@@ -377,38 +377,38 @@ function processFrame() {
       gChannelDithered[i] = imageData[channelIdx + 1] > 127 ? 1 : 0;
       bChannelDithered[i] = imageData[channelIdx + 2] > 127 ? 1 : 0;
     }
-  }
 
-  if (useDBS) {
-    BlueNoiseFloat64.directBinarySearch(
-      rChannel,
-      rChannelDithered,
-      canvasWidth,
-      canvasHeight,
-      DBSSigma,
-      DBSIterations,
-      blueNoiseCustomKernel
-    );
+    for (let i = 0; i < DBSIterations; i++) {
+      BlueNoiseFloat64.directBinarySearchInPlace(
+        rChannel,
+        rChannelDithered,
+        customIndexesArray,
+        canvasWidth,
+        canvasHeight,
+        DBSSigma,
+        blueNoiseCustomKernel
+      );
 
-    BlueNoiseFloat64.directBinarySearch(
-      gChannel,
-      gChannelDithered,
-      canvasWidth,
-      canvasHeight,
-      DBSSigma,
-      DBSIterations,
-      blueNoiseCustomKernel
-    );
+      BlueNoiseFloat64.directBinarySearchInPlace(
+        gChannel,
+        gChannelDithered,
+        customIndexesArray,
+        canvasWidth,
+        canvasHeight,
+        DBSSigma,
+        blueNoiseCustomKernel
+      );
 
-    BlueNoiseFloat64.directBinarySearch(
-      bChannel,
-      bChannelDithered,
-      canvasWidth,
-      canvasHeight,
-      DBSSigma,
-      DBSIterations,
-      blueNoiseCustomKernel
-    );
+      BlueNoiseFloat64.directBinarySearchInPlace(
+        bChannel,
+        bChannelDithered,
+        customIndexesArray,
+        canvasWidth,
+        canvasHeight,
+        DBSSigma,
+        blueNoiseCustomKernel
+      );
+    }
 
     for (let i = 0; i < sqSz; i++) {
       const channelIdx = i * 4;
@@ -419,8 +419,6 @@ function processFrame() {
       imageData[channelIdx + 3] = 255;
     }
   }
-
-  d[ditherDropdownValue](imageData);
 
   ctx.putImageData(frame, 0, 0);
 }
