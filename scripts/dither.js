@@ -512,12 +512,12 @@ function errDiffs(d) {
       for (let x = xStart; x !== xEnd; x += xStep) {
         const i = (x + yBase) << 2;
 
-        const bSRGB = getBufferValue(i, c);
+        const bufferValue = getBufferValue(i, c);
         const cl = d[i + c];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bSRGB) * el;
+        const errStrength = (cl - result + bufferValue) * el;
 
         d[i + c] = result;
 
@@ -567,13 +567,13 @@ function varErrDiffs(d) {
       for (let x = xStart; x !== xEnd; x += xStep) {
         const i = (x + yBase) << 2;
 
-        const bSRGB = getBufferValue(i, c);
+        const bufferValue = getBufferValue(i, c);
         const cl = d[i + c];
         const {kernelErrIdxX, kernelErrIdxY, kernelErrWeight} = varErrDiffsKernel[cl];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bSRGB) * el;
+        const errStrength = (cl - result + bufferValue) * el;
 
         d[i + c] = result;
 
@@ -629,12 +629,12 @@ const dotDiffs = (data) => {
         const x = (idx >> 2) % canvasWidth;
         const y = (idx / (canvasWidth << 2)) | 0;
 
-        const bSRGB = getBufferValue(idx, c);
+        const bufferValue = getBufferValue(idx, c);
         const cl = data[idx + c];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bSRGB) * el;
+        const errStrength = (cl - result + bufferValue) * el;
 
         data[idx + c] = result;
 
