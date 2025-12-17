@@ -415,8 +415,8 @@ function bufferChange(width, height) {
   const v = gId("buffer").value;
 
   if (v === "Int8Array") return new Int8Array(sqSz4);
-  else if (v === "Int16Array") return new Int8Array(sqSz4);
-  else if (v === "Int32Array") return new Int8Array(sqSz4);
+  else if (v === "Int16Array") return new Int16Array(sqSz4);
+  else if (v === "Int32Array") return new Int32Array(sqSz4);
   else if (v === "Float16Array") return new Float16Array(sqSz4); //new typed array
   else if (v === "Float32Array") return new Float32Array(sqSz4);
   else if (v === "Float64Array") return new Float32Array(sqSz4);
@@ -502,7 +502,7 @@ function errDiffs(d) {
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
-      const yBase = y * canvasWidth;
+      const yOffs = y * canvasWidth;
       const isOdd = useSerpentine && y % 2 === 1;
 
       const xStart = isOdd ? canvasWidth - 1 : 0;
@@ -510,7 +510,7 @@ function errDiffs(d) {
       const xStep = isOdd ? -1 : 1;
 
       for (let x = xStart; x !== xEnd; x += xStep) {
-        const i = (x + yBase) << 2;
+        const i = (yOffs + x) << 2;
 
         const bufferValue = getBufferValue(i, c);
         const cl = d[i + c];
@@ -527,10 +527,10 @@ function errDiffs(d) {
           const newX = x + (isOdd ? -errIdxX : errIdxX);
           const newY = y + errDiffsKernelErrIdxY[k];
 
-          if (newY < 0) continue;
-          else if (newX < 0) continue;
-          else if (newY >= canvasHeight) continue;
+          if (newX < 0) continue;
+          else if (newY < 0) continue;
           else if (newX >= canvasWidth) continue;
+          else if (newY >= canvasHeight) continue;
 
           errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
             errStrength * errDiffsKernelErrWeight[k];
@@ -557,7 +557,7 @@ function varErrDiffs(d) {
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
-      const yBase = y * canvasWidth;
+      const yOffs = y * canvasWidth;
       const isOdd = useSerpentine && y % 2 === 1;
 
       const xStart = isOdd ? canvasWidth - 1 : 0;
@@ -565,7 +565,7 @@ function varErrDiffs(d) {
       const xStep = isOdd ? -1 : 1;
 
       for (let x = xStart; x !== xEnd; x += xStep) {
-        const i = (x + yBase) << 2;
+        const i = (yOffs + x) << 2;
 
         const bufferValue = getBufferValue(i, c);
         const cl = d[i + c];
@@ -583,10 +583,10 @@ function varErrDiffs(d) {
           const newX = x + (isOdd ? -errIdxX : errIdxX);
           const newY = y + kernelErrIdxY[k];
 
-          if (newY < 0) continue;
-          else if (newX < 0) continue;
-          else if (newY >= canvasHeight) continue;
+          if (newX < 0) continue;
+          else if (newY < 0) continue;
           else if (newX >= canvasWidth) continue;
+          else if (newY >= canvasHeight) continue;
 
           errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
             errStrength * kernelErrWeight[k];
@@ -609,6 +609,7 @@ const dotDiffs = (data) => {
   const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
   const classHeight = matrixInput.length;
   const classWidth = matrixInput[0].length;
+  const dotDiffsClassMatrixCanvasLUTLength = dotDiffsClassMatrixCanvasLUT.length;
 
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
@@ -616,11 +617,7 @@ const dotDiffs = (data) => {
     const colorLimitScaled255 = colorLimit * scaled255;
     const el = colorErrArray[c];
 
-    for (
-      let classValue = 0, length = dotDiffsClassMatrixCanvasLUT.length;
-      classValue < length;
-      classValue++
-    ) {
+    for (let classValue = 0; classValue < dotDiffsClassMatrixCanvasLUTLength; classValue++) {
       const indexesOfClassValueLength = dotDiffsClassMatrixCanvasLUT[classValue].length;
 
       for (let i = 0; i < indexesOfClassValueLength; i++) {
@@ -644,8 +641,10 @@ const dotDiffs = (data) => {
           const newX = x + errDiffsKernelErrIdxX[k];
           const newY = y + errDiffsKernelErrIdxY[k];
 
-          if (newX < 0 || newX >= canvasWidth) continue;
-          else if (newY < 0 || newY >= canvasHeight) continue;
+          if (newX < 0) continue;
+          else if (newY < 0) continue;
+          else if (newX >= canvasWidth) continue;
+          else if (newY >= canvasHeight) continue;
           else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
 
           totalWeight += errDiffsKernelErrWeight[k];
@@ -658,8 +657,10 @@ const dotDiffs = (data) => {
             const newX = x + errDiffsKernelErrIdxX[k];
             const newY = y + errDiffsKernelErrIdxY[k];
 
-            if (newX < 0 || newX >= canvasWidth) continue;
-            else if (newY < 0 || newY >= canvasHeight) continue;
+            if (newX < 0) continue;
+            else if (newY < 0) continue;
+            else if (newX >= canvasWidth) continue;
+            else if (newY >= canvasHeight) continue;
             else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
 
             errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
