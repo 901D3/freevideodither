@@ -350,7 +350,7 @@ const varErrDiffsPresets = () => {
   }
 
   gId("varErrDiffsMatrixInput").value = formatNestedArray(varErrDiffsMatrixInput);
-  varErrDiffsKernel = parseKernelVarErrDiffs(varErrDiffsMatrixInput);
+  parseKernelVarErrDiffs(varErrDiffsMatrixInput);
 
   process();
 };
@@ -422,59 +422,6 @@ function bufferChange(width, height) {
   else if (v === "Float64Array") return new Float32Array(sqSz4);
 }
 
-function parseKernelErrDiffs(matrix, division) {
-  const start = findStart_2D(matrix, -1);
-  const kernel = [];
-
-  for (let y = 0, length = matrix.length; y < length; y++) {
-    for (let x = 0, length2 = matrix[y].length; x < length2; x++) {
-      let errWeight = matrix[y][x];
-      if (errWeight === -1 || errWeight === 0) continue;
-      errWeight /= division;
-
-      kernel.push({
-        errIdxX: x - start.x,
-        errIdxY: y - start.y,
-        errWeight,
-      });
-    }
-  }
-
-  return kernel;
-}
-
-function parseKernelVarErrDiffs(matrix) {
-  const matrixLength = useMirror
-    ? matrix.length === 256
-      ? matrix.length
-      : matrix.length * 2
-    : matrix.length;
-  const result = [];
-
-  for (let i = 0; i < matrixLength; i++) {
-    const idx = useMirror ? matrix[mirrorIdx(i, 128)] : matrix[i];
-    const start = findStart_2D(idx[0], -1);
-    const kernel = [];
-
-    for (let y = 0; y < idx[0].length; y++) {
-      const yIdx = idx[0];
-      for (let x = 0; x < yIdx[y].length; x++) {
-        const errWeight = yIdx[y][x];
-        if (errWeight === -1 || errWeight === 0) continue;
-
-        kernel.push({
-          errIdxX: x - start.x,
-          errIdxY: y - start.y,
-          errWeight: errWeight / idx[1],
-        });
-      }
-    }
-    result.push(kernel);
-  }
-
-  return result;
-}
-
 const scaled255 = 1 / 255;
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -494,6 +441,7 @@ function bayer(d) {
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
+    const colorLimitScaled255 = colorLimit * scaled255;
 
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
@@ -502,7 +450,7 @@ function bayer(d) {
         const i = (x + yOffs) << 2;
         const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
 
-        d[i + c] = ((d[i + c] * scaled255 * colorLimit + bVal) | 0) * colorLimitScaled;
+        d[i + c] = ((d[i + c] * colorLimitScaled255 + bVal) | 0) * colorLimitScaled;
       }
     }
   }
@@ -522,6 +470,7 @@ function arithmetic(d) {
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
+    const colorLimitScaled255 = colorLimit * scaled255;
 
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
@@ -530,7 +479,7 @@ function arithmetic(d) {
         const i = (x + yOffs) << 2;
         const v = d[i + c];
 
-        d[i + c] = ((v * scaled255 * colorLimit + cp(x, y, c, v)) | 0) * colorLimitScaled;
+        d[i + c] = ((v * colorLimitScaled255 + cp(x, y, c, v)) | 0) * colorLimitScaled;
       }
     }
   }
@@ -544,11 +493,12 @@ function errDiffs(d) {
   setErrDiffsTarget(d);
   if (useBuffer) errDiffsBuffer.fill(0);
 
-  const errDiffsKernelLength = errDiffsKernel.length;
+  const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
 
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
+    const colorLimitScaled255 = colorLimit * scaled255;
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
@@ -565,21 +515,25 @@ function errDiffs(d) {
         const bSRGB = getBufferValue(i, c);
         const cl = d[i + c];
 
-        const result = Math.round((cl + bSRGB) * scaled255 * colorLimit) * colorLimitScaled;
+        const result =
+          (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
         const errStrength = (cl - result + bSRGB) * el;
 
         d[i + c] = result;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
-          const {errIdxX, errIdxY, errWeight} = errDiffsKernel[k];
+          const errIdxX = errDiffsKernelErrIdxX[k];
 
           const newX = x + (isOdd ? -errIdxX : errIdxX);
-          const newY = y + errIdxY;
+          const newY = y + errDiffsKernelErrIdxY[k];
 
-          if (newX < 0 || newY < 0 || newX >= canvasWidth || newY >= canvasHeight) continue;
+          if (newY < 0) continue;
+          else if (newX < 0) continue;
+          else if (newY >= canvasHeight) continue;
+          else if (newX >= canvasWidth) continue;
 
-          const ni = (newY * canvasWidth + newX) << 2;
-          errDiffsBufferTarget[ni + c] += errStrength * errWeight;
+          errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
+            errStrength * errDiffsKernelErrWeight[k];
         }
       }
     }
@@ -599,6 +553,7 @@ function varErrDiffs(d) {
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
+    const colorLimitScaled255 = colorLimit * scaled255;
     const el = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
@@ -614,24 +569,27 @@ function varErrDiffs(d) {
 
         const bSRGB = getBufferValue(i, c);
         const cl = d[i + c];
-        const coeff = varErrDiffsKernel[cl];
-        const varErrDiffsKernelMatrixLength = varErrDiffsKernel[cl].length;
+        const {kernelErrIdxX, kernelErrIdxY, kernelErrWeight} = varErrDiffsKernel[cl];
 
-        const result = Math.round((cl + bSRGB) * scaled255 * colorLimit) * colorLimitScaled;
+        const result =
+          (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
         const errStrength = (cl - result + bSRGB) * el;
 
         d[i + c] = result;
 
-        for (let k = 0; k < varErrDiffsKernelMatrixLength; k++) {
-          const {errIdxX, errIdxY, errWeight} = coeff[k];
+        for (let k = kernelErrIdxX.length - 1; k >= 0; k--) {
+          const errIdxX = kernelErrIdxX[k];
 
           const newX = x + (isOdd ? -errIdxX : errIdxX);
-          const newY = y + errIdxY;
+          const newY = y + kernelErrIdxY[k];
 
-          if (newX < 0 || newY < 0 || newX >= canvasWidth || newY >= canvasHeight) continue;
+          if (newY < 0) continue;
+          else if (newX < 0) continue;
+          else if (newY >= canvasHeight) continue;
+          else if (newX >= canvasWidth) continue;
 
-          const ni = (newY * canvasWidth + newX) << 2;
-          errDiffsBufferTarget[ni + c] += errStrength * errWeight;
+          errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
+            errStrength * kernelErrWeight[k];
         }
       }
     }
@@ -648,13 +606,14 @@ const dotDiffs = (data) => {
   setErrDiffsTarget(data);
   if (useBuffer) errDiffsBuffer.fill(0);
 
-  const errDiffsKernelLength = errDiffsKernel.length;
+  const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
   const classHeight = matrixInput.length;
   const classWidth = matrixInput[0].length;
 
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
+    const colorLimitScaled255 = colorLimit * scaled255;
     const el = colorErrArray[c];
 
     for (
@@ -664,7 +623,7 @@ const dotDiffs = (data) => {
     ) {
       const indexesOfClassValueLength = dotDiffsClassMatrixCanvasLUT[classValue].length;
 
-      for (let i = 0, length = indexesOfClassValueLength; i < length; i++) {
+      for (let i = 0; i < indexesOfClassValueLength; i++) {
         const idx = dotDiffsClassMatrixCanvasLUT[classValue][i];
 
         const x = (idx >> 2) % canvasWidth;
@@ -673,33 +632,38 @@ const dotDiffs = (data) => {
         const bSRGB = getBufferValue(idx, c);
         const cl = data[idx + c];
 
-        const result = Math.round((cl + bSRGB) * scaled255 * colorLimit) * colorLimitScaled;
+        const result =
+          (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
         const errStrength = (cl - result + bSRGB) * el;
 
         data[idx + c] = result;
 
-        let weightedNeighbors = [];
         let totalWeight = 0;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
-          const {errIdxX, errIdxY, errWeight} = errDiffsKernel[k];
-          const newX = x + errIdxX;
-          const newY = y + errIdxY;
-          if (newX < 0 || newY < 0 || newX >= canvasWidth || newY >= canvasHeight) continue;
+          const newX = x + errDiffsKernelErrIdxX[k];
+          const newY = y + errDiffsKernelErrIdxY[k];
 
-          if (matrixInput[newY % classHeight][newX % classWidth] > classValue) {
-            totalWeight += errWeight;
-            weightedNeighbors.push({newX, newY, errWeight});
-          }
+          if (newX < 0 || newX >= canvasWidth) continue;
+          else if (newY < 0 || newY >= canvasHeight) continue;
+          else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
+
+          totalWeight += errDiffsKernelErrWeight[k];
         }
 
-        if (totalWeight > 0) {
+        if (totalWeight !== 0) {
           const scale = errStrength / totalWeight;
 
-          for (let i = 0, length = weightedNeighbors.length; i < length; i++) {
-            const {newX, newY, errWeight} = weightedNeighbors[i];
+          for (let k = 0; k < errDiffsKernelLength; k++) {
+            const newX = x + errDiffsKernelErrIdxX[k];
+            const newY = y + errDiffsKernelErrIdxY[k];
 
-            errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] += errWeight * scale;
+            if (newX < 0 || newX >= canvasWidth) continue;
+            else if (newY < 0 || newY >= canvasHeight) continue;
+            else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
+
+            errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
+              errDiffsKernelErrWeight[k] * scale;
           }
         }
       }
