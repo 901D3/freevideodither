@@ -186,19 +186,37 @@ const dotDiffsClassInputLUTCreate = () => {
 };
 
 function blueNoiseWrapper() {
+  const blueNoiseWidth = Number(document.getElementById("blueNoiseWidth").value);
+  const blueNoiseHeight = Number(document.getElementById("blueNoiseHeight").value);
+  const blueNoiseAlgo = document.getElementById("blueNoiseAlgo").value;
   blueNoiseCanvas.width = blueNoiseWidth;
   blueNoiseCanvas.height = blueNoiseHeight;
-  let result;
 
   const sqSz = blueNoiseWidth * blueNoiseHeight;
-  const blueNoiseAlgo = gId("blueNoiseAlgo").value;
 
-  const density = Number(document.getElementById("blueNoiseDensity").value);
-  const filled1 = (sqSz * density) | 0;
+  const samples = Number(document.getElementById("blueNoiseSamples").value);
   const sigmaImage = Number(document.getElementById("blueNoiseSigmaImage").value);
   const sigmaSample = Number(document.getElementById("blueNoiseSigmaSample").value);
+  const iterations = Number(document.getElementById("blueNoiseIterations").value);
+  const pNorm = Number(document.getElementById("blueNoisePNorm").value);
+
+  const MBCCandidates = Number(document.getElementById("blueNoiseMBCCandidates").value);
+
+  let result;
 
   const t0 = performance.now();
+
+  BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
+    document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
+  );
+
+  BlueNoiseFloat64.useAdaptiveSigmaCandidateAlgo = document.getElementById(
+    "blueNoiseUseAdaptiveSigma"
+  ).checked;
+
+  BlueNoiseFloat64.initialSigmaScale = Number(
+    document.getElementById("blueNoiseInitialSigmaScale").value
+  );
 
   BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
     document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
@@ -224,7 +242,7 @@ function blueNoiseWrapper() {
       blueNoiseHeight,
       sigmaImage,
       sigmaSample,
-      density,
+      samples,
       kernel
     );
   } else if (blueNoiseAlgo === "georgievFajardo") {
@@ -234,8 +252,9 @@ function blueNoiseWrapper() {
       kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
     }
 
-    result = new Uint32Array(sqSz);
+    result = new Float64Array(sqSz);
     for (let i = 0; i < sqSz; i++) result[i] = i;
+    //BlueNoiseUtils.shuffle(result);
 
     BlueNoiseFloat64.georgievFajardoWrapAroundInPlace(
       result,
@@ -243,17 +262,16 @@ function blueNoiseWrapper() {
       blueNoiseHeight,
       sigmaImage,
       sigmaSample,
-      Number(document.getElementById("blueNoiseIterations").value),
-      1,
+      iterations,
+      pNorm,
       kernel
     );
   }
 
-  printLog("Generating took " + (performance.now() - t0) + "ms");
-
   const highest = findHighest(result);
   const denom = (1 / highest) * 255;
 
+  printLog("Generating took " + (performance.now() - t0) + "ms");
   const frame = blueNoiseCtx.getImageData(0, 0, blueNoiseWidth, blueNoiseHeight);
   const imageData = frame.data;
 
