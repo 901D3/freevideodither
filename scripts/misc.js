@@ -1,67 +1,67 @@
 gId("rLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", undefined, "slider");
   rLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[0] = rLvls;
 });
 
 gId("rLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("rLvlsRange"), gId("rLvlsInput"), "rLvls", 2, "input");
   rLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[0] = rLvls;
 });
 
 gId("gLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", undefined, "slider");
   gLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[1] = gLvls;
 });
 
 gId("gLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("gLvlsRange"), gId("gLvlsInput"), "gLvls", 2, "input");
   gLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[1] = gLvls;
 });
 
 gId("bLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", undefined, "slider");
   bLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[2] = bLvls;
 });
 
 gId("bLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("bLvlsRange"), gId("bLvlsInput"), "bLvls", 2, "input");
   bLvls--;
-  colorLimitArray = [rLvls, gLvls, bLvls];
+  colorLimitArray[2] = bLvls;
 });
 
 gId("rErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", undefined, "slider");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[0] = rErrLvls;
 });
 
 gId("rErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("rErrLvlsRange"), gId("rErrLvlsInput"), "rErrLvls", 1, "input");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[0] = rErrLvls;
 });
 
 gId("gErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", undefined, "slider");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[1] = gErrLvls;
 });
 
 gId("gErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("gErrLvlsRange"), gId("gErrLvlsInput"), "gErrLvls", 1, "input");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[1] = gErrLvls;
 });
 
 gId("bErrLvlsRange").addEventListener("input", function () {
   sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", undefined, "slider");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[2] = bErrLvls;
 });
 
 gId("bErrLvlsInput").addEventListener("input", function () {
   sliderInputSync(gId("bErrLvlsRange"), gId("bErrLvlsInput"), "bErrLvls", 1, "input");
-  colorErrArray = [rErrLvls, gErrLvls, bErrLvls];
+  colorErrArray[2] = bErrLvls;
 });
 
 gId("useLinear").addEventListener("input", function () {
@@ -236,27 +236,6 @@ gId("DBSIterations").addEventListener("change", function () {
 gId("blueNoiseCustomKernel").addEventListener("input", function () {
   if (document.getElementById("blueNoiseCustomKernel").value) {
     blueNoiseCustomKernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
-  }
-});
-
-gId("blueNoiseAlgo").addEventListener("change", function () {
-  blueNoiseAlgo = gId("blueNoiseAlgo").value;
-  if (blueNoiseAlgo === "VACluster") {
-    gId("blueNoiseInitialSigmaScale").classList.add("disabled");
-    gId("blueNoiseSigmaSample").classList.add("disabled");
-    gId("blueNoiseIterations").classList.add("disabled");
-  } else if (blueNoiseAlgo === "extendedVACluster") {
-    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
-    gId("blueNoiseSigmaSample").classList.add("disabled");
-    gId("blueNoiseIterations").classList.add("disabled");
-  } else if (blueNoiseAlgo === "bartWronskiVACluster") {
-    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
-    gId("blueNoiseSigmaSample").classList.add("disabled");
-    gId("blueNoiseIterations").classList.add("disabled");
-  } else if (blueNoiseAlgo === "georgievFajardo") {
-    gId("blueNoiseInitialSigmaScale").classList.remove("disabled");
-    gId("blueNoiseSigmaSample").classList.remove("disabled");
-    gId("blueNoiseIterations").classList.remove("disabled");
   }
 });
 
