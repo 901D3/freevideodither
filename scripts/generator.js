@@ -50,13 +50,13 @@ function bayerGen(size) {
   return seed;
 }
 
-const parseKernelErrDiffs = (matrix, division) => {
-  const start = findStart_2D(matrix, -1);
+const parseKernelErrDiffs = (in2DMatrix, division) => {
+  const start = findStart_2D(in2DMatrix, -1);
   let count = 0;
 
-  for (let y = matrix.length - 1; y >= 0; y--) {
-    for (let x = matrix[y].length - 1; x >= 0; x--) {
-      const errWeight = matrix[y][x];
+  for (let y = in2DMatrix.length - 1; y >= 0; y--) {
+    for (let x = in2DMatrix[y].length - 1; x >= 0; x--) {
+      const errWeight = in2DMatrix[y][x];
       if (errWeight === -1 || errWeight === 0) continue;
 
       count++;
@@ -68,9 +68,9 @@ const parseKernelErrDiffs = (matrix, division) => {
   errDiffsKernelErrWeight = new Float32Array(count);
 
   let idx = 0;
-  for (let y = matrix.length - 1; y >= 0; y--) {
-    for (let x = matrix[y].length - 1; x >= 0; x--) {
-      let errWeight = matrix[y][x];
+  for (let y = in2DMatrix.length - 1; y >= 0; y--) {
+    for (let x = in2DMatrix[y].length - 1; x >= 0; x--) {
+      let errWeight = in2DMatrix[y][x];
       if (errWeight === -1 || errWeight === 0) continue;
 
       errDiffsKernelErrIdxX[idx] = x - start.x;
@@ -80,17 +80,17 @@ const parseKernelErrDiffs = (matrix, division) => {
   }
 };
 
-const parseKernelVarErrDiffs = (matrix) => {
+const parseKernelVarErrDiffs = (in2DMatrix) => {
   const matrixLength = useMirror
-    ? matrix.length === 256
-      ? matrix.length
-      : matrix.length * 2
-    : matrix.length;
+    ? in2DMatrix.length === 256
+      ? in2DMatrix.length
+      : in2DMatrix.length * 2
+    : in2DMatrix.length;
 
   varErrDiffsKernel = [];
 
   for (let i = 0; i < matrixLength; i++) {
-    const kernel = useMirror ? matrix[mirrorIdx(i, 128)] : matrix[i];
+    const kernel = useMirror ? in2DMatrix[mirrorIdx(i, 128)] : in2DMatrix[i];
     const errDiffsKernel = kernel[0];
     const division = kernel[1];
 
@@ -176,6 +176,7 @@ const dotDiffsClassInputLUTCreate = () => {
 
     for (let x = 0; x < canvasWidth; x++) {
       const classIndex = classToIndex[matrixInput[classY][x % classWidth]];
+
       if (!dotDiffsClassMatrixCanvasLUT[classIndex]) {
         dotDiffsClassMatrixCanvasLUT[classIndex] = [];
       }
@@ -185,38 +186,148 @@ const dotDiffsClassInputLUTCreate = () => {
   }
 };
 
-function blueNoiseWrapper() {
-  const blueNoiseWidth = Number(document.getElementById("blueNoiseWidth").value);
-  const blueNoiseHeight = Number(document.getElementById("blueNoiseHeight").value);
-  const blueNoiseAlgo = document.getElementById("blueNoiseAlgo").value;
+const dotDiffsClassInputLUTCreateSimple = (classWidth, classHeight) => {
+  const classBuckets = [];
+
+  for (let y = 0; y < classHeight; y++) {
+    const yOffs = y * classWidth;
+
+    for (let x = 0; x < classWidth; x++) {
+      const classValue = matrixInput[y][x];
+
+      if (classBuckets[classValue] === undefined) {
+        classBuckets[classValue] = [];
+      }
+
+      classBuckets[classValue].push(yOffs + x);
+    }
+  }
+
+  dotDiffsClassMatrixCanvasLUT = new Uint32Array(classWidth * classHeight);
+
+  for (
+    let classValue = 0, classRank = 0, classBucketsLength = classBuckets.length;
+    classValue < classBucketsLength;
+    classValue++
+  ) {
+    const bucket = classBuckets[classValue];
+    if (bucket === undefined) continue;
+
+    for (let i = 0, bucketLength = bucket.length; i < bucketLength; i++) {
+      dotDiffsClassMatrixCanvasLUT[classRank++] = bucket[i];
+    }
+  }
+};
+
+/**
+ * Improved Dot Diffusion For Image Halftoning
+ * https://apps.dtic.mil/sti/pdfs/ADA368062.pdf
+ * 
+ * @param {*} gray 
+ * @param {*} candidates1 
+ * @param {*} candidates2 
+ * @param {*} sigma 
+ */
+
+const dotDiffsEnhance = (gray, candidates1, candidates2, sigma) => {
+  const classHeight = matrixInput.length;
+  const classWidth = matrixInput[0].length;
+
+  const sqSz = classWidth * classHeight;
+
+  const kernelArray = BlueNoiseFloat64.getGaussianKernel(sigma);
+  const kernelWidth = (Math.ceil(3 * sigma) << 1) + 1;
+
+  const ditheredArray = new Float32Array(sqSz);
+  const errorArray = new Float32Array(sqSz);
+
+  ditheredArray.fill(gray);
+  dotDiffsClassInputLUTCreateSimple(classWidth, classHeight);
+  dotDiffsSimple(ditheredArray, classWidth, classHeight, sqSz);
+
+  for (let i = 0; i < sqSz; i++) {
+    errorArray[i] = gray - ditheredArray[i];
+  }
+
+  let currentCost = BlueNoiseUtils.computeEnergyWrapAround(
+    errorArray,
+    classWidth,
+    classHeight,
+    kernelArray,
+    kernelWidth,
+    kernelWidth
+  );
+
+  let improved = true;
+
+  breaked: while (improved) {
+    improved = false;
+
+    for (let candidate1 = 0; candidate1 < candidates1; candidate1++) {
+      const candidateIdx1 = (Math.random() * sqSz) | 0;
+
+      for (let candidate2 = 0; candidate2 < candidates2; candidate2++) {
+        let candidateIdx2 = (Math.random() * sqSz) | 0;
+
+        while (candidateIdx1 === candidateIdx2) candidateIdx2 = (Math.random() * sqSz) | 0;
+
+        const tmp = dotDiffsClassMatrixCanvasLUT[candidateIdx1];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx1] =
+          dotDiffsClassMatrixCanvasLUT[candidateIdx2];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx2] = tmp;
+
+        ditheredArray.fill(gray);
+        dotDiffsSimple(ditheredArray, classWidth, classHeight, sqSz);
+
+        for (let i = 0; i < sqSz; i++) {
+          errorArray[i] = gray - ditheredArray[i];
+        }
+
+        const cost = BlueNoiseUtils.computeEnergyWrapAround(
+          errorArray,
+          classWidth,
+          classHeight,
+          kernelArray,
+          kernelWidth,
+          kernelWidth
+        );
+
+        if (cost > currentCost) {
+          currentCost = cost;
+          improved = true;
+
+          continue breaked;
+        }
+
+        dotDiffsClassMatrixCanvasLUT[candidateIdx2] =
+          dotDiffsClassMatrixCanvasLUT[candidateIdx1];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx1] = tmp;
+      }
+    }
+  }
+
+  for (let y = 0; y < classHeight; y++) {
+    const yOffs = y * classWidth;
+
+    for (let x = 0; x < classWidth; x++) {
+      matrixInput[y][x] = dotDiffsClassMatrixCanvasLUT[yOffs + x];
+    }
+  }
+};
+
+const blueNoiseWrapper = () => {
   blueNoiseCanvas.width = blueNoiseWidth;
   blueNoiseCanvas.height = blueNoiseHeight;
+  let result;
 
   const sqSz = blueNoiseWidth * blueNoiseHeight;
+  const blueNoiseAlgo = gId("blueNoiseAlgo").value;
 
   const samples = Number(document.getElementById("blueNoiseSamples").value);
   const sigmaImage = Number(document.getElementById("blueNoiseSigmaImage").value);
   const sigmaSample = Number(document.getElementById("blueNoiseSigmaSample").value);
-  const iterations = Number(document.getElementById("blueNoiseIterations").value);
-  const pNorm = Number(document.getElementById("blueNoisePNorm").value);
-
-  const MBCCandidates = Number(document.getElementById("blueNoiseMBCCandidates").value);
-
-  let result;
 
   const t0 = performance.now();
-
-  BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
-    document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
-  );
-
-  BlueNoiseFloat64.useAdaptiveSigmaCandidateAlgo = document.getElementById(
-    "blueNoiseUseAdaptiveSigma"
-  ).checked;
-
-  BlueNoiseFloat64.initialSigmaScale = Number(
-    document.getElementById("blueNoiseInitialSigmaScale").value
-  );
 
   BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = Number(
     document.getElementById("blueNoiseGaussianSigmaRadiusMultiplier").value
@@ -252,9 +363,8 @@ function blueNoiseWrapper() {
       kernel = JSON.parse(document.getElementById("blueNoiseCustomKernel").value);
     }
 
-    result = new Float64Array(sqSz);
+    result = new Uint32Array(sqSz);
     for (let i = 0; i < sqSz; i++) result[i] = i;
-    //BlueNoiseUtils.shuffle(result);
 
     BlueNoiseFloat64.georgievFajardoWrapAroundInPlace(
       result,
@@ -262,16 +372,17 @@ function blueNoiseWrapper() {
       blueNoiseHeight,
       sigmaImage,
       sigmaSample,
-      iterations,
-      pNorm,
+      Number(document.getElementById("blueNoiseIterations").value),
+      1,
       kernel
     );
   }
 
+  printLog("Generating took " + (performance.now() - t0) + "ms");
+
   const highest = findHighest(result);
   const denom = (1 / highest) * 255;
 
-  printLog("Generating took " + (performance.now() - t0) + "ms");
   const frame = blueNoiseCtx.getImageData(0, 0, blueNoiseWidth, blueNoiseHeight);
   const imageData = frame.data;
 
@@ -307,4 +418,4 @@ function blueNoiseWrapper() {
   matrixInputLUTCreate();
 
   if (ditherDropdown.value === "dotDiffs") dotDiffsClassInputLUTCreate();
-}
+};
