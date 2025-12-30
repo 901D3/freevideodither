@@ -322,12 +322,62 @@ const errDiffsPresets = () => {
   } else if (a === "twoD") {
     errDiffsMatrixInput = [[-1, 1], [1]];
   } else if (a === "oneD") {
-    random() > 0.5 ? (errDiffsMatrixInput = [[-1, 1]]) : (errDiffsMatrixInput = [[-1], [1]]);
+    Math.random() > 0.5
+      ? (errDiffsMatrixInput = [[-1, 1]])
+      : (errDiffsMatrixInput = [[-1], [1]]);
   } else if (a === "knuth") {
     errDiffsMatrixInput = [
       [1, 2, 1],
       [2, -1, 2],
       [1, 2, 1],
+    ];
+  } else if (a === "box3") {
+    errDiffsMatrixInput = [
+      [1, 1, 1],
+      [1, -1, 1],
+      [1, 1, 1],
+    ];
+  } else if (a === "box5") {
+    errDiffsMatrixInput = [
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, -1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+    ];
+  } else if (a === "box7") {
+    errDiffsMatrixInput = [
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, -1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+    ];
+  } else if (a === "box9") {
+    errDiffsMatrixInput = [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, -1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ];
+  } else if (a === "cross") {
+    errDiffsMatrixInput = [
+      [0, 1],
+      [1, -1, 1],
+      [0, 1],
+    ];
+  } else if (a === "diagonalCross") {
+    errDiffsMatrixInput = [
+      [1, 0, 1],
+      [0, -1, 0],
+      [1, 0, 1],
     ];
   }
 
@@ -434,7 +484,7 @@ const scaled255 = 1 / 255;
  * https://en.wikipedia.org/wiki/Ordered_dithering
  */
 
-function bayer(d) {
+function bayer(inArray) {
   const mY = matrixInputLUT.mY;
   const mX = matrixInputLUT.mX;
 
@@ -450,7 +500,7 @@ function bayer(d) {
         const i = (x + yOffs) << 2;
         const bVal = matrixInputLUT[(y % mY) * mX + (x % mX)];
 
-        d[i + c] = ((d[i + c] * colorLimitScaled255 + bVal) | 0) * colorLimitScaled;
+        inArray[i + c] = ((inArray[i + c] * colorLimitScaled255 + bVal) | 0) * colorLimitScaled;
       }
     }
   }
@@ -461,10 +511,10 @@ function bayer(d) {
  * By Øyvind Kolås
  * https://pippin.gimp.org/a_dither
  *
- * Added "v" variable for current pixel value. Can be used with ternary operator for whatever you want
+ * Added "v" variable for current pixel value
  */
 
-function arithmetic(d) {
+function arithmetic(inArray) {
   const cp = new Function("x", "y", "c", "v", "return " + arithmeticInput + ";");
 
   for (let c = 0; c < 3; c++) {
@@ -477,9 +527,9 @@ function arithmetic(d) {
 
       for (let x = 0; x < canvasWidth; x++) {
         const i = (x + yOffs) << 2;
-        const v = d[i + c];
+        const v = inArray[i + c];
 
-        d[i + c] = ((v * colorLimitScaled255 + cp(x, y, c, v)) | 0) * colorLimitScaled;
+        inArray[i + c] = ((v * colorLimitScaled255 + cp(x, y, c, v)) | 0) * colorLimitScaled;
       }
     }
   }
@@ -489,8 +539,8 @@ function arithmetic(d) {
  * https://en.wikipedia.org/wiki/Error_diffusion
  */
 
-function errDiffs(d) {
-  setErrDiffsTarget(d);
+function errDiffs(inArray) {
+  setErrDiffsTarget(inArray);
   if (useBuffer) errDiffsBuffer.fill(0);
 
   const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
@@ -499,7 +549,7 @@ function errDiffs(d) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
     const colorLimitScaled255 = colorLimit * scaled255;
-    const el = colorErrArray[c];
+    const errorStrength = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
@@ -513,18 +563,16 @@ function errDiffs(d) {
         const i = (yOffs + x) << 2;
 
         const bufferValue = getBufferValue(i, c);
-        const cl = d[i + c];
+        const cl = inArray[i + c];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bufferValue) * el;
+        const errStrength = (cl - result + bufferValue) * errorStrength;
 
-        d[i + c] = result;
+        inArray[i + c] = result;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
-          const errIdxX = errDiffsKernelErrIdxX[k];
-
-          const newX = x + (isOdd ? -errIdxX : errIdxX);
+          const newX = x + (isOdd ? -errDiffsKernelErrIdxX[k] : errDiffsKernelErrIdxX[k]);
           const newY = y + errDiffsKernelErrIdxY[k];
 
           if (newX < 0) continue;
@@ -546,15 +594,15 @@ function errDiffs(d) {
  * https://perso.liris.cnrs.fr/ostrom/publications/pdf/SIGGRAPH01_varcoeffED.pdf
  */
 
-function varErrDiffs(d) {
-  setErrDiffsTarget(d);
+function varErrDiffs(inArray) {
+  setErrDiffsTarget(inArray);
   if (useBuffer) errDiffsBuffer.fill(0);
 
   for (let c = 0; c < 3; c++) {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
     const colorLimitScaled255 = colorLimit * scaled255;
-    const el = colorErrArray[c];
+    const errorStrength = colorErrArray[c];
 
     for (let y = 0; y < canvasHeight; y++) {
       const yOffs = y * canvasWidth;
@@ -568,19 +616,17 @@ function varErrDiffs(d) {
         const i = (yOffs + x) << 2;
 
         const bufferValue = getBufferValue(i, c);
-        const cl = d[i + c];
+        const cl = inArray[i + c];
         const {kernelErrIdxX, kernelErrIdxY, kernelErrWeight} = varErrDiffsKernel[cl];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bufferValue) * el;
+        const errStrength = (cl - result + bufferValue) * errorStrength;
 
-        d[i + c] = result;
+        inArray[i + c] = result;
 
         for (let k = kernelErrIdxX.length - 1; k >= 0; k--) {
-          const errIdxX = kernelErrIdxX[k];
-
-          const newX = x + (isOdd ? -errIdxX : errIdxX);
+          const newX = x + (isOdd ? -kernelErrIdxX[k] : kernelErrIdxX[k]);
           const newY = y + kernelErrIdxY[k];
 
           if (newX < 0) continue;
@@ -602,8 +648,8 @@ function varErrDiffs(d) {
  * https://dl.acm.org/doi/pdf/10.1145/35039.35040
  */
 
-const dotDiffs = (data) => {
-  setErrDiffsTarget(data);
+const dotDiffs = (inArray) => {
+  setErrDiffsTarget(inArray);
   if (useBuffer) errDiffsBuffer.fill(0);
 
   const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
@@ -615,7 +661,7 @@ const dotDiffs = (data) => {
     const colorLimit = colorLimitArray[c];
     const colorLimitScaled = (1 / colorLimit) * 255;
     const colorLimitScaled255 = colorLimit * scaled255;
-    const el = colorErrArray[c];
+    const errorStrength = colorErrArray[c];
 
     for (let classValue = 0; classValue < dotDiffsClassMatrixCanvasLUTLength; classValue++) {
       const indexesOfClassValueLength = dotDiffsClassMatrixCanvasLUT[classValue].length;
@@ -627,14 +673,14 @@ const dotDiffs = (data) => {
         const y = (idx / (canvasWidth << 2)) | 0;
 
         const bufferValue = getBufferValue(idx, c);
-        const cl = data[idx + c];
+        const cl = inArray[idx + c];
 
         const result =
           (((cl + bufferValue) * colorLimitScaled255 + 0.5) | 0) * colorLimitScaled;
-        const errStrength = (cl - result + bufferValue) * el;
 
-        data[idx + c] = result;
+        inArray[idx + c] = result;
 
+        let errStrength = (cl - result + bufferValue) * errorStrength;
         let totalWeight = 0;
 
         for (let k = 0; k < errDiffsKernelLength; k++) {
@@ -643,15 +689,15 @@ const dotDiffs = (data) => {
 
           if (newX < 0) continue;
           else if (newY < 0) continue;
+          else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
           else if (newX >= canvasWidth) continue;
           else if (newY >= canvasHeight) continue;
-          else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
 
           totalWeight += errDiffsKernelErrWeight[k];
         }
 
         if (totalWeight !== 0) {
-          const scale = errStrength / totalWeight;
+          errStrength /= totalWeight;
 
           for (let k = 0; k < errDiffsKernelLength; k++) {
             const newX = x + errDiffsKernelErrIdxX[k];
@@ -659,14 +705,54 @@ const dotDiffs = (data) => {
 
             if (newX < 0) continue;
             else if (newY < 0) continue;
+            else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
             else if (newX >= canvasWidth) continue;
             else if (newY >= canvasHeight) continue;
-            else if (matrixInput[newY % classHeight][newX % classWidth] <= classValue) continue;
 
             errDiffsBufferTarget[((newY * canvasWidth + newX) << 2) + c] +=
-              errDiffsKernelErrWeight[k] * scale;
+              errDiffsKernelErrWeight[k] * errStrength;
           }
         }
+      }
+    }
+  }
+};
+
+const dotDiffsSimple = (inArray, classWidth, classHeight, classSqSz) => {
+  const errDiffsKernelLength = errDiffsKernelErrIdxX.length;
+
+  for (let classIdx = 0; classIdx < classSqSz; classIdx++) {
+    const idx = dotDiffsClassMatrixCanvasLUT[classIdx];
+    const x = idx % classWidth;
+    const y = (idx / classWidth) | 0;
+
+    const cl = inArray[idx];
+    const result = (cl + 0.5) | 0;
+
+    inArray[idx] = result;
+
+    let errStrength = cl - result;
+    let totalWeight = 0;
+
+    for (let k = 0; k < errDiffsKernelLength; k++) {
+      const newX = (x + errDiffsKernelErrIdxX[k] + classWidth) % classWidth;
+      const newY = (y + errDiffsKernelErrIdxY[k] + classHeight) % classHeight;
+
+      if (classIdx <= dotDiffsClassMatrixCanvasLUT[newY * classWidth + newX]) continue;
+
+      totalWeight += errDiffsKernelErrWeight[k];
+    }
+
+    if (totalWeight !== 0) {
+      errStrength /= totalWeight;
+
+      for (let k = 0; k < errDiffsKernelLength; k++) {
+        const newX = (x + errDiffsKernelErrIdxX[k] + classWidth) % classWidth;
+        const newY = (y + errDiffsKernelErrIdxY[k] + classHeight) % classHeight;
+
+        if (classIdx <= dotDiffsClassMatrixCanvasLUT[newY * classWidth + newX]) continue;
+
+        inArray[newY * classWidth + newX] += errDiffsKernelErrWeight[k] * errStrength;
       }
     }
   }
