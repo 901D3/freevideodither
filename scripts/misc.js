@@ -222,7 +222,7 @@ gId("blueNoiseGaussianSigmaRadiusMultiplier").addEventListener("change", functio
     gId("blueNoiseGaussianSigmaRadiusMultiplier").value
   );
 
-  blueNoiseFloat64.gaussianSigmaRadiusMultiplier = DBSGaussianSigmaRadiusMultiplier;
+  BlueNoiseFloat64.gaussianSigmaRadiusMultiplier = DBSGaussianSigmaRadiusMultiplier;
 });
 
 gId("blueNoiseSigmaImage").addEventListener("change", function () {
