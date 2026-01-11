@@ -288,19 +288,26 @@
               <input type="number" id="blueNoiseSigmaSample" value="1" />
             </div>
             <div class="settings_label-input">
-              <span>Density</span>
-              <input type="number" id="blueNoiseDensity" value="0.1" />
+              <span>Samples</span>
+              <input type="number" id="blueNoiseSamples" value="100" />
             </div>
             <div class="settings_label-input">
               <span>Iterations</span>
-              <input type="number" id="blueNoiseIterations" value="100000" />
+              <input type="number" id="blueNoiseIterations" value="15" />
+            </div>
+            <div class="settings_label-input">
+              <span>MBC Candidates</span>
+              <input type="number" id="blueNoiseMBCCandidates" value="20" />
+            </div>
+            <div class="settings_label-input">
+              <span>P Norm</span>
+              <input type="number" id="blueNoisePNorm" value="0.5" />
             </div>
             <div class="settings_checkbox-label-input">
               <input type="checkbox" id="blueNoiseUseAdaptiveSigma" />
-              <label for="blueNoiseUseAdaptiveSigma">Use adaptive sigma(uneven dots fix)</label>
-              <input type="number" id="blueNoiseInitialSigmaScale" value="0.4" />
+              <span>Use adaptive sigma(uneven dots fix)</span>
+              <input type="number" id="blueNoiseInitialSigmaScale" value="0.5" />
             </div>
-            <button onclick="blueNoiseWrapper()">Generate</button>
           </div>
           <div class="whitehr"></div>
           <div class="settings_label-select">
