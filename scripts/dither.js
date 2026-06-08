@@ -1,6 +1,5 @@
 const matrixThresholdPresets = () => {
   const a = gId("matrix").value;
-  gId("blueNoiseDisp").classList.add("disabled");
 
   if (a === "threshold") {
     matrixInput = [[1]];
