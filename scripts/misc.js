@@ -304,12 +304,5 @@ gId("dither").addEventListener("change", function () {
     getBufferValue = (i, c) => errDiffsBuffer[i + c]; // read from buffer
   } else {
     getBufferValue = () => 0; // always return 0
-  }
-
-  blueNoiseWidth = Number(gId("blueNoiseWidth").value);
-  blueNoiseHeight = Number(gId("blueNoiseHeight").value);
-
-  try {
-    blueNoiseInitArray = JSON.parse(gId("blueNoiseInitArrayInput").value).flat();
-  } catch {}
+  }=
 })();
