@@ -63,8 +63,6 @@ var ctx = canvas.getContext("2d", {
   desynchronized: false,
 });
 ctx.imageSmoothingEnabled = false;
-var blueNoiseCanvas = gId("blueNoiseCanvas");
-var blueNoiseCtx = blueNoiseCanvas.getContext("2d");
 var video = gId("video");
 var ditherDropdown = gId("dither");
 var ditherDropdownValue = "none";
