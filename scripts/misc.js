@@ -304,5 +304,5 @@ gId("dither").addEventListener("change", function () {
     getBufferValue = (i, c) => errDiffsBuffer[i + c]; // read from buffer
   } else {
     getBufferValue = () => 0; // always return 0
-  }=
+  }
 })();
