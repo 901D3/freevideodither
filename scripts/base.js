@@ -108,6 +108,9 @@ BaseInit = function () {
   gCtx.video.addEventListener("seeking", processFrame);
 
   RendererInit();
+
+  errorDiffs.fn.DitherErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(true, true);
+  errorDiffs.fn.DitherVariableErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(false, true);
 }
 
 document.addEventListener("DOMContentLoaded", BaseInit);
