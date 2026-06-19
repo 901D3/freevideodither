@@ -13,13 +13,6 @@ Once you know how to use it, it becomes powerful as hell im not kidding
 
 For anyone on mobile, it is recommended to go landscape mode for best UX
 
-──────────
-
-### _**Reference:**_
-[cs559-5.ppt by University Of Wisconsin](http://research.cs.wisc.edu/graphics/Courses/559-f2002/lectures/cs559-5.ppt)
-
-[dithermark.com](https://www.dithermark.com)
-
 # _Legal notices_
 
 ### **901D3/WebM-muxer.js**
