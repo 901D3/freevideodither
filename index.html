@@ -12,7 +12,10 @@
 
   <script src="https://unpkg.com/json5@2/dist/index.min.js"></script>
 
-  <script src="scripts/lib/901D3/ditherxyr.js"></script>
+  <script src="https://901d3.github.io/WebM-muxer.js/src/WebM-muxer.js"></script>
+  <script src="https://901d3.github.io/ditherxyr.js/ditherxyr.js"></script>
+
+  <script src="scripts/DiffuseMatrices.js"></script>
 
   <script src="scripts/mathlib.js"></script>
 
@@ -58,7 +61,8 @@
     <div class="settings-container">
       <div class="settings-label-slider-input">
         <span>Frame Rate</span>
-        <input type="number" id="RenderFrameRate" value="30" oninput="gCtx.frameRate = Number(document.getElementById('RenderFrameRate').value);"/>
+        <input type="number" id="RenderFrameRate" value="30"
+          oninput="gCtx.frameRate = Number(document.getElementById('RenderFrameRate').value);" />
       </div>
       <div class="settings-label-slider-input">
         <span>Blob Quality</span>
@@ -131,13 +135,10 @@
   <span id="Speeds"></span>
 </body>
 
-<script src="scripts/lib/901D3/WebM-muxer.js"></script>
-
-<script src="scripts/DiffuseMatrices.js"></script>
-
 <script src="scripts/dither.js"></script>
 <script src="scripts/misc.js"></script>
 <script src="scripts/process.js"></script>
+
 <script>
   document.addEventListener("keydown", function (event) {
     var activeElement = document.activeElement.tagName.toLowerCase();
