@@ -50,6 +50,11 @@ var errorDiffs = {
 
   classMap: null,
   compiledClassMap: null,
+
+  fn: {
+    DitherErrorDiffusion: null,
+    DitherVariableErrorDiffusion: null,
+  },
 };
 
 var StartRendering = function () { };
