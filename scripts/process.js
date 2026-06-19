@@ -75,9 +75,6 @@ async function render() {
   }
 }
 
-var DitherErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(true, true);
-var DitherVariableErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(false, true);
-
 function processFrame() {
   const t0 = performance.now();
   gCtx.ctx.drawImage(gCtx.video, 0, 0, gCtx.width, gCtx.height);
@@ -129,7 +126,7 @@ function processFrame() {
     DITHERXYR.strideIn = DITHERXYR.strideOut = 4;
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 0;
-    DitherErrorDiffusion(
+    errorDiffs.fn.DitherErrorDiffusion(
       imageData, imageData, null, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
@@ -137,7 +134,7 @@ function processFrame() {
       gCtx.rNormalize, gCtx.rRescale, 256);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
-    DitherErrorDiffusion(
+    errorDiffs.fn.DitherErrorDiffusion(
       imageData, imageData, null, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
@@ -145,7 +142,7 @@ function processFrame() {
       gCtx.gNormalize, gCtx.gRescale, 256);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
-    DitherErrorDiffusion(
+    errorDiffs.fn.DitherErrorDiffusion(
       imageData, imageData, null, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
@@ -160,7 +157,7 @@ function processFrame() {
     DITHERXYR.strideIn = DITHERXYR.strideOut = 4;
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 0;
-    DitherVariableErrorDiffusion(
+    errorDiffs.fn.DitherVariableErrorDiffusion(
       imageData, imageData, errorBuffer, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
@@ -169,7 +166,7 @@ function processFrame() {
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
     errorBuffer.fill(0);
-    DitherVariableErrorDiffusion(
+    errorDiffs.fn.DitherVariableErrorDiffusion(
       imageData, imageData, errorBuffer, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
@@ -178,7 +175,7 @@ function processFrame() {
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
     errorBuffer.fill(0);
-    DitherVariableErrorDiffusion(
+    errorDiffs.fn.DitherVariableErrorDiffusion(
       imageData, imageData, errorBuffer, gCtx.width, gCtx.height,
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
