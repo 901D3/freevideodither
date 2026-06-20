@@ -93,31 +93,31 @@ function processFrame() {
     DITHERXYR.DitherOrdered(
       imageData, imageData, gCtx.width, gCtx.height,
       ordered.compiledMatrix,
-      gCtx.rNormalize, gCtx.rRescale);
+      palettes.compiledPaletteR);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
     DITHERXYR.DitherOrdered(
       imageData, imageData, gCtx.width, gCtx.height,
       ordered.compiledMatrix,
-      gCtx.gNormalize, gCtx.gRescale);
+      palettes.compiledPaletteG);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
     DITHERXYR.DitherOrdered(
       imageData, imageData, gCtx.width, gCtx.height,
       ordered.compiledMatrix,
-      gCtx.bNormalize, gCtx.bRescale);
+      palettes.compiledPaletteB);
   }
   else if (a === 'Arithmetic') {
     DITHERXYR.strideIn = DITHERXYR.strideOut = 4;
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 0;
-    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, gCtx.rNormalize, gCtx.rRescale);
+    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, palettes.compiledPaletteR);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
-    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, gCtx.gNormalize, gCtx.gRescale);
+    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, palettes.compiledPaletteG);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
-    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, gCtx.bNormalize, gCtx.bRescale);
+    DITHERXYR.DitherArithmetic(imageData, imageData, gCtx.width, gCtx.height, arithmetic.fn, palettes.compiledPaletteB);
   }
   else if (a === 'ErrorDiffusion') {
     const tileCountX = gCtx.width / errorDiffs.compiledClassMap.width;
@@ -131,7 +131,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.rNormalize, gCtx.rRescale, 256);
+      palettes.compiledPaletteR);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
     errorDiffs.fn.DitherErrorDiffusion(
@@ -139,7 +139,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.gNormalize, gCtx.gRescale, 256);
+      palettes.compiledPaletteG);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
     errorDiffs.fn.DitherErrorDiffusion(
@@ -147,7 +147,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.bNormalize, gCtx.bRescale, 256);
+      palettes.compiledPaletteB);
   }
   else if (a === 'VariableErrorDiffusion') {
     const errorBuffer = new Float32Array(gCtx.width * gCtx.height);
@@ -162,7 +162,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.rNormalize, gCtx.rRescale, 256);
+      palettes.compiledPaletteR);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 1;
     errorBuffer.fill(0);
@@ -171,7 +171,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.gNormalize, gCtx.gRescale, 256);
+      palettes.compiledPaletteG);
 
     DITHERXYR.offsetIn = DITHERXYR.offsetOut = 2;
     errorBuffer.fill(0);
@@ -180,7 +180,7 @@ function processFrame() {
       errorDiffs.compiledDiffuseKernel,
       errorDiffs.compiledClassMap,
       tileCountX, tileCountY,
-      gCtx.bNormalize, gCtx.bRescale, 256);
+      palettes.compiledPaletteB);
   }
 
   gCtx.ctx.putImageData(frame, 0, 0);
