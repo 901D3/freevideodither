@@ -1,48 +1,42 @@
 document.getElementById('RCountSlider').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), undefined, 'slider') - 1;
-    gCtx.rRescale = 255 / a;
-    gCtx.rNormalize = a / 255;
+    gCtx.rCount = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), undefined, 'slider');
+    CompilePalette();
   }
 );
 
 document.getElementById('RCountInput').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), 2, 'input') - 1;
-    gCtx.rRescale = 255 / a;
-    gCtx.rNormalize = a / 255;
+    gCtx.rCount = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), 2, 'input');
+    CompilePalette();
   }
 );
 
 document.getElementById('GCountSlider').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), undefined, 'slider') - 1;
-    gCtx.gRescale = 255 / a;
-    gCtx.gNormalize = a / 255;
+    gCtx.gCount = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), undefined, 'slider');
+    CompilePalette();
   }
 );
 
 document.getElementById('GCountInput').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), 2, 'input') - 1;
-    gCtx.gRescale = 255 / a;
-    gCtx.gNormalize = a / 255;
+    gCtx.gCount = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), 2, 'input');
+    CompilePalette();
   }
 );
 
 document.getElementById('BCountSlider').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), undefined, 'slider') - 1;
-    gCtx.bRescale = 255 / a;
-    gCtx.bNormalize = a / 255;
+    gCtx.bCount = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), undefined, 'slider');
+    CompilePalette();
   }
 );
 
 document.getElementById('BCountInput').addEventListener('input',
   function () {
-    const a = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), 2, 'input') - 1;
-    gCtx.bRescale = 255 / a;
-    gCtx.bNormalize = a / 255;
+    gCtx.bCount = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), 2, 'input');
+    CompilePalette();
   }
 );
 
@@ -55,7 +49,7 @@ document.getElementById('UseSerpentine').addEventListener('input',
 
     const a = document.getElementById('Dither').value;
     if (a === 'ErrorDiffusion' || a === 'VariableErrorDiffusion')
-      ProcessClassMatrix();
+      CompileClassMap();
   }
 );
 
@@ -179,11 +173,12 @@ document.getElementById('PrimeTextarea').addEventListener('input',
   function () {
     const b = document.getElementById('Dither').value;
 
-    if (b === 'Ordered') ProcessOrderedDitherMatrix();
-    else if (b === 'ErrorDiffusion' || b === 'VariableErrorDiffusion') ProcessErrorDiffusionMatrices();
+    if (b === 'Ordered') CompileOrderedDitherMatrix();
+    else if (b === 'ErrorDiffusion' || b === 'VariableErrorDiffusion') CompileErrorDiffusionMatrices();
   }
 );
 
+/*
 // Improved Dot Diffusion For Image Halftoning
 // https://web.archive.org/web/20240720181431/https://apps.dtic.mil/sti/pdfs/ADA368062.pdf
 
@@ -272,20 +267,15 @@ ImproveClassMatrix = function (gray, candidates1, candidates2, sigma) {
     }
   }
 };
+*/
 
 
 (function () {
-  let a = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), 2, 'input') - 1;
-  gCtx.rRescale = 255 / a;
-  gCtx.rNormalize = a / 255;
+  gCtx.rCount = SliderInputSync(document.getElementById('RCountSlider'), document.getElementById('RCountInput'), 2, 'input');
+  gCtx.gCount = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), 2, 'input');
+  gCtx.bCount = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), 2, 'input');
 
-  a = SliderInputSync(document.getElementById('GCountSlider'), document.getElementById('GCountInput'), 2, 'input') - 1;
-  gCtx.gRescale = 255 / a;
-  gCtx.gNormalize = a / 255;
-
-  a = SliderInputSync(document.getElementById('BCountSlider'), document.getElementById('BCountInput'), 2, 'input') - 1;
-  gCtx.bRescale = 255 / a;
-  gCtx.bNormalize = a / 255;
+  CompilePalette();
 
   useLinear = document.getElementById('UseLinear').checked;
   useSerpentine = document.getElementById('UseSerpentine').checked;
