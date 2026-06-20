@@ -2,14 +2,15 @@
 var SetArithmeticDitherPresets = function () { };
 
 var SetOrderedDitherPreset = function () { };
-var ProcessOrderedDitherMatrix = function () { };
+var CompileOrderedDitherMatrix = function () { };
 
 var SetErrorDiffsPreset = function () { };
-var ProcessErrorDiffusionMatrices = function () { };
-var ProcessClassMatrix = function () { };
+var CompileErrorDiffusionMatrices = function () { };
+var CompileClassMap = function () { };
 
-var ProcessDiffuseTransform = function () { };
+var CompileDiffuseTransform = function () { };
 
+var CompilePalette = function () { };
 
 SetArithmeticDitherPresets = function () {
   const a = document.getElementById('Presets').value;
@@ -25,7 +26,7 @@ SetOrderedDitherPreset = function () {
 
   let matrix;
 
-  if (a === 'Threshold') matrix = [[1]];
+  if (a === 'Threshold') matrix = [[0]];
   else if (a === 'Bayer2') matrix = GenerateBayer(2);
   else if (a === 'Bayer4') matrix = GenerateBayer(4);
   else if (a === 'Bayer8') matrix = GenerateBayer(8);
@@ -51,10 +52,10 @@ SetOrderedDitherPreset = function () {
 
   document.getElementById('PrimeTextarea').value = FormatNestedArray(matrix);
 
-  ProcessOrderedDitherMatrix();
-}
+  CompileOrderedDitherMatrix();
+};
 
-ProcessOrderedDitherMatrix = function () {
+CompileOrderedDitherMatrix = function () {
   const matrixOrdered = DITHERXYR.Struct_Matrix();
   let matrix = JSON5.parse(document.getElementById('PrimeTextarea').value);
   let flatMatrix = matrix.flat();
@@ -67,7 +68,7 @@ ProcessOrderedDitherMatrix = function () {
   ordered.compiledMatrix = DITHERXYR.Struct_CompiledMatrix();
   ordered.compiledMatrix.matrix = new Float32Array(matrixOrdered.width * matrixOrdered.height);
 
-  DITHERXYR.ProcessOrderedDitherMatrix(matrixOrdered, ordered.compiledMatrix);
+  DITHERXYR.CompileOrderedDitherMatrix(matrixOrdered, ordered.compiledMatrix);
 };
 
 SetErrorDiffsPreset = function () {
@@ -112,10 +113,10 @@ SetErrorDiffsPreset = function () {
 
   document.getElementById('PrimeTextarea').value = FormatNestedArray(matrix);
 
-  ProcessErrorDiffusionMatrices();
-}
+  CompileErrorDiffusionMatrices();
+};
 
-ProcessErrorDiffusionMatrices = function () {
+CompileErrorDiffusionMatrices = function () {
   const kernelList = Array.from({ length: 256 }, () => DITHERXYR.Struct_DiffuseKernel());
 
   const matrix = JSON5.parse(document.getElementById('PrimeTextarea').value);
@@ -172,10 +173,10 @@ ProcessErrorDiffusionMatrices = function () {
 
   DITHERXYR.CompileDiffuseKernel(kernelList, 256, errorDiffs.compiledDiffuseKernel);
 
-  ProcessClassMatrix();
+  CompileClassMap();
 };
 
-ProcessClassMatrix = function () {
+CompileClassMap = function () {
   errorDiffs.classMap = DITHERXYR.Struct_ClassMap();
 
   const a = document.getElementById('Dither').value;
@@ -184,7 +185,7 @@ ProcessClassMatrix = function () {
     if (gCtx.serpentine) {
       errorDiffs.classMap.width = gCtx.width;
       errorDiffs.classMap.height = gCtx.height;
-      errorDiffs.classMap.map = new Uint32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
+      errorDiffs.classMap.map = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
 
       let step = 0;
 
@@ -205,20 +206,20 @@ ProcessClassMatrix = function () {
     else {
       errorDiffs.classMap.width = 1;
       errorDiffs.classMap.height = 1;
-      errorDiffs.classMap.map = new Uint8Array([0]);
+      errorDiffs.classMap.map = new Int32Array([0]);
     }
 
     errorDiffs.compiledClassMap = DITHERXYR.Struct_CompiledClassMap();
     errorDiffs.compiledClassMap.classMap = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
     errorDiffs.compiledClassMap.compiledClassMap = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height * 2);
-    DITHERXYR.CompileClassMatrix(errorDiffs.classMap, errorDiffs.compiledClassMap);
+    DITHERXYR.CompileClassMap(errorDiffs.classMap, errorDiffs.compiledClassMap);
 
-    ProcessDiffuseTransform();
+    CompileDiffuseTransform();
   }
-}
+};
 
-ProcessDiffuseTransform = function () {
-  errorDiffs.compiledClassMap.kernelTransform = new Uint8Array(errorDiffs.compiledClassMap.width * errorDiffs.compiledClassMap.height);
+CompileDiffuseTransform = function () {
+  errorDiffs.compiledClassMap.kernelTransform = new Int32Array(errorDiffs.compiledClassMap.width * errorDiffs.compiledClassMap.height);
 
   if (gCtx.serpentine) {
     for (let y = 1; y < errorDiffs.compiledClassMap.height; y += 2) {
@@ -228,7 +229,52 @@ ProcessDiffuseTransform = function () {
         errorDiffs.compiledClassMap.kernelTransform[row + x] = DITHERXYR.DIFFUSETRANSF_FLIPX;
     }
   }
-}
+};
+
+CompilePalette = function () {
+  const paletteR = DITHERXYR.Struct_Palette();
+  const paletteG = DITHERXYR.Struct_Palette();
+  const paletteB = DITHERXYR.Struct_Palette();
+
+  paletteR.paletteMax = paletteG.paletteMax = paletteB.paletteMax = 255;
+
+  paletteR.count = gCtx.rCount;
+  paletteG.count = gCtx.gCount;
+  paletteB.count = gCtx.bCount;
+
+  paletteR.values = new Int32Array(gCtx.rCount);
+  paletteG.values = new Int32Array(gCtx.gCount);
+  paletteB.values = new Int32Array(gCtx.bCount);
+
+  palettes.compiledPaletteR = DITHERXYR.Struct_CompiledPalette();
+  palettes.compiledPaletteG = DITHERXYR.Struct_CompiledPalette();
+  palettes.compiledPaletteB = DITHERXYR.Struct_CompiledPalette();
+
+  palettes.compiledPaletteR.values = new Int32Array(gCtx.rCount);
+  palettes.compiledPaletteG.values = new Int32Array(gCtx.gCount);
+  palettes.compiledPaletteB.values = new Int32Array(gCtx.bCount);
+
+  palettes.compiledPaletteR.invRanges = new Float32Array(gCtx.rCount - 1);
+  palettes.compiledPaletteG.invRanges = new Float32Array(gCtx.gCount - 1);
+  palettes.compiledPaletteB.invRanges = new Float32Array(gCtx.bCount - 1);
+
+  palettes.compiledPaletteR.lookup = new Int32Array(paletteR.paletteMax + 1);
+  palettes.compiledPaletteG.lookup = new Int32Array(paletteG.paletteMax + 1);
+  palettes.compiledPaletteB.lookup = new Int32Array(paletteB.paletteMax + 1);
+
+  for (let i = 0; i < gCtx.rCount; i++)
+    paletteR.values[i] = Math.floor(i * 255 / (gCtx.rCount - 1));
+
+  for (let i = 0; i < gCtx.gCount; i++)
+    paletteG.values[i] = Math.floor(i * 255 / (gCtx.gCount - 1));
+
+  for (let i = 0; i < gCtx.bCount; i++)
+    paletteB.values[i] = Math.floor(i * 255 / (gCtx.bCount - 1));
+
+  DITHERXYR.CompilePalette(paletteR, palettes.compiledPaletteR);
+  DITHERXYR.CompilePalette(paletteG, palettes.compiledPaletteG);
+  DITHERXYR.CompilePalette(paletteB, palettes.compiledPaletteB);
+};
 
 function ToRGBMat(f) {
   let { width, height, data } = f,
