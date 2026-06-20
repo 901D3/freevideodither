@@ -7,13 +7,9 @@ var gCtx = {
   width: 480,
   height: 270,
 
-  rRescale: 0,
-  gRescale: 0,
-  bRescale: 0,
-
-  rNormalize: 0,
-  gNormalize: 0,
-  bNormalize: 0,
+  rCount: 0,
+  gCount: 0,
+  bCount: 0,
 
   serpentine: false,
   linear: false,
@@ -35,12 +31,17 @@ var gCtx = {
   resumeRenderFn: null,
 };
 
+var palettes = {
+  compiledPaletteR: null,
+  compiledPaletteG: null,
+  compiledPaletteB: null,
+};
 var ordered = {
   matrix: null,
   compiledMatrix: null,
   mWidth: 0,
   mHeight: 0
-}
+};
 var arithmetic = { fn: null };
 var errorDiffs = {
   compiledDiffuseKernel: null,
