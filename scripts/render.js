@@ -11,7 +11,8 @@ StartRendering = function () {
   startRenderBtn.setAttribute("disabled", "");
   stopRenderBtn.removeAttribute("disabled", "");
 
-  render();
+  if (gCtx.exportY4M) RenderY4M();
+  else Render();
 }
 
 StopRendering = function () {
