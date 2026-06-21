@@ -1,6 +1,7 @@
 
 var gCtx = {
   video: null,
+  speeds: null,
 
   canvas: null,
   ctx: null,
@@ -18,9 +19,9 @@ var gCtx = {
 
   // renderer specific
 
-  useWebCodecs: false,
+  exportY4M: false,
+
   renderStartTime: 0,
-  maxConcurrentEncodes: 2,
 
   frameRate: 30,
 
@@ -58,11 +59,20 @@ var errorDiffs = {
   },
 };
 
+var SpeedsInit = function () { };
+var SpeedsLog = function () { };
+
 var StartRendering = function () { };
 var StopRendering = function () { };
 var PauseRendering = function () { };
 var ResumeRendering = function () { };
 var RendererInit = function () { };
+
+var Render = function () { };
+var RenderY4M = function () { };
+
+var Process = function () { };
+var ProcessFrame = function () { };
 
 var UploadVideoHandler = function () { };
 
