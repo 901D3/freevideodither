@@ -161,7 +161,8 @@
   document.addEventListener("keydown", function (event) {
     var activeElement = document.activeElement.tagName.toLowerCase();
     if (event.code === "KeyR" && activeElement !== "input" && activeElement !== "textarea") {
-      processFrame();
+      
+      ProcessFrame();
     } else if (event.code === "KeyF" && activeElement !== "input" && activeElement !== "textarea") fullscreenCanvas();
   });
 </script>
