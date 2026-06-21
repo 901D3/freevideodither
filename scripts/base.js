@@ -1,3 +1,12 @@
+
+SpeedsInit = function () {
+  gCtx.speeds.innerText = '';
+};
+
+SpeedsLog = function (msg) {
+  gCtx.speeds.appendChild(document.createTextNode(msg + "\n"));
+};
+
 UploadVideoHandler = function (event) {
   const file = event.target.files[0];
   if (file) {
@@ -53,7 +62,7 @@ ChangeCanvasSize = function () {
     gCtx.width = width, gCtx.height = height;
     gCtx.canvas.width = gCtx.width, gCtx.canvas.height = gCtx.height;
 
-    ProcessClassMatrix();
+    CompileClassMap();
   }
 }
 
@@ -104,13 +113,18 @@ BaseInit = function () {
   }
 
   gCtx.video = document.getElementById("video");
-  gCtx.video.addEventListener("play", process);
-  gCtx.video.addEventListener("seeking", processFrame);
+  gCtx.video.addEventListener("play", Process);
+  gCtx.video.addEventListener("seeking", ProcessFrame);
+
+  gCtx.speeds = document.getElementById('Speeds');
 
   RendererInit();
 
   errorDiffs.fn.DitherErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(true, true);
   errorDiffs.fn.DitherVariableErrorDiffusion = DITHERXYR.CreateDitherErrorDiffusion(false, true);
+
+  document.getElementById('ExportY4M').addEventListener('input',
+    function () { gCtx.exportY4M = document.getElementById('ExportY4M').checked; });
 }
 
 document.addEventListener("DOMContentLoaded", BaseInit);
