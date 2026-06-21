@@ -43,6 +43,10 @@
     </div>
     <div class="display-flex top-bottom-flow width-fit-content" style="gap: 12px">
       <span class="font-weight-bold" style="font-size: 20px">Renderer</span>
+      <div class="settings-checkbox-label">
+        <input type="checkbox" id="ExportY4M" />
+        <label for="ExportY4M">Export as Y4M</label>
+      </div>
       <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
         <button id="StartRenderBtn" type="button" class="sqrButton">Render</button>
         <button id="StopRenderBtn" class="sqrButton" type="button" disabled="">Stop</button>
@@ -62,12 +66,26 @@
       <div class="settings-label-slider-input">
         <span>Frame Rate</span>
         <input type="number" id="RenderFrameRate" value="30"
-          oninput="gCtx.frameRate = Number(document.getElementById('RenderFrameRate').value);" />
+          oninput="gCtx.frameRate = Math.floor(Number(document.getElementById('RenderFrameRate').value));" />
       </div>
       <div class="settings-label-slider-input">
         <span>Blob Quality</span>
         <input type="number" id="RenderBlobQuality" value="0.90" />
       </div>
+    </div>
+    <div class="settings-container">
+      <div class="settings-label-select">
+        <label>Y4M Color Space</label>
+        <select id="Y4MColorSpace">
+          <option value="C420jpeg">YUV420 (Width must be even)</option>
+          <option value="C444">YUV444</option>
+        </select>
+      </div>
+      <div class="settings-label-input">
+        <label>Buffer Size Threshold (MB)</label>
+        <input id="BufferSizeThreshold" value="64" />
+      </div>
+      <span style="width: 250px;">Note: Parted Y4M files are guaranteed contiguous frames, no frame is dropped.</span>
     </div>
   </div>
   <div class="bigContainer left-right-flow">
@@ -132,7 +150,7 @@
       </div>
     </div>
   </div>
-  <span id="Speeds"></span>
+  <span id="Speeds" style="white-space: pre-wrap;"></span>
 </body>
 
 <script src="scripts/dither.js"></script>
