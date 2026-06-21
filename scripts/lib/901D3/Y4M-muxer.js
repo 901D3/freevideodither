@@ -7,6 +7,7 @@ var Y4MMuxer = {
     FRAME: null,
   },
 
+  Init() { },
   WriteHeader() { },
   AppendFrame() { },
 
