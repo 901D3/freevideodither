@@ -93,7 +93,6 @@ RenderY4M = async function () {
   const startTime = Number(document.getElementById('RenderStartTime').value ?? 0);
   const startFrame = Math.floor(startTime * gCtx.frameRate);
   const totalFrames = Math.ceil(gCtx.video.duration * gCtx.frameRate);
-  Speeds
 
   gCtx.video.pause();
   gCtx.video.currentTime = startTime;
