@@ -1,20 +1,9 @@
 
 var PITCH = 0, YAW = 1, ROLL = 2;
 
-var PI = Math.PI;
+var bound = function (min, v, max) { Math.max(Math.min(v, max), min) };
 
-var sin = Math.sin;
-var cos = Math.cos;
-var tan = Math.tan;
-
-var sqrt = Math.sqrt;
-
-var min = Math.min;
-var max = Math.max;
-
-var floor = Math.floor;
-
-var DEG2RAD = function (d) { return d * PI / 180; }
+var DEG2RAD = function (d) { return d * Math.PI / 180; }
 var L22D = function (x, y) { return sqrt(x ** 2 + y ** 2); }
 var L23D = function (x, y, z) { return sqrt(x ** 2 + y ** 2 + z ** 2); }
 var L2Dist2D = function (x1, y1, x2, y2) { return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2); }
@@ -77,14 +66,14 @@ var AngleVectors = function (angles, viewVectors) {
   const pitchRad = DEG2RAD(angles[PITCH]);
   const rollRad = DEG2RAD(angles[ROLL]);
 
-  const sinYaw = sin(yawRad);
-  const cosYaw = cos(yawRad);
+  const sinYaw = Math.sin(yawRad);
+  const cosYaw = Math.cos(yawRad);
 
-  const sinPitch = sin(pitchRad);
-  const cosPitch = cos(pitchRad);
+  const sinPitch = Math.sin(pitchRad);
+  const cosPitch = Math.cos(pitchRad);
 
-  const sinRoll = sin(rollRad);
-  const cosRoll = cos(rollRad);
+  const sinRoll = Math.sin(rollRad);
+  const cosRoll = Math.cos(rollRad);
 
   viewVectors[VIEW_FORWARD_IDX] = cosPitch * cosYaw;
   viewVectors[VIEW_FORWARD_IDX + 1] = cosPitch * sinYaw;
