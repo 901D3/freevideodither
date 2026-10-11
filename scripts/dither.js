@@ -379,3 +379,4 @@ ImproveClassMatrix = function (gray, candidates1, candidates2, sigma) {
   }
 };
 */
+ 
