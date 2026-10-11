@@ -1,12 +1,11 @@
 
-var gCtx = {
+var gctx = {
   video: null,
   speeds: null,
-
   canvas: null,
-  ctx: null,
-  width: 480,
-  height: 270,
+  canvas_ctx: null,
+
+  primetextarea: null,
 
   rCount: 0,
   gCount: 0,
@@ -19,39 +18,34 @@ var gCtx = {
 
   // renderer specific
 
-  exportY4M: false,
+  render_framerate: 30,
 
-  renderStartTime: 0,
+  render_blobquality: 0.9,
+  render_isrendering: false,
+  render_paused: false,
 
-  frameRate: 30,
+  render_y4m: false,
 
-  blobQuality: 0.9,
-  isRendering: false,
-  renderingPaused: false,
-
-  resumeRenderFn: null,
+  render_resolvepromise: null,
 };
 
 var palettes = {
-  compiledPaletteR: null,
-  compiledPaletteG: null,
-  compiledPaletteB: null,
+  paletter: null,
+  paletteg: null,
+  paletteb: null,
 };
+
 var ordered = {
   matrix: null,
-  compiledMatrix: null,
-  mWidth: 0,
-  mHeight: 0
+  matrixwidth: 0,
+  matrixheight: 0
 };
+
 var arithmetic = { fn: null };
+
 var errorDiffs = {
-  compiledDiffuseKernel: null,
-  diffuseMatrixOffsets: null,
-
-  diffuseTransformMap: null,
-
+  diffskernel: null,
   classMap: null,
-  compiledClassMap: null,
 
   fn: {
     DitherErrorDiffusion: null,
@@ -59,30 +53,25 @@ var errorDiffs = {
   },
 };
 
+//
+// base.js
+//
 var SpeedsInit = function () { };
 var SpeedsLog = function () { };
-
-var StartRendering = function () { };
-var StopRendering = function () { };
-var PauseRendering = function () { };
-var ResumeRendering = function () { };
 var RendererInit = function () { };
-
-var Render = function () { };
-var RenderY4M = function () { };
-
-var Process = function () { };
-var ProcessFrame = function () { };
-
-var UploadVideoHandler = function () { };
-
-var UploadDitherImageHandler = function () { };
-
+var RenderLoop = function () { };
+var RenderFrame = function () { };
 var WaitForResolve = function () { return new Promise(function (resolve) { resolvePromise = resolve; }); }
 
-var ChangeCanvasSize = function () { };
+//
+// dither.js
+//
+var SetArithmeticDitherPresets = function () { };
+var SetOrderedDitherPreset = function () { };
+var SetErrorDiffsPreset = function () { };
 
-var GenerateBayer = function (size) { };
-var ImproveClassMatrix = function () { };
+var ProcessArithmeticEq = function () { };
+var ProcessPalette = function () { };
+var ProcessErrorDiffusionMatrices = function () { };
 
-var BaseInit = function () { };
+// var ImproveClassMatrix = function () { };
