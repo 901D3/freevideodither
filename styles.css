@@ -1,25 +1,54 @@
 @import url('https://fonts.cdnfonts.com/css/trebuchet-ms-2');
 @import url('https://fonts.cdnfonts.com/css/ubuntu');
 
-@import url("styles/$_.css");
+.top-bottom-flow { display: flex; flex-direction: column; }
+.bottom-top-flow { display: flex; flex-direction: column-reverse; }
+.left-right-flow { display: flex; flex-direction: row; }
+.right-left-flow { display: flex; flex-direction: row-reverse; }
 
-* {
-  border-radius: 0px;
-}
+.full-width {width: 100% !important;}
+.width-fit-content {width: fit-content !important;}
+.max-width-fit-content {max-width: fit-content !important;}
 
-.resizable {
-  overflow: hidden;
-  resize: both;
-}
+.full-height {height: 100% !important;}
+.height-fit-content {height: fit-content !important;}
+.max-height-fit-content {max-height: fit-content !important;}
+
+.vertical-align-top {vertical-align: top !important;}
+.vertical-align-center {vertical-align: center !important;}
+.vertical-align-middle {vertical-align: middle !important;}
+.vertical-align-bottom {vertical-align: bottom !important;}
+
+.vertical-align-top-margin { margin-top: 0px;  margin-bottom: auto !important; }
+.vertical-align-center-margin,
+.vertical-align-middle-margin { margin-top: auto;  margin-bottom: auto !important; }
+.vertical-align-bottom-margin { margin-top: auto;  margin-bottom: 0px !important; }
+
+.vertical-align-top-flex { justify-content: flex-start !important; }
+.vertical-align-center-flex { justify-content: center !important; }
+.vertical-align-middle-flex { justify-content: middle !important; }
+.vertical-align-bottom-flex { justify-content: flex-end !important; }
+
+.horizontal-align-left { margin-left: 0px;  margin-right: auto !important; }
+.horizontal-align-center,
+.horizontal-align-middle { margin-left: auto; margin-right: auto !important; }
+.horizontal-align-right { margin-left: auto;  margin-right: 0px !important; }
+
+.horizontal-align-left-flex { align-content: flex-start !important; }
+.horizontal-align-center-flex { align-content: center !important; }
+.horizontal-align-middle-flex { align-content: middle !important; }
+.horizontal-align-right-flex { align-content: flex-end !important; }
+
+* { border-radius: 0px; }
+
+.resizable { overflow: hidden; resize: both; }
 
 body {
-  width: 100%;
-  height: 100%;
   accent-color: #ff9d00;
   background-color: #111;
   color: #ffffff;
   margin: 0px;
-  padding: 0px;
+  padding: 5px;
   overflow-x: auto;
 }
 
@@ -92,6 +121,7 @@ canvas {
   image-rendering: pixelated;
   margin: 0px;
   padding: 0px;
+  line-height: 0;
 }
 
 hr {
@@ -133,60 +163,6 @@ audio {
   resize: both;
 }
 
-.previewContainer {
-  display: flex;
-  flex-direction: column;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.bigContainer {
-  display: flex;
-  justify-items: center;
-  align-items: center;
-  overflow: auto;
-  resize: both;
-}
-
-.previewContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.mainVideo {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 5px;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: auto;
-  margin-right: auto;
-  border: 2px solid #ea7010;
-  line-height: 0;
-}
-
-.mainCanvas {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: fit-content;
-  height: fit-content;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: auto;
-  margin-right: auto;
-  border: 2px solid #ea7010;
-  line-height: 0;
-}
-
 .firehr {
   width: 99%;
   height: 2px;
@@ -207,9 +183,7 @@ audio {
   background: #fff;
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 .disabled {
   pointer-events: none;
@@ -289,6 +263,7 @@ audio {
   align-items: center;
   margin: 2px 0;
   cursor: pointer;
+  gap: 3px;
 }
 
 .settings-checkbox-label input[type="checkbox"] {
@@ -297,7 +272,6 @@ audio {
 }
 
 .settings-checkbox-label label {
-  margin-left: 5px;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -461,5 +435,3 @@ audio {
   margin: 0px;
   padding: 0px;
 }
-
-.setting-label-shortinput {}
