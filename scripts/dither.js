@@ -1,24 +1,46 @@
 
-var SetArithmeticDitherPresets = function () { };
+function GenerateBayer(size) {
+  let seed = [[0, 2], [3, 1]];
 
-var SetOrderedDitherPreset = function () { };
-var CompileOrderedDitherMatrix = function () { };
+  while (seed.length < size) {
+    let n = seed.length;
+    let size = n << 1;
+    let mat = [];
 
-var SetErrorDiffsPreset = function () { };
-var CompileErrorDiffusionMatrices = function () { };
-var CompileClassMap = function () { };
+    for (let x = 0; x < size; x++) {
+      mat[x] = [];
+      for (let y = 0; y < size; y++) {
+        let v = seed[x % n][y % n];
+        if (x < n && y < n) mat[x][y] = v * 4;
+        else if (x < n && y >= n) mat[x][y] = v * 4 + 2;
+        else if (x >= n && y < n) mat[x][y] = v * 4 + 3;
+        else mat[x][y] = v * 4 + 1;
 
-var CompileDiffuseTransform = function () { };
+      }
+    }
 
-var CompilePalette = function () { };
+    seed = mat;
+  }
+
+  return seed;
+}
+
+ProcessArithmeticEq = function () { DITHERXYR.ArithmeticFn = new Function('x', 'y', 'v', 'return ' + gctx.primetextarea.value + ';'); };
 
 SetArithmeticDitherPresets = function () {
   const a = document.getElementById('Presets').value;
 
-  if (a === 'ArithmeticAddConvariant') arithmetic.fn = function (x, y, v) { return ((x + y * 237) * 119 & 255) / 256; };
-  else if (a === 'ArithmeticXorConvariant') arithmetic.fn = function (x, y, v) { return (((x ^ (y * 149)) * 1234) & 255) / 256; };
-  else if (a === 'Halftone') arithmetic.fn = function (x, y, v) { return 0.5 + 0.5 * Math.sin(0.8 * x) * Math.sin(0.8 * y); };
+  let eq = '';
+
+  if (a === 'ArithmeticAddConvariant') eq = '((x + y * 237) * 119 & 255) / 256';
+  else if (a === 'ArithmeticXorConvariant') eq = '(((x ^ (y * 149)) * 1234) & 255) / 256';
+  else if (a === 'Halftone') eq = '0.5 + 0.5 * Math.sin(0.6 * x) * Math.sin(0.6 * y)';
+  else if (a === 'Random') eq = 'Math.random()';
   else return;
+
+  gctx.primetextarea.value = eq;
+
+  DITHERXYR.ArithmeticFn = new Function('x', 'y', 'v', 'return ' + eq + ';');
 };
 
 SetOrderedDitherPreset = function () {
@@ -50,25 +72,20 @@ SetOrderedDitherPreset = function () {
   else if (a === 'Rylander') matrix = [[0, 8, 2, 10], [4, 12, 6, 14], [3, 11, 1, 9], [7, 15, 5, 3]];
   else return;
 
-  document.getElementById('PrimeTextarea').value = FormatNestedArray(matrix);
+  gctx.primetextarea.value = FormatNestedArray(matrix);
 
-  CompileOrderedDitherMatrix();
-};
+  {
+    let flatMatrix = matrix.flat();
+    const div = FindHighest(flatMatrix) + 1;
 
-CompileOrderedDitherMatrix = function () {
-  const matrixOrdered = DITHERXYR.Struct_Matrix();
-  let matrix = JSON5.parse(document.getElementById('PrimeTextarea').value);
-  let flatMatrix = matrix.flat();
+    ordered.matrix = DITHERXYR.Struct_Matrix();
+    ordered.matrix.width = matrix[0].length;
+    ordered.matrix.height = matrix.length;
+    ordered.matrix.matrix = new Float32Array(ordered.matrix.width * ordered.matrix.height);
 
-  matrixOrdered.width = matrix[0].length;
-  matrixOrdered.height = matrix.length;
-  matrixOrdered.division = FindHighest(matrix.flat()) + 1;
-  matrixOrdered.matrix = new Int32Array(flatMatrix);
-
-  ordered.compiledMatrix = DITHERXYR.Struct_CompiledMatrix();
-  ordered.compiledMatrix.matrix = new Float32Array(matrixOrdered.width * matrixOrdered.height);
-
-  DITHERXYR.CompileOrderedDitherMatrix(matrixOrdered, ordered.compiledMatrix);
+    for (let i = ordered.matrix.width * ordered.matrix.height - 1; i >= 0; i--)
+      ordered.matrix.matrix[i] = (0.5 + flatMatrix[i]) / div;
+  }
 };
 
 SetErrorDiffsPreset = function () {
@@ -96,7 +113,7 @@ SetErrorDiffsPreset = function () {
     else if (a === 'Arce') matrix = [[0, 0, 0, -1, 32, 0, 0], [6, 13, 10, 19, 10, 18, 8], [0, 0, 12, 26, 12, 0, 0], [3, 6, 4, 8, 4, 7, 2]];
     else if (a === 'Xot') matrix = [[0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 4, 4], [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7], [0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 7, 4], [0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 7, 4], [0, 0, 2, 2, 0, 0, 3, 3, 0, 7, 8, 8, 7], [0, 3, 3, 3, 5, 6, 5, 5, 5, 7, 5, 5, 4], [2, 3, 3, 3, 7, 6, 5, 5, 4, 6, 1, 1, 1], [2, 3, 3, 3, 7, 6, 5, 5, 4, 6, 1, 1, 1, 1], [0, 3, 3, 3, 5, 6, 5, 5, 5, 5, 1, 1, 1, 1], [0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 0, 1, 1]];
     else if (a === 'TwoD') matrix = [[-1, 1], [1, 0]];
-    else if (a === 'OneD') Math.random() > 0.5 ? (matrix = [[-1, 1]]) : (matrix = [[-1], [1]]);
+    else if (a === 'OneD') matrix = [[-1, 1]];
     else if (a === 'Knuth') matrix = [[1, 2, 1], [2, -1, 2], [1, 2, 1]];
     else if (a === 'Box3') matrix = [[1, 1, 1], [1, -1, 1], [1, 1, 1]];
     else if (a === 'Box5') matrix = [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, -1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]];
@@ -111,67 +128,87 @@ SetErrorDiffsPreset = function () {
     else if (a === 'ZhouFang') matrix = DiffuseMatrices.ZhouFang;
   }
 
-  document.getElementById('PrimeTextarea').value = FormatNestedArray(matrix);
+  gctx.primetextarea.value = FormatNestedArray(matrix);
 
-  CompileErrorDiffusionMatrices();
+  ProcessErrorDiffusionMatrices();
 };
 
-CompileErrorDiffusionMatrices = function () {
-  const kernelList = Array.from({ length: 256 }, () => DITHERXYR.Struct_DiffuseKernel());
+ProcessErrorDiffusionMatrices = function () {
+  errorDiffs.diffskernel = Array.from({ length: 256 }, () => DITHERXYR.Struct_DiffuseKernel());
 
-  const matrix = JSON5.parse(document.getElementById('PrimeTextarea').value);
-  const flatMatrix = matrix.flat();
+  const matrix = JSON5.parse(gctx.primetextarea.value);
 
   const a = document.getElementById('Dither').value
 
   if (a === 'ErrorDiffusion') {
-    const mWidth = matrix[0].length, mHeight = matrix.length;
+    const flatMatrix = matrix.flat();
+
+    const width = matrix[0].length;
+    const height = matrix.length;
     const centerPos = GetPosition2D(matrix, -1);
     const div = MatrixSum1D(flatMatrix) + 1;
 
     for (let i = 0; i < 256; i++) {
-      const kernel = kernelList[i];
+      const p_kernel = errorDiffs.diffskernel[i];
 
-      kernel.weights = flatMatrix;
-      kernel.division = div;
+      p_kernel.weight_count = 0;
 
-      Vector2Copy(centerPos, kernel.center, 0, 0);
+      for (let j = 0; j < flatMatrix.length; j++) {
+        if (flatMatrix[j] <= 0) continue;
+        p_kernel.weight_count++;
+      }
 
-      kernel.dimension[0] = mWidth;
-      kernel.dimension[1] = mHeight;
+      p_kernel.weights = new Float32Array(p_kernel.weight_count * 3);
+
+      for (let j = 0, k = 0; j < flatMatrix.length; j++) {
+        if (flatMatrix[j] <= 0) continue;
+
+        const x = j % width;
+        const y = Math.floor(j / width);
+
+        p_kernel.weights[k * 3] = flatMatrix[j] / div;
+        p_kernel.weights[k * 3 + 1] = x - centerPos[0];
+        p_kernel.weights[k * 3 + 2] = y - centerPos[1];
+        k++
+      }
+
+      p_kernel.width = width;
+      p_kernel.height = height;
     }
   }
   else if (a === 'VariableErrorDiffusion') {
     for (let i = 0; i < 256; i++) {
-      const kernel = kernelList[i];
-      const currentMatrix = matrix[i];
+      const p_kernel = errorDiffs.diffskernel[i];
+      const p_currmat = matrix[i];
 
-      kernel.weights = currentMatrix.flat();
-      kernel.division = MatrixSum2D(currentMatrix) + 1;
+      p_kernel.width = p_currmat[0].length;
+      p_kernel.height = p_currmat.length;
 
-      Vector2Copy(GetPosition2D(currentMatrix, -1), kernel.center, 0, 0);
+      const flatMatrix = p_currmat.flat();
+      const div = MatrixSum1D(flatMatrix) + 1;
+      const centerPos = GetPosition2D(p_currmat, -1);
 
-      kernel.dimension[0] = currentMatrix[0].length;
-      kernel.dimension[1] = currentMatrix.length;
+      p_kernel.weight_count = 0;
+      for (let j = 0; j < flatMatrix.length; j++) {
+        if (flatMatrix[j] <= 0) continue;
+        p_kernel.weight_count++;
+      }
+
+      p_kernel.weights = new Float32Array(p_kernel.weight_count * 3);
+
+      for (let j = 0, k = 0; j < flatMatrix.length; j++) {
+        if (flatMatrix[j] <= 0) continue;
+
+        const x = j % p_kernel.width;
+        const y = Math.floor(j / p_kernel.width);
+
+        p_kernel.weights[k * 3] = flatMatrix[j] / div;
+        p_kernel.weights[k * 3 + 1] = x - centerPos[0];
+        p_kernel.weights[k * 3 + 2] = y - centerPos[1];
+        k++
+      }
     }
   }
-
-  errorDiffs.compiledDiffuseKernel = Array.from({ length: 256 }, () => DITHERXYR.Struct_CompiledDiffuseKernels());
-  for (let i = 0; i < 256; i++) {
-    const currentKernel = kernelList[i];
-    let weightCount = 0;
-    for (let j = currentKernel.dimension[0] * currentKernel.dimension[1] - 1; j >= 0; j--) {
-      if (currentKernel.weights[j] > 0) weightCount++;
-    }
-
-    const a = errorDiffs.compiledDiffuseKernel[i];
-
-    a.weights = new Float32Array(weightCount);
-    a.offsets = new Int32Array(weightCount * 2);
-    a.weightCount = weightCount;
-  }
-
-  DITHERXYR.CompileDiffuseKernel(kernelList, 256, errorDiffs.compiledDiffuseKernel);
 
   CompileClassMap();
 };
@@ -182,24 +219,32 @@ CompileClassMap = function () {
   const a = document.getElementById('Dither').value;
 
   if (a === 'ErrorDiffusion' || a === 'VariableErrorDiffusion') {
-    if (gCtx.serpentine) {
-      errorDiffs.classMap.width = gCtx.width;
-      errorDiffs.classMap.height = gCtx.height;
+    if (gctx.serpentine) {
+      errorDiffs.classMap.width = gctx.canvas.width;
+      errorDiffs.classMap.height = gctx.canvas.height;
       errorDiffs.classMap.map = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
+      errorDiffs.classMap.processed_map = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height * 2);
+      errorDiffs.classMap.kernel_transform = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
+
+      const p_map = errorDiffs.classMap.map;
+      const p_kerneltransf = errorDiffs.classMap.kernel_transform;
 
       let step = 0;
 
       for (let y = 0; y < errorDiffs.classMap.height; y++) {
         const row = y * errorDiffs.classMap.width;
-        const isOddRow = (y % 2) === 1;
 
-        if (!isOddRow) {
-          for (let x = 0; x < errorDiffs.classMap.width; x++)
-            errorDiffs.classMap.map[row + x] = step++;
+        if (y % 2 === 0) {
+          for (let x = 0; x < errorDiffs.classMap.width; x++) {
+            p_map[row + x] = step++;
+            p_kerneltransf[row + x] = 0;
+          }
         }
         else {
-          for (let x = errorDiffs.classMap.width - 1; x >= 0; x--)
-            errorDiffs.classMap.map[row + x] = step++;
+          for (let x = errorDiffs.classMap.width - 1; x >= 0; x--) {
+            p_map[row + x] = step++;
+            p_kerneltransf[row + x] = DITHERXYR.KERNEL_TRANSFORM_FLIPX;
+          }
         }
       }
     }
@@ -207,88 +252,130 @@ CompileClassMap = function () {
       errorDiffs.classMap.width = 1;
       errorDiffs.classMap.height = 1;
       errorDiffs.classMap.map = new Int32Array([0]);
+      errorDiffs.classMap.processed_map = new Int32Array([0, 0]);
+      errorDiffs.classMap.kernel_transform = new Int32Array([0]);
     }
 
-    errorDiffs.compiledClassMap = DITHERXYR.Struct_CompiledClassMap();
-    errorDiffs.compiledClassMap.classMap = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height);
-    errorDiffs.compiledClassMap.compiledClassMap = new Int32Array(errorDiffs.classMap.width * errorDiffs.classMap.height * 2);
-    DITHERXYR.CompileClassMap(errorDiffs.classMap, errorDiffs.compiledClassMap);
-
-    CompileDiffuseTransform();
+    DITHERXYR.ProcessClassMap(errorDiffs.classMap);
   }
 };
 
-CompileDiffuseTransform = function () {
-  errorDiffs.compiledClassMap.kernelTransform = new Int32Array(errorDiffs.compiledClassMap.width * errorDiffs.compiledClassMap.height);
+ProcessPalette = function () {
+  palettes.paletter = DITHERXYR.Struct_Palette();
+  palettes.paletteg = DITHERXYR.Struct_Palette();
+  palettes.paletteb = DITHERXYR.Struct_Palette();
 
-  if (gCtx.serpentine) {
-    for (let y = 1; y < errorDiffs.compiledClassMap.height; y += 2) {
-      const row = y * errorDiffs.compiledClassMap.width;
+  palettes.paletter.max = palettes.paletteg.max = palettes.paletteb.max = 255;
 
-      for (let x = 0; x < errorDiffs.compiledClassMap.width; x++)
-        errorDiffs.compiledClassMap.kernelTransform[row + x] = DITHERXYR.DIFFUSETRANSF_FLIPX;
+  palettes.paletter.count = gctx.rCount;
+  palettes.paletteg.count = gctx.gCount;
+  palettes.paletteb.count = gctx.bCount;
+
+  palettes.paletter.v = new Int32Array(gctx.rCount);
+  palettes.paletteg.v = new Int32Array(gctx.gCount);
+  palettes.paletteb.v = new Int32Array(gctx.bCount);
+
+  palettes.paletter.lookupcache = new Int32Array(palettes.paletter.max + 1);
+  palettes.paletteg.lookupcache = new Int32Array(palettes.paletteg.max + 1);
+  palettes.paletteb.lookupcache = new Int32Array(palettes.paletteb.max + 1);
+
+  for (let i = 0; i < gctx.rCount; i++) palettes.paletter.v[i] = Math.floor(i * 255 / (gctx.rCount - 1));
+  for (let i = 0; i < gctx.gCount; i++) palettes.paletteg.v[i] = Math.floor(i * 255 / (gctx.gCount - 1));
+  for (let i = 0; i < gctx.bCount; i++) palettes.paletteb.v[i] = Math.floor(i * 255 / (gctx.bCount - 1));
+
+  DITHERXYR.ProcessPalette(palettes.paletter);
+  DITHERXYR.ProcessPalette(palettes.paletteg);
+  DITHERXYR.ProcessPalette(palettes.paletteb);
+};
+
+
+/*
+// Improved Dot Diffusion For Image Halftoning
+// https://web.archive.org/web/20240720181431/https://apps.dtic.mil/sti/pdfs/ADA368062.pdf
+
+ImproveClassMatrix = function (gray, candidates1, candidates2, sigma) {
+  const classHeight = matrixInput.length;
+  const classWidth = matrixInput[0].length;
+
+  const sqSz = classWidth * classHeight;
+
+  const kernelArray = BlueNoiseFloat64.getGaussianKernel(sigma);
+  const kernelWidth = (Math.ceil(3 * sigma) << 1) + 1;
+
+  const ditheredArray = new Float32Array(sqSz);
+  const errorArray = new Float32Array(sqSz);
+
+  ditheredArray.fill(gray);
+  dotDiffsClassInputLUTCreateSimple(classWidth, classHeight);
+  dotDiffsSimple(ditheredArray, classWidth, classHeight, sqSz);
+
+  for (let i = 0; i < sqSz; i++) {
+    errorArray[i] = gray - ditheredArray[i];
+  }
+
+  let currentCost = BlueNoiseUtils.computeEnergyWrapAround(
+    errorArray,
+    classWidth,
+    classHeight,
+    kernelArray,
+    kernelWidth,
+    kernelWidth
+  );
+
+  let improved = true;
+
+  breaked: while (improved) {
+    improved = false;
+
+    for (let candidate1 = 0; candidate1 < candidates1; candidate1++) {
+      const candidateIdx1 = (Math.random() * sqSz) | 0;
+
+      for (let candidate2 = 0; candidate2 < candidates2; candidate2++) {
+        let candidateIdx2 = (Math.random() * sqSz) | 0;
+
+        while (candidateIdx1 === candidateIdx2) candidateIdx2 = (Math.random() * sqSz) | 0;
+
+        const tmp = dotDiffsClassMatrixCanvasLUT[candidateIdx1];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx1] =
+          dotDiffsClassMatrixCanvasLUT[candidateIdx2];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx2] = tmp;
+
+        ditheredArray.fill(gray);
+        dotDiffsSimple(ditheredArray, classWidth, classHeight, sqSz);
+
+        for (let i = 0; i < sqSz; i++) {
+          errorArray[i] = gray - ditheredArray[i];
+        }
+
+        const cost = BlueNoiseUtils.computeEnergyWrapAround(
+          errorArray,
+          classWidth,
+          classHeight,
+          kernelArray,
+          kernelWidth,
+          kernelWidth
+        );
+
+        if (cost > currentCost) {
+          currentCost = cost;
+          improved = true;
+
+          continue breaked;
+        }
+
+        dotDiffsClassMatrixCanvasLUT[candidateIdx2] =
+          dotDiffsClassMatrixCanvasLUT[candidateIdx1];
+        dotDiffsClassMatrixCanvasLUT[candidateIdx1] = tmp;
+      }
+    }
+  }
+
+  for (let y = 0; y < classHeight; y++) {
+    const yOffs = y * classWidth;
+
+    for (let x = 0; x < classWidth; x++) {
+      matrixInput[y][x] = dotDiffsClassMatrixCanvasLUT[yOffs + x];
     }
   }
 };
-
-CompilePalette = function () {
-  const paletteR = DITHERXYR.Struct_Palette();
-  const paletteG = DITHERXYR.Struct_Palette();
-  const paletteB = DITHERXYR.Struct_Palette();
-
-  paletteR.paletteMax = paletteG.paletteMax = paletteB.paletteMax = 255;
-
-  paletteR.count = gCtx.rCount;
-  paletteG.count = gCtx.gCount;
-  paletteB.count = gCtx.bCount;
-
-  paletteR.values = new Int32Array(gCtx.rCount);
-  paletteG.values = new Int32Array(gCtx.gCount);
-  paletteB.values = new Int32Array(gCtx.bCount);
-
-  palettes.compiledPaletteR = DITHERXYR.Struct_CompiledPalette();
-  palettes.compiledPaletteG = DITHERXYR.Struct_CompiledPalette();
-  palettes.compiledPaletteB = DITHERXYR.Struct_CompiledPalette();
-
-  palettes.compiledPaletteR.values = new Int32Array(gCtx.rCount);
-  palettes.compiledPaletteG.values = new Int32Array(gCtx.gCount);
-  palettes.compiledPaletteB.values = new Int32Array(gCtx.bCount);
-
-  palettes.compiledPaletteR.invRanges = new Float32Array(gCtx.rCount - 1);
-  palettes.compiledPaletteG.invRanges = new Float32Array(gCtx.gCount - 1);
-  palettes.compiledPaletteB.invRanges = new Float32Array(gCtx.bCount - 1);
-
-  palettes.compiledPaletteR.lookup = new Int32Array(paletteR.paletteMax + 1);
-  palettes.compiledPaletteG.lookup = new Int32Array(paletteG.paletteMax + 1);
-  palettes.compiledPaletteB.lookup = new Int32Array(paletteB.paletteMax + 1);
-
-  for (let i = 0; i < gCtx.rCount; i++)
-    paletteR.values[i] = Math.floor(i * 255 / (gCtx.rCount - 1));
-
-  for (let i = 0; i < gCtx.gCount; i++)
-    paletteG.values[i] = Math.floor(i * 255 / (gCtx.gCount - 1));
-
-  for (let i = 0; i < gCtx.bCount; i++)
-    paletteB.values[i] = Math.floor(i * 255 / (gCtx.bCount - 1));
-
-  DITHERXYR.CompilePalette(paletteR, palettes.compiledPaletteR);
-  DITHERXYR.CompilePalette(paletteG, palettes.compiledPaletteG);
-  DITHERXYR.CompilePalette(paletteB, palettes.compiledPaletteB);
-};
-
-function ToRGBMat(f) {
-  let { width, height, data } = f,
-    rgbMatrix = [];
-
-  for (let y = 0; y < height; y++) {
-    let row = [];
-    for (let x = 0; x < width; x++) {
-      let i = (y * width + x) << 2,
-        cl = data[i];
-      row.push(cl);
-    }
-    rgbMatrix.push(row);
-  }
-
-  return rgbMatrix;
-}
+*/
