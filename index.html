@@ -6,32 +6,36 @@
   <title>Free Video Dithering</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unifont@5.1.0/index.min.css" />
 
   <script src="https://unpkg.com/json5@2/dist/index.min.js"></script>
 
   <script src="https://901d3.github.io/WebM-muxer.js/src/WebM-muxer.js"></script>
-  <script src="https://901d3.github.io/ditherxyr.js/ditherxyr.js"></script>
   <script src="scripts/lib/901D3/Y4M-muxer.js"></script>
+  <script src="scripts/ditherxyr.js"></script>
 
   <script src="scripts/DiffuseMatrices.js"></script>
-
   <script src="scripts/mathlib.js"></script>
-
   <script src="scripts/utils_h.js"></script>
   <script src="scripts/index_h.js"></script>
-
   <script src="scripts/base.js"></script>
+  <script src="scripts/dither.js"></script>
   <script src="scripts/render.js"></script>
+
+  <style>
+    .bigContainer {
+      display: flex;
+      overflow: auto;
+      resize: both;
+    }
+  </style>
+
 </head>
 
 <body class="display-flex top-bottom-flow" style="gap: 8px">
-  <div class="display-flex top-bottom-flow" style="gap: 15px">
-    <span class="glowfire text-align-center vertical-align-top-margin color font-weight-bold"
-      style="font-size: 90px">Free Video Dithering</span>
-    <div class="firehr"></div>
-  </div>
+  <span class="glowfire color font-weight-bold" style="font-size: 90px">Free Video Dithering</span>
+
+  <div class="firehr"></div>
+
   <div class="display-flex left-right-flow width-fit-content" style="gap: 15px">
     <div class="display-flex top-bottom-flow" style="gap: 12px">
       <span class="font-weight-bold" style="font-size: 20px">Upload Video</span>
@@ -39,51 +43,47 @@
         title=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv"
         accept=".mp4, .mov, .mpeg, .webm, .3gp, .3gp2, .ogm, .ogv" />
     </div>
+
     <div class="display-flex top-bottom-flow width-fit-content" style="gap: 12px">
       <span class="font-weight-bold" style="font-size: 20px">Renderer</span>
-      <div class="settings-checkbox-label">
-        <input type="checkbox" id="ExportY4M" />
+      <div class="settings-checkbox-label"> <input type="checkbox" id="ExportY4M" />
         <label for="ExportY4M">Export as Y4M</label>
       </div>
+
       <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
         <button id="StartRenderBtn" type="button" class="sqrButton">Render</button>
         <button id="StopRenderBtn" class="sqrButton" type="button" disabled="">Stop</button>
       </div>
+
       <div class="display-flex left-right-flow width-fit-content" style="gap: 12px">
         <button id="PauseRenderBtn" class="sqrButton" disabled="">Pause</button>
         <button id="ResumeRenderBtn" class="sqrButton" type="button" disabled="">Resume</button>
       </div>
     </div>
+
     <div class="settings-container">
-      <div class="settings-label-input_long">
-        <span>Start time</span>
-        <input id="RenderStartTime" value="" placeholder="Seconds" />
-      </div>
     </div>
+
     <div class="settings-container">
-      <div class="settings-label-slider-input">
-        <span>Frame Rate</span>
-        <input type="number" id="RenderFrameRate" value="30"
-          oninput="gCtx.frameRate = Math.floor(Number(document.getElementById('RenderFrameRate').value));" />
+      <div class="settings-label-input_long"> <span>Start time</span>
+        <input id="RenderStartTime" placeholder="Seconds" />
       </div>
-      <div class="settings-label-slider-input">
-        <span>Blob Quality</span>
-        <input type="number" id="RenderBlobQuality" value="0.90" />
-      </div>
+
+      <div class="settings-label-input"> <span>Frame Rate</span> <input type="number" id="RenderFrameRate" /> </div>
+      <div class="settings-label-input"> <span>Blob Quality</span> <input type="number" id="RenderBlobQuality" /> </div>
     </div>
+
     <div class="settings-container">
-      <div class="settings-label-select">
-        <label>Y4M Color Space</label>
+      <div class="settings-label-select"> <label>Y4M Color Space</label>
         <select id="Y4MColorSpace">
           <option value="C420jpeg">YUV420 (Width must be even)</option>
           <option value="C444">YUV444</option>
         </select>
       </div>
-      <div class="settings-label-input">
-        <label>Buffer Size Threshold (MB)</label>
-        <input id="BufferSizeThreshold" value="64" />
+
+      <div class="settings-label-input"> <label>Buffer Size Threshold (MB)</label>
+        <input id="BufferSizeThreshold" />
       </div>
-      <span style="width: 250px;">Note: Parted Y4M files are guaranteed contiguous frames, no frame is dropped.</span>
     </div>
   </div>
   <div class="bigContainer left-right-flow">
@@ -96,73 +96,67 @@
         <option value="VariableErrorDiffusion">Variable Error Diffusion</option>
         <!--<option value="DotDiffusion">Dot Difussion</option>-->
       </select>
-      <div class="settings-label-select">
-        <span>Presets</span>
-        <select id="Presets"></select>
-      </div>
+      <div class="settings-label-select"> <span>Presets</span> <select id="Presets"></select> </div>
+
       <input type="file" id="UploadDitherImage" class="height-fit-content disabled"
         title=".png, .jpg, .jpeg, .webp, .gif, .ico, .bmp, .avif"
         accept=".png, .jpg, .jpeg, .webp, .gif, .ico, .bmp, .avif" />
+
       <textarea id="PrimeTextarea"></textarea>
       <textarea id="SecondTextarea"></textarea>
+
       <div class="whitehr"></div>
-      <div class="whitehr"></div>
-      <div class="settings-container">
-        <div class="settings-label-slider-input">
-          <span>R Count</span> <input type="range" id="RCountSlider" min="2" max="32" />
-          <input type="number" id="RCountInput" value="2" />
-        </div>
-        <div class="settings-label-slider-input">
-          <span>G Count</span> <input type="range" id="GCountSlider" min="2" max="32" />
-          <input type="number" id="GCountInput" value="2" />
-        </div>
-        <div class="settings-label-slider-input">
-          <span>B Count</span> <input type="range" id="BCountSlider" min="2" max="32" />
-          <input type="number" id="BCountInput" value="2" />
-        </div>
+
+      <div class="settings-label-slider-input"> <span>R Count</span>
+        <input type="range" id="RCountSlider" min="2" max="32" />
+        <input type="number" id="RCountInput" value="2" />
       </div>
+
+      <div class="settings-label-slider-input"> <span>G Count</span>
+        <input type="range" id="GCountSlider" min="2" max="32" />
+        <input type="number" id="GCountInput" value="2" />
+      </div>
+
+      <div class="settings-label-slider-input"> <span>B Count</span>
+        <input type="range" id="BCountSlider" min="2" max="32" />
+        <input type="number" id="BCountInput" value="2" />
+      </div>
+
       <div class="settings-checkbox-label">
-        <input type="checkbox" id="UseLinear" /> <label for="UseLinear">Linear Color Space</label>
+        <input type="checkbox" id="UseLinear" />
+        <label for="UseLinear">Linear Color Space</label>
       </div>
+
       <div class="settings-checkbox-label">
-        <input type="checkbox" id="UseSerpentine" /> <label for="UseSerpentine">Serpentine Scan</label>
+        <input type="checkbox" id="UseSerpentine" />
+        <label for="UseSerpentine">Serpentine Scan</label>
       </div>
+
       <div class="whitehr"></div>
-      <div class="settings-container">
-        <div class="settings-label-input">
-          <span>Canvas Width</span> <input type="number" id="CanvasWidth" value="480" />
-        </div>
-        <div class="settings-label-input">
-          <span>Canvas Height</span> <input type="number" id="CanvasHeight" value="270" />
-        </div>
-        <button onclick="ChangeCanvasSize()">Change size</button>
+
+      <div class="settings-label-input">
+        <span>Canvas Width</span> <input type="number" id="CanvasWidth" value="480" />
       </div>
+      <div class="settings-label-input">
+        <span>Canvas Height</span> <input type="number" id="CanvasHeight" value="270" />
+      </div>
+
+      <div class="whitehr"></div>
+
+      <span id="Speeds" style="white-space: pre-wrap;"></span>
     </div>
-    <div class="previewContainer">
-      <div class="mainVideo">
+
+    <div class="top-bottom-flow horizontal-align-center vertical-align-center" style="gap: 6px;">
+      <div style="border: 2px solid #EA7010">
         <video id="video" width="480" height="270" src="gradient.mp4" controls loop crossorigin="anonymous"></video>
       </div>
-      <div class="firehr"></div>
-      <div class="mainCanvas">
+
+      <div class="horizontal-align-center vertical-align-center"
+        style="width: min-content; height: min-content ;border: 2px solid #EA7010; line-height: 1;">
         <canvas id="canvas" width="480" height="270"></canvas>
       </div>
     </div>
   </div>
-  <span id="Speeds" style="white-space: pre-wrap;"></span>
 </body>
-
-<script src="scripts/dither.js"></script>
-<script src="scripts/misc.js"></script>
-<script src="scripts/process.js"></script>
-
-<script>
-  document.addEventListener("keydown", function (event) {
-    var activeElement = document.activeElement.tagName.toLowerCase();
-    if (event.code === "KeyR" && activeElement !== "input" && activeElement !== "textarea") {
-      
-      ProcessFrame();
-    } else if (event.code === "KeyF" && activeElement !== "input" && activeElement !== "textarea") fullscreenCanvas();
-  });
-</script>
 
 </html>
